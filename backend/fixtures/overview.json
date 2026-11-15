@@ -1,0 +1,156 @@
+{
+  "kpis": {
+    "activeRings": 7,
+    "amountAtRisk": 4995000.0,
+    "accountsUnderInvestigation": 45,
+    "detectionRate": 92.5,
+    "alertReductionPct": 97.8,
+    "moneySaved": 1815000.0
+  },
+  "rings": [
+    {
+      "id": "R-106",
+      "typology": "mixed",
+      "riskScore": 95,
+      "totalMoved": 2100000.0,
+      "amountAtRisk": 1550000.0,
+      "accountCount": 11,
+      "status": "frozen"
+    },
+    {
+      "id": "R-101",
+      "typology": "burst_fanin",
+      "riskScore": 94,
+      "totalMoved": 1850000.0,
+      "amountAtRisk": 1200000.0,
+      "accountCount": 14,
+      "status": "under_review"
+    },
+    {
+      "id": "R-104",
+      "typology": "structural_cycle",
+      "riskScore": 96,
+      "totalMoved": 1420000.0,
+      "amountAtRisk": 985000.0,
+      "accountCount": 6,
+      "status": "new"
+    },
+    {
+      "id": "R-105",
+      "typology": "layering_chain",
+      "riskScore": 93,
+      "totalMoved": 950000.0,
+      "amountAtRisk": 950000.0,
+      "accountCount": 6,
+      "status": "new"
+    },
+    {
+      "id": "R-102",
+      "typology": "rapid_pass_through",
+      "riskScore": 91,
+      "totalMoved": 820000.0,
+      "amountAtRisk": 820000.0,
+      "accountCount": 5,
+      "status": "new"
+    }
+  ],
+  "alertVolume": [
+    {
+      "bucket": "09:00",
+      "burst_fanin": 0,
+      "rapid_pass_through": 0,
+      "dormant_activation": 0,
+      "structural_cycle": 0,
+      "layering_chain": 0
+    },
+    {
+      "bucket": "10:00",
+      "burst_fanin": 1,
+      "rapid_pass_through": 0,
+      "dormant_activation": 0,
+      "structural_cycle": 1,
+      "layering_chain": 0
+    },
+    {
+      "bucket": "11:00",
+      "burst_fanin": 2,
+      "rapid_pass_through": 1,
+      "dormant_activation": 0,
+      "structural_cycle": 1,
+      "layering_chain": 0
+    },
+    {
+      "bucket": "12:00",
+      "burst_fanin": 1,
+      "rapid_pass_through": 2,
+      "dormant_activation": 1,
+      "structural_cycle": 0,
+      "layering_chain": 1
+    },
+    {
+      "bucket": "13:00",
+      "burst_fanin": 0,
+      "rapid_pass_through": 1,
+      "dormant_activation": 1,
+      "structural_cycle": 1,
+      "layering_chain": 1
+    },
+    {
+      "bucket": "14:00",
+      "burst_fanin": 2,
+      "rapid_pass_through": 0,
+      "dormant_activation": 0,
+      "structural_cycle": 0,
+      "layering_chain": 2
+    },
+    {
+      "bucket": "15:00",
+      "burst_fanin": 1,
+      "rapid_pass_through": 1,
+      "dormant_activation": 0,
+      "structural_cycle": 1,
+      "layering_chain": 0
+    },
+    {
+      "bucket": "16:00",
+      "burst_fanin": 0,
+      "rapid_pass_through": 0,
+      "dormant_activation": 1,
+      "structural_cycle": 0,
+      "layering_chain": 1
+    }
+  ],
+  "activity": [
+    {
+      "id": "ACT-1004",
+      "kind": "frozen",
+      "ringId": "R-106",
+      "detail": "Hot debit-freeze applied across all aggregator and mule accounts.",
+      "actor": "Kishore Kumar",
+      "occurredAt": "2026-03-10T15:15:00Z"
+    },
+    {
+      "id": "ACT-1002",
+      "kind": "under_review",
+      "ringId": "R-101",
+      "detail": "Assigned to junior analyst for victim verification.",
+      "actor": "Ananya Sharma",
+      "occurredAt": "2026-03-10T11:25:00Z"
+    },
+    {
+      "id": "ACT-1003",
+      "kind": "detected",
+      "ringId": "R-104",
+      "detail": "High-confidence cycle detected (96 score).",
+      "actor": "System",
+      "occurredAt": "2026-03-10T10:45:00Z"
+    }
+  ],
+  "detectionRate": 92.5,
+  "previousPeriod": {
+    "activeRings": 5,
+    "amountAtRisk": 3800000.0,
+    "accountsUnderInvestigation": 34,
+    "detectionRate": 88.0
+  }
+}

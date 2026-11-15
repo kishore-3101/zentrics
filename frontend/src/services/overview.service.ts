@@ -1,16 +1,16 @@
+import axios from 'axios';
 import { USE_MOCK } from '../config/env';
 import { MOCK_OVERVIEW } from '../features/overview/data/mockOverview';
 import type { OverviewData } from '../features/overview/types';
 
 /**
  * Overview data source.
- * Today this only serves clearly labelled mock data. When the API contract is
- * available, call it here with the shared Axios client and map the response
- * into `OverviewData`; the dashboard itself will not need to change.
+ * Conforms to GET /overview on the mock/backend server.
  */
 export async function fetchOverview(): Promise<OverviewData> {
-  if (!USE_MOCK) {
-    throw new Error('The live overview API is not wired yet. Set VITE_USE_MOCK=true to use mock data.');
+  if (USE_MOCK) {
+    return MOCK_OVERVIEW;
   }
-  return MOCK_OVERVIEW;
+  const response = await axios.get<OverviewData>('/overview');
+  return response.data;
 }

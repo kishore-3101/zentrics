@@ -1,0 +1,223 @@
+[
+  {
+    "run_id": 1,
+    "ring_id": "R-104",
+    "fingerprint": "e89c31b0a8f89b6e828e83b4b0e8913b7728f11a",
+    "ring_type": "structural_cycle",
+    "score": 96.0,
+    "priority": 945600.0,
+    "amount_moved": 1420000.00,
+    "amount_cashed": 435000.00,
+    "amount_at_risk": 985000.00,
+    "duration_min": 34.0,
+    "n_accounts": 6,
+    "n_victims": 2,
+    "pattern_tags": ["structural_cycle", "circular_flow", "high_velocity", "cross_channel_upi"],
+    "recommended": "Immediate freeze of all circular intermediary accounts; file cyber-cell STR/SAR.",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "case_id": 104,
+    "status": "new",
+    "assigned_to": null,
+    "case_notes": null,
+    "explanation": "Closed circular routing detected: ₹14,20,000 circulated across 4 intermediary mule accounts across 3 laps, with 3% commission decay per lap and partial cash-out at ATM sinks.",
+    "key_evidence": [
+      "Closed 4-hop directed cycle: ACC_MULE_401 -> ACC_MULE_402 -> ACC_MULE_403 -> ACC_MULE_404 -> ACC_MULE_401",
+      "3 completed circulation laps within 34 minutes",
+      "₹4,35,000 siphoned to ATM_SINK_MUMBAI during second lap"
+    ],
+    "key_accounts": [
+      {"account_id": "ACC_VICTIM_401", "role": "victim", "amount": 750000.00},
+      {"account_id": "ACC_MULE_401", "role": "collector", "amount": 1420000.00},
+      {"account_id": "ATM_SINK_MUMBAI", "role": "cash_out", "amount": 435000.00}
+    ]
+  },
+  {
+    "run_id": 1,
+    "ring_id": "R-101",
+    "fingerprint": "a1b2c3d4e5f67890123456789abcdef012345678",
+    "ring_type": "burst_fanin",
+    "score": 94.0,
+    "priority": 1128000.0,
+    "amount_moved": 1850000.00,
+    "amount_cashed": 650000.00,
+    "amount_at_risk": 1200000.00,
+    "duration_min": 28.0,
+    "n_accounts": 14,
+    "n_victims": 8,
+    "pattern_tags": ["burst_fanin", "fan_in_fan_out", "rapid_aggregation"],
+    "recommended": "Freeze collector account ACC_COLL_101 and subordinate mule nodes.",
+    "detected_at": "2026-03-10T11:15:00Z",
+    "case_id": 101,
+    "status": "under_review",
+    "assigned_to": "Ananya Sharma",
+    "case_notes": "Identified high-frequency UPI deposits from 8 distinct states in under 30 minutes.",
+    "explanation": "High-velocity fan-in burst detected: 8 victim accounts transferred ₹18,50,000 into collector ACC_COLL_101, which rapidly split funds among 4 mule accounts for cash-out.",
+    "key_evidence": [
+      "Inflow velocity: 8 distinct depositors within 28 minutes (14.2x baseline)",
+      "Pass-through ratio: 92% of funds forwarded within 8 minutes of arrival",
+      "Immediate ATM withdrawals detected at 2 different city clusters"
+    ],
+    "key_accounts": [
+      {"account_id": "ACC_COLL_101", "role": "collector", "amount": 1850000.00},
+      {"account_id": "ACC_MULE_101", "role": "mule", "amount": 450000.00},
+      {"account_id": "ATM_SINK_DELHI", "role": "cash_out", "amount": 650000.00}
+    ]
+  },
+  {
+    "run_id": 1,
+    "ring_id": "R-102",
+    "fingerprint": "b2c3d4e5f6a17890123456789abcdef012345678",
+    "ring_type": "rapid_pass_through",
+    "score": 91.0,
+    "priority": 746200.0,
+    "amount_moved": 820000.00,
+    "amount_cashed": 0.00,
+    "amount_at_risk": 820000.00,
+    "duration_min": 12.0,
+    "n_accounts": 5,
+    "n_victims": 2,
+    "pattern_tags": ["rapid_pass_through", "pass_through_hub", "zero_retention"],
+    "recommended": "Initiate hot-stop on pass-through transit hub ACC_HUB_201.",
+    "detected_at": "2026-03-10T12:05:00Z",
+    "case_id": 102,
+    "status": "new",
+    "assigned_to": null,
+    "case_notes": null,
+    "explanation": "Rapid transit hub anomaly: Hub account ACC_HUB_201 received ₹8,20,000 from 2 victim sources and forwarded 98.5% within 4.2 minutes across IMPS rails.",
+    "key_evidence": [
+      "Median forward delay: 4.2 minutes",
+      "Retention ratio: 1.5% (retained as operator fee)",
+      "Zero historical transaction profile before today"
+    ],
+    "key_accounts": [
+      {"account_id": "ACC_HUB_201", "role": "collector", "amount": 820000.00},
+      {"account_id": "ACC_MULE_201", "role": "mule", "amount": 410000.00},
+      {"account_id": "ACC_MULE_202", "role": "mule", "amount": 400000.00}
+    ]
+  },
+  {
+    "run_id": 1,
+    "ring_id": "R-103",
+    "fingerprint": "c3d4e5f6a1b27890123456789abcdef012345678",
+    "ring_type": "dormant_activation",
+    "score": 88.0,
+    "priority": 563200.0,
+    "amount_moved": 640000.00,
+    "amount_cashed": 180000.00,
+    "amount_at_risk": 460000.00,
+    "duration_min": 45.0,
+    "n_accounts": 4,
+    "n_victims": 1,
+    "pattern_tags": ["dormant_activation", "dormant_active", "volume_spike"],
+    "recommended": "Request KYC re-verification; place temporary debit restriction.",
+    "detected_at": "2026-03-10T13:20:00Z",
+    "case_id": 103,
+    "status": "under_review",
+    "assigned_to": "Rohan Mehta",
+    "case_notes": "Account dormant for 142 days; suddenly received ₹6.4L from cyber fraud victim.",
+    "explanation": "Dormancy activation spike: Account ACC_DORM_301, completely inactive for 142 days, suddenly moved ₹6,40,000 (85x prior volume) within 45 minutes.",
+    "key_evidence": [
+      "Dormancy duration: 142 days with average balance < ₹500",
+      "Volume jump: 85x historical lifetime transaction volume",
+      "Instant pass-through to external bank gateway EXT_BANK_ICICI"
+    ],
+    "key_accounts": [
+      {"account_id": "ACC_DORM_301", "role": "mule", "amount": 640000.00},
+      {"account_id": "EXT_BANK_ICICI", "role": "cash_out", "amount": 180000.00}
+    ]
+  },
+  {
+    "run_id": 1,
+    "ring_id": "R-105",
+    "fingerprint": "d4e5f6a1b2c37890123456789abcdef012345678",
+    "ring_type": "layering_chain",
+    "score": 93.0,
+    "priority": 883500.0,
+    "amount_moved": 950000.00,
+    "amount_cashed": 0.00,
+    "amount_at_risk": 950000.00,
+    "duration_min": 52.0,
+    "n_accounts": 6,
+    "n_victims": 1,
+    "pattern_tags": ["layering_chain", "multi_hop", "structuring"],
+    "recommended": "Escalate to FinCEN / FIU-IND compliance officer for multi-hop tracking.",
+    "detected_at": "2026-03-10T14:10:00Z",
+    "case_id": 105,
+    "status": "new",
+    "assigned_to": null,
+    "case_notes": null,
+    "explanation": "Multi-hop layering chain: ₹9,50,000 routed through 5 serial mule accounts (A -> B -> C -> D -> E) with 2-4% commission decay at each hop over 52 minutes.",
+    "key_evidence": [
+      "5 sequential hops with mean hop delay of 9.4 minutes",
+      "Amounts structured just under ₹2,00,000 reporting threshold",
+      "End destination points towards external cross-border payment gateway"
+    ],
+    "key_accounts": [
+      {"account_id": "ACC_CHAIN_01", "role": "collector", "amount": 950000.00},
+      {"account_id": "ACC_CHAIN_03", "role": "mule", "amount": 890000.00},
+      {"account_id": "ACC_CHAIN_05", "role": "mule", "amount": 830000.00}
+    ]
+  },
+  {
+    "run_id": 1,
+    "ring_id": "R-106",
+    "fingerprint": "e5f6a1b2c3d47890123456789abcdef012345678",
+    "ring_type": "mixed",
+    "score": 95.0,
+    "priority": 1472500.0,
+    "amount_moved": 2100000.00,
+    "amount_cashed": 550000.00,
+    "amount_at_risk": 1550000.00,
+    "duration_min": 68.0,
+    "n_accounts": 11,
+    "n_victims": 4,
+    "pattern_tags": ["mixed", "complex_syndicate", "cycle_and_fanout"],
+    "recommended": "Coordinate inter-bank freeze across all identified syndicate accounts.",
+    "detected_at": "2026-03-10T15:00:00Z",
+    "case_id": 106,
+    "status": "frozen",
+    "assigned_to": "Kishore Kumar",
+    "case_notes": "Composite syndicate detected combining fan-in aggregation with circular obfuscation loop before ATM extraction.",
+    "explanation": "Hybrid multi-stage syndicate: 4 victim accounts funneled ₹21,00,000 into 2 aggregators, who fed a 3-account circular loop before distributing to 5 mule cash-out nodes.",
+    "key_evidence": [
+      "Combines fan-in aggregation with circular obfuscation loop",
+      "11 accounts involved across savings, current, and wallet categories",
+      "₹5,50,000 extracted at ATM sinks in Chennai and Bengaluru"
+    ],
+    "key_accounts": [
+      {"account_id": "ACC_SYN_AGG_1", "role": "collector", "amount": 1100000.00},
+      {"account_id": "ACC_SYN_AGG_2", "role": "collector", "amount": 1000000.00},
+      {"account_id": "ATM_SINK_BLR", "role": "cash_out", "amount": 350000.00}
+    ]
+  },
+  {
+    "run_id": 1,
+    "ring_id": "R-107",
+    "fingerprint": "f6a1b2c3d4e57890123456789abcdef012345678",
+    "ring_type": "burst_fanin",
+    "score": 24.0,
+    "priority": 7200.0,
+    "amount_moved": 450000.00,
+    "amount_cashed": 0.00,
+    "amount_at_risk": 30000.00,
+    "duration_min": 480.0,
+    "n_accounts": 35,
+    "n_victims": 0,
+    "pattern_tags": ["hard_negative_shop", "kirana_merchant", "high_retention"],
+    "recommended": "No enforcement needed; legitimate high-volume retail merchant.",
+    "detected_at": "2026-03-10T16:00:00Z",
+    "case_id": 107,
+    "status": "false_positive",
+    "assigned_to": "Ananya Sharma",
+    "case_notes": "Reviewed and verified as Sharma Supermarket (GST registered kirana). Funds retained for supplier payment.",
+    "explanation": "Benign merchant activity (Hard Negative): Retail grocery store with 34 micro-UPI customer payments (median ₹240). Retains 93.3% of funds; zero cash-out to sinks.",
+    "key_evidence": [
+      "34 inbound customer payments spread evenly over 8 business hours",
+      "High retention ratio (93.3%) with zero rapid forwarding",
+      "Registered merchant category with valid GSTIN and recurring distributor payments"
+    ],
+    "key_accounts": [
+      {"account_id": "ACC_SHOP_KIRANA_01", "role": "collector", "amount": 450000.00}
+    ]
+  }
+]

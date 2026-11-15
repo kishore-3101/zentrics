@@ -1,0 +1,1700 @@
+{
+  "R-104": {
+    "ring_id": "R-104",
+    "fingerprint": "e89c31b0a8f89b6e828e83b4b0e8913b7728f11a",
+    "ring_type": "structural_cycle",
+    "score": 96.0,
+    "priority": 945600.0,
+    "amount_moved": 1420000.0,
+    "amount_cashed": 435000.0,
+    "amount_at_risk": 985000.0,
+    "duration_min": 34.0,
+    "status": "new",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "structural_cycle",
+      "circular_flow",
+      "high_velocity",
+      "cross_channel_upi"
+    ],
+    "explanation": "Closed circular routing detected: \u20b914,20,000 circulated across 4 intermediary mule accounts across 3 laps, with 3% commission decay per lap and partial cash-out at ATM sinks.",
+    "nodes": [
+      {
+        "account_id": "ACC_VICTIM_401",
+        "role": "victim",
+        "risk_score": 12.0,
+        "ml_prob": 0.08,
+        "rule_score": 0.1,
+        "neighbor_risk": 0.15,
+        "open_date": "2019-04-12",
+        "kyc_level": "full",
+        "account_type": "savings",
+        "city_cluster": "MUMBAI",
+        "declared_income_band": "mid",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 800000.0,
+        "total_outgoing": 750000.0,
+        "transaction_count": 3,
+        "reason_codes": [
+          {
+            "code": "NORMAL_PROFILE",
+            "label": "Established account profile (5+ years)",
+            "weight": -15.0,
+            "direction": "decreases_risk"
+          }
+        ],
+        "is_frozen": false,
+        "position": [
+          -250,
+          0,
+          0
+        ]
+      },
+      {
+        "account_id": "ACC_MULE_401",
+        "role": "collector",
+        "risk_score": 94.0,
+        "ml_prob": 0.95,
+        "rule_score": 0.92,
+        "neighbor_risk": 0.88,
+        "open_date": "2026-02-14",
+        "kyc_level": "minimal",
+        "account_type": "savings",
+        "city_cluster": "MUMBAI",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 1420000.0,
+        "total_outgoing": 1390000.0,
+        "transaction_count": 12,
+        "reason_codes": [
+          {
+            "code": "CYCLE_PARTICIPATION",
+            "label": "Key anchor in length-4 circular fund loop",
+            "weight": 34.0,
+            "direction": "increases_risk"
+          },
+          {
+            "code": "RAPID_FORWARDING",
+            "label": "Funds forwarded in < 5 mins (98% pass-through)",
+            "weight": 28.0,
+            "direction": "increases_risk"
+          }
+        ],
+        "is_frozen": false,
+        "position": [
+          -80,
+          120,
+          0
+        ]
+      },
+      {
+        "account_id": "ACC_MULE_402",
+        "role": "mule",
+        "risk_score": 91.0,
+        "ml_prob": 0.89,
+        "rule_score": 0.9,
+        "neighbor_risk": 0.86,
+        "open_date": "2026-01-20",
+        "kyc_level": "minimal",
+        "account_type": "wallet",
+        "city_cluster": "THANE",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 1380000.0,
+        "total_outgoing": 1350000.0,
+        "transaction_count": 9,
+        "reason_codes": [
+          {
+            "code": "CYCLE_PARTICIPATION",
+            "label": "Participated in 3 cycle laps",
+            "weight": 31.0,
+            "direction": "increases_risk"
+          }
+        ],
+        "is_frozen": false,
+        "position": [
+          80,
+          120,
+          0
+        ]
+      },
+      {
+        "account_id": "ACC_MULE_403",
+        "role": "mule",
+        "risk_score": 89.0,
+        "ml_prob": 0.88,
+        "rule_score": 0.87,
+        "neighbor_risk": 0.84,
+        "open_date": "2026-02-01",
+        "kyc_level": "minimal",
+        "account_type": "savings",
+        "city_cluster": "NAVI_MUMBAI",
+        "declared_income_band": "lower_mid",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 1350000.0,
+        "total_outgoing": 1320000.0,
+        "transaction_count": 8,
+        "reason_codes": [
+          {
+            "code": "CYCLE_PARTICIPATION",
+            "label": "Cycle conduit node",
+            "weight": 29.0,
+            "direction": "increases_risk"
+          }
+        ],
+        "is_frozen": false,
+        "position": [
+          120,
+          -50,
+          0
+        ]
+      },
+      {
+        "account_id": "ACC_MULE_404",
+        "role": "mule",
+        "risk_score": 93.0,
+        "ml_prob": 0.92,
+        "rule_score": 0.91,
+        "neighbor_risk": 0.89,
+        "open_date": "2026-02-10",
+        "kyc_level": "minimal",
+        "account_type": "wallet",
+        "city_cluster": "MUMBAI",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 1320000.0,
+        "total_outgoing": 1290000.0,
+        "transaction_count": 10,
+        "reason_codes": [
+          {
+            "code": "SINK_EXTRACTION",
+            "label": "Direct transfer to ATM sink",
+            "weight": 32.0,
+            "direction": "increases_risk"
+          }
+        ],
+        "is_frozen": false,
+        "position": [
+          -50,
+          -100,
+          0
+        ]
+      },
+      {
+        "account_id": "ATM_SINK_MUMBAI",
+        "role": "cash_out",
+        "risk_score": 5.0,
+        "ml_prob": 0.01,
+        "rule_score": 0.05,
+        "neighbor_risk": 0.1,
+        "open_date": "2015-01-01",
+        "kyc_level": "full",
+        "account_type": "sink",
+        "city_cluster": "MUMBAI",
+        "declared_income_band": "high",
+        "bank_id": "CASH_OUT_NETWORK",
+        "total_incoming": 435000.0,
+        "total_outgoing": 0.0,
+        "transaction_count": 5,
+        "reason_codes": [
+          {
+            "code": "TERMINAL_SINK",
+            "label": "Designated cash withdrawal point",
+            "weight": 0.0,
+            "direction": "decreases_risk"
+          }
+        ],
+        "is_frozen": false,
+        "position": [
+          250,
+          0,
+          0
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "txn_id": "TXN_401_01",
+        "src_account": "ACC_VICTIM_401",
+        "dst_account": "ACC_MULE_401",
+        "amount": 750000.0,
+        "channel": "UPI",
+        "ts": "2026-03-10T10:15:00Z",
+        "hop_index": 1,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_401_02",
+        "src_account": "ACC_MULE_401",
+        "dst_account": "ACC_MULE_402",
+        "amount": 730000.0,
+        "channel": "IMPS",
+        "ts": "2026-03-10T10:20:00Z",
+        "hop_index": 2,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_401_03",
+        "src_account": "ACC_MULE_402",
+        "dst_account": "ACC_MULE_403",
+        "amount": 710000.0,
+        "channel": "UPI",
+        "ts": "2026-03-10T10:25:00Z",
+        "hop_index": 3,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_401_04",
+        "src_account": "ACC_MULE_403",
+        "dst_account": "ACC_MULE_404",
+        "amount": 690000.0,
+        "channel": "UPI",
+        "ts": "2026-03-10T10:30:00Z",
+        "hop_index": 4,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_401_05",
+        "src_account": "ACC_MULE_404",
+        "dst_account": "ACC_MULE_401",
+        "amount": 470000.0,
+        "channel": "IMPS",
+        "ts": "2026-03-10T10:35:00Z",
+        "hop_index": 5,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_401_06",
+        "src_account": "ACC_MULE_404",
+        "dst_account": "ATM_SINK_MUMBAI",
+        "amount": 200000.0,
+        "channel": "ATM_WITHDRAWAL",
+        "ts": "2026-03-10T10:40:00Z",
+        "hop_index": 5,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_401_07",
+        "src_account": "ACC_MULE_401",
+        "dst_account": "ATM_SINK_MUMBAI",
+        "amount": 235000.0,
+        "channel": "ATM_WITHDRAWAL",
+        "ts": "2026-03-10T10:44:00Z",
+        "hop_index": 6,
+        "is_suspicious": true
+      }
+    ]
+  },
+  "R-101": {
+    "ring_id": "R-101",
+    "fingerprint": "a1b2c3d4e5f67890123456789abcdef012345678",
+    "ring_type": "burst_fanin",
+    "score": 94.0,
+    "priority": 1128000.0,
+    "amount_moved": 1850000.0,
+    "amount_cashed": 650000.0,
+    "amount_at_risk": 1200000.0,
+    "duration_min": 28.0,
+    "status": "under_review",
+    "detected_at": "2026-03-10T11:15:00Z",
+    "pattern_tags": [
+      "burst_fanin",
+      "fan_in_fan_out",
+      "rapid_aggregation"
+    ],
+    "explanation": "High-velocity fan-in burst detected: 8 victim accounts transferred \u20b918,50,000 into collector ACC_COLL_101, which rapidly split funds among 4 mule accounts for cash-out.",
+    "nodes": [
+      {
+        "account_id": "ACC_COLL_101",
+        "role": "collector",
+        "risk_score": 96.0,
+        "ml_prob": 0.98,
+        "rule_score": 0.94,
+        "neighbor_risk": 0.85,
+        "open_date": "2026-02-18",
+        "kyc_level": "minimal",
+        "account_type": "savings",
+        "city_cluster": "DELHI",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 1850000.0,
+        "total_outgoing": 1750000.0,
+        "transaction_count": 14,
+        "reason_codes": [
+          {
+            "code": "BURST_INFLOW",
+            "label": "8 senders in 28 mins",
+            "weight": 35.0,
+            "direction": "increases_risk"
+          }
+        ],
+        "is_frozen": false,
+        "position": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "account_id": "ACC_MULE_101",
+        "role": "mule",
+        "risk_score": 88.0,
+        "ml_prob": 0.86,
+        "rule_score": 0.89,
+        "neighbor_risk": 0.82,
+        "open_date": "2026-02-20",
+        "kyc_level": "minimal",
+        "account_type": "wallet",
+        "city_cluster": "DELHI",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 450000.0,
+        "total_outgoing": 450000.0,
+        "transaction_count": 4,
+        "reason_codes": [
+          {
+            "code": "RAPID_SPLIT",
+            "label": "Fast split receiver",
+            "weight": 25.0,
+            "direction": "increases_risk"
+          }
+        ],
+        "is_frozen": false,
+        "position": [
+          180,
+          80,
+          0
+        ]
+      },
+      {
+        "account_id": "ATM_SINK_DELHI",
+        "role": "cash_out",
+        "risk_score": 5.0,
+        "ml_prob": 0.01,
+        "rule_score": 0.05,
+        "neighbor_risk": 0.05,
+        "open_date": "2018-01-01",
+        "kyc_level": "full",
+        "account_type": "sink",
+        "city_cluster": "DELHI",
+        "declared_income_band": "high",
+        "bank_id": "CASH_OUT_NETWORK",
+        "total_incoming": 650000.0,
+        "total_outgoing": 0.0,
+        "transaction_count": 6,
+        "reason_codes": [],
+        "is_frozen": false,
+        "position": [
+          280,
+          0,
+          0
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "txn_id": "TXN_101_01",
+        "src_account": "ACC_VIC_1",
+        "dst_account": "ACC_COLL_101",
+        "amount": 250000.0,
+        "channel": "UPI",
+        "ts": "2026-03-10T10:50:00Z",
+        "hop_index": 1,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_101_02",
+        "src_account": "ACC_COLL_101",
+        "dst_account": "ACC_MULE_101",
+        "amount": 450000.0,
+        "channel": "IMPS",
+        "ts": "2026-03-10T11:00:00Z",
+        "hop_index": 2,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_101_03",
+        "src_account": "ACC_MULE_101",
+        "dst_account": "ATM_SINK_DELHI",
+        "amount": 450000.0,
+        "channel": "ATM_WITHDRAWAL",
+        "ts": "2026-03-10T11:12:00Z",
+        "hop_index": 3,
+        "is_suspicious": true
+      }
+    ]
+  },
+  "R-102": {
+    "ring_id": "R-102",
+    "fingerprint": "b2c3d4e5f6a17890123456789abcdef012345678",
+    "ring_type": "rapid_pass_through",
+    "score": 91.0,
+    "priority": 746200.0,
+    "amount_moved": 820000.0,
+    "amount_cashed": 0.0,
+    "amount_at_risk": 820000.0,
+    "duration_min": 12.0,
+    "status": "new",
+    "detected_at": "2026-03-10T12:05:00Z",
+    "pattern_tags": [
+      "rapid_pass_through",
+      "pass_through_hub",
+      "zero_retention"
+    ],
+    "explanation": "Rapid transit hub anomaly: Hub account ACC_HUB_201 received \u20b98,20,000 from 2 victim sources and forwarded 98.5% within 4.2 minutes across IMPS rails.",
+    "nodes": [
+      {
+        "account_id": "ACC_HUB_201",
+        "role": "collector",
+        "risk_score": 93.0,
+        "ml_prob": 0.94,
+        "rule_score": 0.91,
+        "neighbor_risk": 0.82,
+        "open_date": "2026-02-25",
+        "kyc_level": "minimal",
+        "account_type": "savings",
+        "city_cluster": "HYDERABAD",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 820000.0,
+        "total_outgoing": 810000.0,
+        "transaction_count": 4,
+        "reason_codes": [
+          {
+            "code": "PASS_THROUGH_SPEED",
+            "label": "Forwarded in 4.2 mins",
+            "weight": 38.0,
+            "direction": "increases_risk"
+          }
+        ],
+        "is_frozen": false,
+        "position": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "account_id": "ACC_MULE_201",
+        "role": "mule",
+        "risk_score": 87.0,
+        "ml_prob": 0.85,
+        "rule_score": 0.86,
+        "neighbor_risk": 0.8,
+        "open_date": "2026-02-15",
+        "kyc_level": "minimal",
+        "account_type": "wallet",
+        "city_cluster": "HYDERABAD",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 410000.0,
+        "total_outgoing": 0.0,
+        "transaction_count": 1,
+        "reason_codes": [],
+        "is_frozen": false,
+        "position": [
+          150,
+          60,
+          0
+        ]
+      },
+      {
+        "account_id": "ACC_MULE_202",
+        "role": "mule",
+        "risk_score": 86.0,
+        "ml_prob": 0.84,
+        "rule_score": 0.85,
+        "neighbor_risk": 0.79,
+        "open_date": "2026-02-16",
+        "kyc_level": "minimal",
+        "account_type": "savings",
+        "city_cluster": "HYDERABAD",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 400000.0,
+        "total_outgoing": 0.0,
+        "transaction_count": 1,
+        "reason_codes": [],
+        "is_frozen": false,
+        "position": [
+          150,
+          -60,
+          0
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "txn_id": "TXN_201_01",
+        "src_account": "ACC_VIC_201",
+        "dst_account": "ACC_HUB_201",
+        "amount": 420000.0,
+        "channel": "UPI",
+        "ts": "2026-03-10T11:55:00Z",
+        "hop_index": 1,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_201_02",
+        "src_account": "ACC_VIC_202",
+        "dst_account": "ACC_HUB_201",
+        "amount": 400000.0,
+        "channel": "UPI",
+        "ts": "2026-03-10T11:58:00Z",
+        "hop_index": 1,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_201_03",
+        "src_account": "ACC_HUB_201",
+        "dst_account": "ACC_MULE_201",
+        "amount": 410000.0,
+        "channel": "IMPS",
+        "ts": "2026-03-10T12:02:00Z",
+        "hop_index": 2,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_201_04",
+        "src_account": "ACC_HUB_201",
+        "dst_account": "ACC_MULE_202",
+        "amount": 400000.0,
+        "channel": "IMPS",
+        "ts": "2026-03-10T12:03:00Z",
+        "hop_index": 2,
+        "is_suspicious": true
+      }
+    ]
+  },
+  "R-103": {
+    "ring_id": "R-103",
+    "fingerprint": "c3d4e5f6a1b27890123456789abcdef012345678",
+    "ring_type": "dormant_activation",
+    "score": 88.0,
+    "priority": 563200.0,
+    "amount_moved": 640000.0,
+    "amount_cashed": 180000.0,
+    "amount_at_risk": 460000.0,
+    "duration_min": 45.0,
+    "status": "under_review",
+    "detected_at": "2026-03-10T13:20:00Z",
+    "pattern_tags": [
+      "dormant_activation",
+      "dormant_active",
+      "volume_spike"
+    ],
+    "explanation": "Dormancy activation spike: Account ACC_DORM_301, completely inactive for 142 days, suddenly moved \u20b96,40,000 (85x prior volume) within 45 minutes.",
+    "nodes": [
+      {
+        "account_id": "ACC_DORM_301",
+        "role": "mule",
+        "risk_score": 90.0,
+        "ml_prob": 0.91,
+        "rule_score": 0.88,
+        "neighbor_risk": 0.75,
+        "open_date": "2025-08-10",
+        "kyc_level": "minimal",
+        "account_type": "savings",
+        "city_cluster": "KOLKATA",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 640000.0,
+        "total_outgoing": 640000.0,
+        "transaction_count": 3,
+        "reason_codes": [
+          {
+            "code": "DORMANCY_BREAK",
+            "label": "142 days inactive before surge",
+            "weight": 36.0,
+            "direction": "increases_risk"
+          }
+        ],
+        "is_frozen": false,
+        "position": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "account_id": "EXT_BANK_ICICI",
+        "role": "cash_out",
+        "risk_score": 5.0,
+        "ml_prob": 0.01,
+        "rule_score": 0.05,
+        "neighbor_risk": 0.05,
+        "open_date": "2015-01-01",
+        "kyc_level": "full",
+        "account_type": "sink",
+        "city_cluster": "KOLKATA",
+        "declared_income_band": "high",
+        "bank_id": "EXT_BANK",
+        "total_incoming": 180000.0,
+        "total_outgoing": 0.0,
+        "transaction_count": 1,
+        "reason_codes": [],
+        "is_frozen": false,
+        "position": [
+          180,
+          0,
+          0
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "txn_id": "TXN_301_01",
+        "src_account": "ACC_VIC_301",
+        "dst_account": "ACC_DORM_301",
+        "amount": 640000.0,
+        "channel": "NEFT",
+        "ts": "2026-03-10T12:40:00Z",
+        "hop_index": 1,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_301_02",
+        "src_account": "ACC_DORM_301",
+        "dst_account": "EXT_BANK_ICICI",
+        "amount": 180000.0,
+        "channel": "IMPS",
+        "ts": "2026-03-10T13:10:00Z",
+        "hop_index": 2,
+        "is_suspicious": true
+      }
+    ]
+  },
+  "R-105": {
+    "ring_id": "R-105",
+    "fingerprint": "d4e5f6a1b2c37890123456789abcdef012345678",
+    "ring_type": "layering_chain",
+    "score": 93.0,
+    "priority": 883500.0,
+    "amount_moved": 950000.0,
+    "amount_cashed": 0.0,
+    "amount_at_risk": 950000.0,
+    "duration_min": 52.0,
+    "status": "new",
+    "detected_at": "2026-03-10T14:10:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "multi_hop",
+      "structuring"
+    ],
+    "explanation": "Multi-hop layering chain: \u20b99,50,000 routed through 5 serial mule accounts (A -> B -> C -> D -> E) with 2-4% commission decay at each hop over 52 minutes.",
+    "nodes": [
+      {
+        "account_id": "ACC_CHAIN_01",
+        "role": "collector",
+        "risk_score": 92.0,
+        "ml_prob": 0.9,
+        "rule_score": 0.91,
+        "neighbor_risk": 0.85,
+        "open_date": "2026-02-12",
+        "kyc_level": "minimal",
+        "account_type": "savings",
+        "city_cluster": "PUNE",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 950000.0,
+        "total_outgoing": 920000.0,
+        "transaction_count": 2,
+        "reason_codes": [],
+        "is_frozen": false,
+        "position": [
+          -200,
+          0,
+          0
+        ]
+      },
+      {
+        "account_id": "ACC_CHAIN_02",
+        "role": "mule",
+        "risk_score": 91.0,
+        "ml_prob": 0.89,
+        "rule_score": 0.9,
+        "neighbor_risk": 0.86,
+        "open_date": "2026-02-14",
+        "kyc_level": "minimal",
+        "account_type": "savings",
+        "city_cluster": "PUNE",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 920000.0,
+        "total_outgoing": 890000.0,
+        "transaction_count": 2,
+        "reason_codes": [],
+        "is_frozen": false,
+        "position": [
+          -100,
+          0,
+          0
+        ]
+      },
+      {
+        "account_id": "ACC_CHAIN_03",
+        "role": "mule",
+        "risk_score": 91.0,
+        "ml_prob": 0.89,
+        "rule_score": 0.9,
+        "neighbor_risk": 0.86,
+        "open_date": "2026-02-16",
+        "kyc_level": "minimal",
+        "account_type": "savings",
+        "city_cluster": "PUNE",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 890000.0,
+        "total_outgoing": 860000.0,
+        "transaction_count": 2,
+        "reason_codes": [],
+        "is_frozen": false,
+        "position": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "account_id": "ACC_CHAIN_04",
+        "role": "mule",
+        "risk_score": 92.0,
+        "ml_prob": 0.9,
+        "rule_score": 0.91,
+        "neighbor_risk": 0.87,
+        "open_date": "2026-02-18",
+        "kyc_level": "minimal",
+        "account_type": "wallet",
+        "city_cluster": "PUNE",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 860000.0,
+        "total_outgoing": 830000.0,
+        "transaction_count": 2,
+        "reason_codes": [],
+        "is_frozen": false,
+        "position": [
+          100,
+          0,
+          0
+        ]
+      },
+      {
+        "account_id": "ACC_CHAIN_05",
+        "role": "mule",
+        "risk_score": 94.0,
+        "ml_prob": 0.93,
+        "rule_score": 0.92,
+        "neighbor_risk": 0.88,
+        "open_date": "2026-02-20",
+        "kyc_level": "minimal",
+        "account_type": "wallet",
+        "city_cluster": "PUNE",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 830000.0,
+        "total_outgoing": 0.0,
+        "transaction_count": 1,
+        "reason_codes": [
+          {
+            "code": "CHAIN_DESTINATION",
+            "label": "5-hop terminal holding node",
+            "weight": 33.0,
+            "direction": "increases_risk"
+          }
+        ],
+        "is_frozen": false,
+        "position": [
+          200,
+          0,
+          0
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "txn_id": "TXN_501_01",
+        "src_account": "ACC_CHAIN_01",
+        "dst_account": "ACC_CHAIN_02",
+        "amount": 920000.0,
+        "channel": "IMPS",
+        "ts": "2026-03-10T13:25:00Z",
+        "hop_index": 1,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_501_02",
+        "src_account": "ACC_CHAIN_02",
+        "dst_account": "ACC_CHAIN_03",
+        "amount": 890000.0,
+        "channel": "IMPS",
+        "ts": "2026-03-10T13:38:00Z",
+        "hop_index": 2,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_501_03",
+        "src_account": "ACC_CHAIN_03",
+        "dst_account": "ACC_CHAIN_04",
+        "amount": 860000.0,
+        "channel": "UPI",
+        "ts": "2026-03-10T13:49:00Z",
+        "hop_index": 3,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_501_04",
+        "src_account": "ACC_CHAIN_04",
+        "dst_account": "ACC_CHAIN_05",
+        "amount": 830000.0,
+        "channel": "UPI",
+        "ts": "2026-03-10T14:02:00Z",
+        "hop_index": 4,
+        "is_suspicious": true
+      }
+    ]
+  },
+  "R-106": {
+    "ring_id": "R-106",
+    "fingerprint": "e5f6a1b2c3d47890123456789abcdef012345678",
+    "ring_type": "mixed",
+    "score": 95.0,
+    "priority": 1472500.0,
+    "amount_moved": 2100000.0,
+    "amount_cashed": 550000.0,
+    "amount_at_risk": 1550000.0,
+    "duration_min": 68.0,
+    "status": "frozen",
+    "detected_at": "2026-03-10T15:00:00Z",
+    "pattern_tags": [
+      "mixed",
+      "complex_syndicate",
+      "cycle_and_fanout"
+    ],
+    "explanation": "Hybrid multi-stage syndicate: 4 victim accounts funneled \u20b921,00,000 into 2 aggregators, who fed a 3-account circular loop before distributing to 5 mule cash-out nodes.",
+    "nodes": [
+      {
+        "account_id": "ACC_SYN_AGG_1",
+        "role": "collector",
+        "risk_score": 97.0,
+        "ml_prob": 0.98,
+        "rule_score": 0.95,
+        "neighbor_risk": 0.9,
+        "open_date": "2026-01-15",
+        "kyc_level": "minimal",
+        "account_type": "current",
+        "city_cluster": "BENGALURU",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 1100000.0,
+        "total_outgoing": 1050000.0,
+        "transaction_count": 6,
+        "reason_codes": [],
+        "is_frozen": true,
+        "position": [
+          -120,
+          100,
+          0
+        ]
+      },
+      {
+        "account_id": "ACC_SYN_AGG_2",
+        "role": "collector",
+        "risk_score": 96.0,
+        "ml_prob": 0.97,
+        "rule_score": 0.94,
+        "neighbor_risk": 0.89,
+        "open_date": "2026-01-18",
+        "kyc_level": "minimal",
+        "account_type": "savings",
+        "city_cluster": "CHENNAI",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 1000000.0,
+        "total_outgoing": 950000.0,
+        "transaction_count": 5,
+        "reason_codes": [],
+        "is_frozen": true,
+        "position": [
+          -120,
+          -100,
+          0
+        ]
+      },
+      {
+        "account_id": "ATM_SINK_BLR",
+        "role": "cash_out",
+        "risk_score": 5.0,
+        "ml_prob": 0.01,
+        "rule_score": 0.05,
+        "neighbor_risk": 0.05,
+        "open_date": "2016-01-01",
+        "kyc_level": "full",
+        "account_type": "sink",
+        "city_cluster": "BENGALURU",
+        "declared_income_band": "high",
+        "bank_id": "CASH_OUT_NETWORK",
+        "total_incoming": 350000.0,
+        "total_outgoing": 0.0,
+        "transaction_count": 4,
+        "reason_codes": [],
+        "is_frozen": false,
+        "position": [
+          220,
+          0,
+          0
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "txn_id": "TXN_601_01",
+        "src_account": "ACC_SYN_AGG_1",
+        "dst_account": "ATM_SINK_BLR",
+        "amount": 350000.0,
+        "channel": "ATM_WITHDRAWAL",
+        "ts": "2026-03-10T14:45:00Z",
+        "hop_index": 2,
+        "is_suspicious": true
+      }
+    ]
+  },
+  "R-107": {
+    "ring_id": "R-107",
+    "fingerprint": "f6a1b2c3d4e57890123456789abcdef012345678",
+    "ring_type": "burst_fanin",
+    "score": 24.0,
+    "priority": 7200.0,
+    "amount_moved": 450000.0,
+    "amount_cashed": 0.0,
+    "amount_at_risk": 30000.0,
+    "duration_min": 480.0,
+    "status": "false_positive",
+    "detected_at": "2026-03-10T16:00:00Z",
+    "pattern_tags": [
+      "hard_negative_shop",
+      "kirana_merchant",
+      "high_retention"
+    ],
+    "explanation": "Benign merchant activity (Hard Negative): Retail grocery store with 34 micro-UPI customer payments (median \u20b9240). Retains 93.3% of funds; zero cash-out to sinks.",
+    "nodes": [
+      {
+        "account_id": "ACC_SHOP_KIRANA_01",
+        "role": "collector",
+        "risk_score": 22.0,
+        "ml_prob": 0.15,
+        "rule_score": 0.25,
+        "neighbor_risk": 0.18,
+        "open_date": "2021-06-10",
+        "kyc_level": "full",
+        "account_type": "current",
+        "city_cluster": "AHMEDABAD",
+        "declared_income_band": "upper_mid",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 450000.0,
+        "total_outgoing": 30000.0,
+        "transaction_count": 36,
+        "reason_codes": [
+          {
+            "code": "HIGH_RETENTION",
+            "label": "Retains 93.3% of funds (legitimate merchant balance)",
+            "weight": -28.0,
+            "direction": "decreases_risk"
+          }
+        ],
+        "is_frozen": false,
+        "position": [
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "txn_id": "TXN_701_01",
+        "src_account": "ACC_CUST_1",
+        "dst_account": "ACC_SHOP_KIRANA_01",
+        "amount": 420.0,
+        "channel": "UPI",
+        "ts": "2026-03-10T09:15:00Z",
+        "hop_index": 1,
+        "is_suspicious": false
+      }
+    ]
+  },
+  "R-089": {
+    "ring_id": "R-101",
+    "fingerprint": "a1b2c3d4e5f67890123456789abcdef012345678",
+    "ring_type": "burst_fanin",
+    "score": 94.0,
+    "priority": 1128000.0,
+    "amount_moved": 1850000.0,
+    "amount_cashed": 650000.0,
+    "amount_at_risk": 1200000.0,
+    "duration_min": 28.0,
+    "status": "under_review",
+    "detected_at": "2026-03-10T11:15:00Z",
+    "pattern_tags": [
+      "burst_fanin",
+      "fan_in_fan_out",
+      "rapid_aggregation"
+    ],
+    "explanation": "High-velocity fan-in burst detected: 8 victim accounts transferred \u20b918,50,000 into collector ACC_COLL_101, which rapidly split funds among 4 mule accounts for cash-out.",
+    "nodes": [
+      {
+        "account_id": "ACC_COLL_101",
+        "role": "collector",
+        "risk_score": 96.0,
+        "ml_prob": 0.98,
+        "rule_score": 0.94,
+        "neighbor_risk": 0.85,
+        "open_date": "2026-02-18",
+        "kyc_level": "minimal",
+        "account_type": "savings",
+        "city_cluster": "DELHI",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 1850000.0,
+        "total_outgoing": 1750000.0,
+        "transaction_count": 14,
+        "reason_codes": [
+          {
+            "code": "BURST_INFLOW",
+            "label": "8 senders in 28 mins",
+            "weight": 35.0,
+            "direction": "increases_risk"
+          }
+        ],
+        "is_frozen": false,
+        "position": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "account_id": "ACC_MULE_101",
+        "role": "mule",
+        "risk_score": 88.0,
+        "ml_prob": 0.86,
+        "rule_score": 0.89,
+        "neighbor_risk": 0.82,
+        "open_date": "2026-02-20",
+        "kyc_level": "minimal",
+        "account_type": "wallet",
+        "city_cluster": "DELHI",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 450000.0,
+        "total_outgoing": 450000.0,
+        "transaction_count": 4,
+        "reason_codes": [
+          {
+            "code": "RAPID_SPLIT",
+            "label": "Fast split receiver",
+            "weight": 25.0,
+            "direction": "increases_risk"
+          }
+        ],
+        "is_frozen": false,
+        "position": [
+          180,
+          80,
+          0
+        ]
+      },
+      {
+        "account_id": "ATM_SINK_DELHI",
+        "role": "cash_out",
+        "risk_score": 5.0,
+        "ml_prob": 0.01,
+        "rule_score": 0.05,
+        "neighbor_risk": 0.05,
+        "open_date": "2018-01-01",
+        "kyc_level": "full",
+        "account_type": "sink",
+        "city_cluster": "DELHI",
+        "declared_income_band": "high",
+        "bank_id": "CASH_OUT_NETWORK",
+        "total_incoming": 650000.0,
+        "total_outgoing": 0.0,
+        "transaction_count": 6,
+        "reason_codes": [],
+        "is_frozen": false,
+        "position": [
+          280,
+          0,
+          0
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "txn_id": "TXN_101_01",
+        "src_account": "ACC_VIC_1",
+        "dst_account": "ACC_COLL_101",
+        "amount": 250000.0,
+        "channel": "UPI",
+        "ts": "2026-03-10T10:50:00Z",
+        "hop_index": 1,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_101_02",
+        "src_account": "ACC_COLL_101",
+        "dst_account": "ACC_MULE_101",
+        "amount": 450000.0,
+        "channel": "IMPS",
+        "ts": "2026-03-10T11:00:00Z",
+        "hop_index": 2,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_101_03",
+        "src_account": "ACC_MULE_101",
+        "dst_account": "ATM_SINK_DELHI",
+        "amount": 450000.0,
+        "channel": "ATM_WITHDRAWAL",
+        "ts": "2026-03-10T11:12:00Z",
+        "hop_index": 3,
+        "is_suspicious": true
+      }
+    ]
+  },
+  "R-097": {
+    "ring_id": "R-102",
+    "fingerprint": "b2c3d4e5f6a17890123456789abcdef012345678",
+    "ring_type": "rapid_pass_through",
+    "score": 91.0,
+    "priority": 746200.0,
+    "amount_moved": 820000.0,
+    "amount_cashed": 0.0,
+    "amount_at_risk": 820000.0,
+    "duration_min": 12.0,
+    "status": "new",
+    "detected_at": "2026-03-10T12:05:00Z",
+    "pattern_tags": [
+      "rapid_pass_through",
+      "pass_through_hub",
+      "zero_retention"
+    ],
+    "explanation": "Rapid transit hub anomaly: Hub account ACC_HUB_201 received \u20b98,20,000 from 2 victim sources and forwarded 98.5% within 4.2 minutes across IMPS rails.",
+    "nodes": [
+      {
+        "account_id": "ACC_HUB_201",
+        "role": "collector",
+        "risk_score": 93.0,
+        "ml_prob": 0.94,
+        "rule_score": 0.91,
+        "neighbor_risk": 0.82,
+        "open_date": "2026-02-25",
+        "kyc_level": "minimal",
+        "account_type": "savings",
+        "city_cluster": "HYDERABAD",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 820000.0,
+        "total_outgoing": 810000.0,
+        "transaction_count": 4,
+        "reason_codes": [
+          {
+            "code": "PASS_THROUGH_SPEED",
+            "label": "Forwarded in 4.2 mins",
+            "weight": 38.0,
+            "direction": "increases_risk"
+          }
+        ],
+        "is_frozen": false,
+        "position": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "account_id": "ACC_MULE_201",
+        "role": "mule",
+        "risk_score": 87.0,
+        "ml_prob": 0.85,
+        "rule_score": 0.86,
+        "neighbor_risk": 0.8,
+        "open_date": "2026-02-15",
+        "kyc_level": "minimal",
+        "account_type": "wallet",
+        "city_cluster": "HYDERABAD",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 410000.0,
+        "total_outgoing": 0.0,
+        "transaction_count": 1,
+        "reason_codes": [],
+        "is_frozen": false,
+        "position": [
+          150,
+          60,
+          0
+        ]
+      },
+      {
+        "account_id": "ACC_MULE_202",
+        "role": "mule",
+        "risk_score": 86.0,
+        "ml_prob": 0.84,
+        "rule_score": 0.85,
+        "neighbor_risk": 0.79,
+        "open_date": "2026-02-16",
+        "kyc_level": "minimal",
+        "account_type": "savings",
+        "city_cluster": "HYDERABAD",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 400000.0,
+        "total_outgoing": 0.0,
+        "transaction_count": 1,
+        "reason_codes": [],
+        "is_frozen": false,
+        "position": [
+          150,
+          -60,
+          0
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "txn_id": "TXN_201_01",
+        "src_account": "ACC_VIC_201",
+        "dst_account": "ACC_HUB_201",
+        "amount": 420000.0,
+        "channel": "UPI",
+        "ts": "2026-03-10T11:55:00Z",
+        "hop_index": 1,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_201_02",
+        "src_account": "ACC_VIC_202",
+        "dst_account": "ACC_HUB_201",
+        "amount": 400000.0,
+        "channel": "UPI",
+        "ts": "2026-03-10T11:58:00Z",
+        "hop_index": 1,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_201_03",
+        "src_account": "ACC_HUB_201",
+        "dst_account": "ACC_MULE_201",
+        "amount": 410000.0,
+        "channel": "IMPS",
+        "ts": "2026-03-10T12:02:00Z",
+        "hop_index": 2,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_201_04",
+        "src_account": "ACC_HUB_201",
+        "dst_account": "ACC_MULE_202",
+        "amount": 400000.0,
+        "channel": "IMPS",
+        "ts": "2026-03-10T12:03:00Z",
+        "hop_index": 2,
+        "is_suspicious": true
+      }
+    ]
+  },
+  "R-092": {
+    "ring_id": "R-103",
+    "fingerprint": "c3d4e5f6a1b27890123456789abcdef012345678",
+    "ring_type": "dormant_activation",
+    "score": 88.0,
+    "priority": 563200.0,
+    "amount_moved": 640000.0,
+    "amount_cashed": 180000.0,
+    "amount_at_risk": 460000.0,
+    "duration_min": 45.0,
+    "status": "under_review",
+    "detected_at": "2026-03-10T13:20:00Z",
+    "pattern_tags": [
+      "dormant_activation",
+      "dormant_active",
+      "volume_spike"
+    ],
+    "explanation": "Dormancy activation spike: Account ACC_DORM_301, completely inactive for 142 days, suddenly moved \u20b96,40,000 (85x prior volume) within 45 minutes.",
+    "nodes": [
+      {
+        "account_id": "ACC_DORM_301",
+        "role": "mule",
+        "risk_score": 90.0,
+        "ml_prob": 0.91,
+        "rule_score": 0.88,
+        "neighbor_risk": 0.75,
+        "open_date": "2025-08-10",
+        "kyc_level": "minimal",
+        "account_type": "savings",
+        "city_cluster": "KOLKATA",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 640000.0,
+        "total_outgoing": 640000.0,
+        "transaction_count": 3,
+        "reason_codes": [
+          {
+            "code": "DORMANCY_BREAK",
+            "label": "142 days inactive before surge",
+            "weight": 36.0,
+            "direction": "increases_risk"
+          }
+        ],
+        "is_frozen": false,
+        "position": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "account_id": "EXT_BANK_ICICI",
+        "role": "cash_out",
+        "risk_score": 5.0,
+        "ml_prob": 0.01,
+        "rule_score": 0.05,
+        "neighbor_risk": 0.05,
+        "open_date": "2015-01-01",
+        "kyc_level": "full",
+        "account_type": "sink",
+        "city_cluster": "KOLKATA",
+        "declared_income_band": "high",
+        "bank_id": "EXT_BANK",
+        "total_incoming": 180000.0,
+        "total_outgoing": 0.0,
+        "transaction_count": 1,
+        "reason_codes": [],
+        "is_frozen": false,
+        "position": [
+          180,
+          0,
+          0
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "txn_id": "TXN_301_01",
+        "src_account": "ACC_VIC_301",
+        "dst_account": "ACC_DORM_301",
+        "amount": 640000.0,
+        "channel": "NEFT",
+        "ts": "2026-03-10T12:40:00Z",
+        "hop_index": 1,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_301_02",
+        "src_account": "ACC_DORM_301",
+        "dst_account": "EXT_BANK_ICICI",
+        "amount": 180000.0,
+        "channel": "IMPS",
+        "ts": "2026-03-10T13:10:00Z",
+        "hop_index": 2,
+        "is_suspicious": true
+      }
+    ]
+  },
+  "R-085": {
+    "ring_id": "R-105",
+    "fingerprint": "d4e5f6a1b2c37890123456789abcdef012345678",
+    "ring_type": "layering_chain",
+    "score": 93.0,
+    "priority": 883500.0,
+    "amount_moved": 950000.0,
+    "amount_cashed": 0.0,
+    "amount_at_risk": 950000.0,
+    "duration_min": 52.0,
+    "status": "new",
+    "detected_at": "2026-03-10T14:10:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "multi_hop",
+      "structuring"
+    ],
+    "explanation": "Multi-hop layering chain: \u20b99,50,000 routed through 5 serial mule accounts (A -> B -> C -> D -> E) with 2-4% commission decay at each hop over 52 minutes.",
+    "nodes": [
+      {
+        "account_id": "ACC_CHAIN_01",
+        "role": "collector",
+        "risk_score": 92.0,
+        "ml_prob": 0.9,
+        "rule_score": 0.91,
+        "neighbor_risk": 0.85,
+        "open_date": "2026-02-12",
+        "kyc_level": "minimal",
+        "account_type": "savings",
+        "city_cluster": "PUNE",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 950000.0,
+        "total_outgoing": 920000.0,
+        "transaction_count": 2,
+        "reason_codes": [],
+        "is_frozen": false,
+        "position": [
+          -200,
+          0,
+          0
+        ]
+      },
+      {
+        "account_id": "ACC_CHAIN_02",
+        "role": "mule",
+        "risk_score": 91.0,
+        "ml_prob": 0.89,
+        "rule_score": 0.9,
+        "neighbor_risk": 0.86,
+        "open_date": "2026-02-14",
+        "kyc_level": "minimal",
+        "account_type": "savings",
+        "city_cluster": "PUNE",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 920000.0,
+        "total_outgoing": 890000.0,
+        "transaction_count": 2,
+        "reason_codes": [],
+        "is_frozen": false,
+        "position": [
+          -100,
+          0,
+          0
+        ]
+      },
+      {
+        "account_id": "ACC_CHAIN_03",
+        "role": "mule",
+        "risk_score": 91.0,
+        "ml_prob": 0.89,
+        "rule_score": 0.9,
+        "neighbor_risk": 0.86,
+        "open_date": "2026-02-16",
+        "kyc_level": "minimal",
+        "account_type": "savings",
+        "city_cluster": "PUNE",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 890000.0,
+        "total_outgoing": 860000.0,
+        "transaction_count": 2,
+        "reason_codes": [],
+        "is_frozen": false,
+        "position": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "account_id": "ACC_CHAIN_04",
+        "role": "mule",
+        "risk_score": 92.0,
+        "ml_prob": 0.9,
+        "rule_score": 0.91,
+        "neighbor_risk": 0.87,
+        "open_date": "2026-02-18",
+        "kyc_level": "minimal",
+        "account_type": "wallet",
+        "city_cluster": "PUNE",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 860000.0,
+        "total_outgoing": 830000.0,
+        "transaction_count": 2,
+        "reason_codes": [],
+        "is_frozen": false,
+        "position": [
+          100,
+          0,
+          0
+        ]
+      },
+      {
+        "account_id": "ACC_CHAIN_05",
+        "role": "mule",
+        "risk_score": 94.0,
+        "ml_prob": 0.93,
+        "rule_score": 0.92,
+        "neighbor_risk": 0.88,
+        "open_date": "2026-02-20",
+        "kyc_level": "minimal",
+        "account_type": "wallet",
+        "city_cluster": "PUNE",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 830000.0,
+        "total_outgoing": 0.0,
+        "transaction_count": 1,
+        "reason_codes": [
+          {
+            "code": "CHAIN_DESTINATION",
+            "label": "5-hop terminal holding node",
+            "weight": 33.0,
+            "direction": "increases_risk"
+          }
+        ],
+        "is_frozen": false,
+        "position": [
+          200,
+          0,
+          0
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "txn_id": "TXN_501_01",
+        "src_account": "ACC_CHAIN_01",
+        "dst_account": "ACC_CHAIN_02",
+        "amount": 920000.0,
+        "channel": "IMPS",
+        "ts": "2026-03-10T13:25:00Z",
+        "hop_index": 1,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_501_02",
+        "src_account": "ACC_CHAIN_02",
+        "dst_account": "ACC_CHAIN_03",
+        "amount": 890000.0,
+        "channel": "IMPS",
+        "ts": "2026-03-10T13:38:00Z",
+        "hop_index": 2,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_501_03",
+        "src_account": "ACC_CHAIN_03",
+        "dst_account": "ACC_CHAIN_04",
+        "amount": 860000.0,
+        "channel": "UPI",
+        "ts": "2026-03-10T13:49:00Z",
+        "hop_index": 3,
+        "is_suspicious": true
+      },
+      {
+        "txn_id": "TXN_501_04",
+        "src_account": "ACC_CHAIN_04",
+        "dst_account": "ACC_CHAIN_05",
+        "amount": 830000.0,
+        "channel": "UPI",
+        "ts": "2026-03-10T14:02:00Z",
+        "hop_index": 4,
+        "is_suspicious": true
+      }
+    ]
+  },
+  "R-099": {
+    "ring_id": "R-106",
+    "fingerprint": "e5f6a1b2c3d47890123456789abcdef012345678",
+    "ring_type": "mixed",
+    "score": 95.0,
+    "priority": 1472500.0,
+    "amount_moved": 2100000.0,
+    "amount_cashed": 550000.0,
+    "amount_at_risk": 1550000.0,
+    "duration_min": 68.0,
+    "status": "frozen",
+    "detected_at": "2026-03-10T15:00:00Z",
+    "pattern_tags": [
+      "mixed",
+      "complex_syndicate",
+      "cycle_and_fanout"
+    ],
+    "explanation": "Hybrid multi-stage syndicate: 4 victim accounts funneled \u20b921,00,000 into 2 aggregators, who fed a 3-account circular loop before distributing to 5 mule cash-out nodes.",
+    "nodes": [
+      {
+        "account_id": "ACC_SYN_AGG_1",
+        "role": "collector",
+        "risk_score": 97.0,
+        "ml_prob": 0.98,
+        "rule_score": 0.95,
+        "neighbor_risk": 0.9,
+        "open_date": "2026-01-15",
+        "kyc_level": "minimal",
+        "account_type": "current",
+        "city_cluster": "BENGALURU",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 1100000.0,
+        "total_outgoing": 1050000.0,
+        "transaction_count": 6,
+        "reason_codes": [],
+        "is_frozen": true,
+        "position": [
+          -120,
+          100,
+          0
+        ]
+      },
+      {
+        "account_id": "ACC_SYN_AGG_2",
+        "role": "collector",
+        "risk_score": 96.0,
+        "ml_prob": 0.97,
+        "rule_score": 0.94,
+        "neighbor_risk": 0.89,
+        "open_date": "2026-01-18",
+        "kyc_level": "minimal",
+        "account_type": "savings",
+        "city_cluster": "CHENNAI",
+        "declared_income_band": "low",
+        "bank_id": "TRACE_BANK",
+        "total_incoming": 1000000.0,
+        "total_outgoing": 950000.0,
+        "transaction_count": 5,
+        "reason_codes": [],
+        "is_frozen": true,
+        "position": [
+          -120,
+          -100,
+          0
+        ]
+      },
+      {
+        "account_id": "ATM_SINK_BLR",
+        "role": "cash_out",
+        "risk_score": 5.0,
+        "ml_prob": 0.01,
+        "rule_score": 0.05,
+        "neighbor_risk": 0.05,
+        "open_date": "2016-01-01",
+        "kyc_level": "full",
+        "account_type": "sink",
+        "city_cluster": "BENGALURU",
+        "declared_income_band": "high",
+        "bank_id": "CASH_OUT_NETWORK",
+        "total_incoming": 350000.0,
+        "total_outgoing": 0.0,
+        "transaction_count": 4,
+        "reason_codes": [],
+        "is_frozen": false,
+        "position": [
+          220,
+          0,
+          0
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "txn_id": "TXN_601_01",
+        "src_account": "ACC_SYN_AGG_1",
+        "dst_account": "ATM_SINK_BLR",
+        "amount": 350000.0,
+        "channel": "ATM_WITHDRAWAL",
+        "ts": "2026-03-10T14:45:00Z",
+        "hop_index": 2,
+        "is_suspicious": true
+      }
+    ]
+  }
+}

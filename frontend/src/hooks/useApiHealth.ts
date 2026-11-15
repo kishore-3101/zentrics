@@ -1,12 +1,48 @@
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 import { USE_MOCK } from '../config/env';
 
 export type ApiHealthStatus = 'live' | 'mock' | 'offline' | 'unknown';
 
 /**
- * Shell-level placeholder. It reports what we actually know (mock vs. not),
- * and never claims a live connection.
- * TODO: replace with a real probe once a health route exists in the API contract.
+ * Probes the backend API /health endpoint to reflect true connectivity state in the header badge.
  */
 export function useApiHealth(): { status: ApiHealthStatus } {
-  return { status: USE_MOCK ? 'mock' : 'unknown' };
+  const [status, setStatus] = useState<ApiHealthStatus>(USE_MOCK ? 'mock' : 'unknown');
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function checkHealth() {
+      if (USE_MOCK) {
+        if (isMounted) setStatus('mock');
+        return;
+      }
+
+      try {
+        const response = await axios.get('/health', { timeout: 2500 });
+        if (isMounted) {
+          if (response.status === 200 && response.data?.status === 'healthy') {
+            setStatus('live');
+          } else {
+            setStatus('offline');
+          }
+        }
+      } catch (err) {
+        if (isMounted) {
+          setStatus('offline');
+        }
+      }
+    }
+
+    checkHealth();
+    const interval = setInterval(checkHealth, 5000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
+
+  return { status };
 }
