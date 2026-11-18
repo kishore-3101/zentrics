@@ -1,0 +1,105 @@
+# TraceMesh Detection and Ring Clustering Configuration
+
+graph:
+  required_account_columns:
+    - account_id
+  required_transaction_columns:
+    - transaction_id
+    - sender_account
+    - receiver_account
+    - amount
+    - timestamp
+    - transaction_status
+    - channel
+  account_attributes:
+    - account_type
+    - account_open_date
+    - account_age_days
+    - kyc_status
+    - occupation
+    - city
+    - branch_id
+  window_presets_minutes:
+    10m: 10
+    1h: 60
+    24h: 1440
+    7d: 10080
+  known_sinks: []
+
+detectors:
+  fan_in_burst:
+    enabled: true
+    window_minutes: 60
+    min_senders: 5
+    min_amount: 1000.0
+    weight: 0.25
+  fan_out_split:
+    enabled: true
+    window_minutes: 60
+    min_recipients: 4
+    min_amount: 1000.0
+    inflow_lookback_minutes: 60
+    weight: 0.25
+  rapid_pass_through:
+    enabled: true
+    max_delay_minutes: 30
+    min_forward_ratio: 0.80
+    max_forward_ratio: 1.25
+    min_amount: 500.0
+    weight: 0.30
+  layering_chain:
+    enabled: true
+    min_hops: 3
+    max_hops: 6
+    max_hop_delay_minutes: 60
+    amount_tolerance: 0.20
+    min_amount: 500.0
+    weight: 0.30
+  circular_flow:
+    enabled: true
+    min_cycle_length: 3
+    max_cycle_length: 5
+    max_cycle_duration_hours: 24
+    amount_tolerance: 0.25
+    weight: 0.35
+  dormant_active:
+    enabled: true
+    dormant_days_threshold: 30
+    min_recent_txns: 3
+    volume_multiplier: 3.0
+    weight: 0.20
+
+scoring:
+  method: "noisy_or"  # "noisy_or" avoids score inflation, smooth saturation [0, 1]
+  severity_multipliers:
+    low: 0.5
+    medium: 0.75
+    high: 1.0
+    critical: 1.25
+
+clustering:
+  suspicious_score_threshold: 0.30
+  min_ring_size: 3
+  max_ring_size: 50
+  community_algorithm: "louvain"  # fallback to connected_components
+  separate_shared_mules: true
+  min_shared_mule_component_size: 3
+
+ring_scoring:
+  weights:
+    mean_risk: 0.35
+    max_risk: 0.20
+    amount_factor: 0.15
+    speed_factor: 0.15
+    pattern_diversity: 0.15
+  action_thresholds:
+    freeze_and_escalate: 80.0
+    watchlist_review: 50.0
+    monitor: 0.0
+
+streaming:
+  window_minutes: 60
+  re_eval_neighborhood_hops: 2
+  alert_score_threshold: 50.0
+  high_priority_score_threshold: 80.0
+  max_event_history: 10000
