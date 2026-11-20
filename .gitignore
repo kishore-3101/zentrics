@@ -1,4 +1,41 @@
-.venv/
+
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# Environment secrets
 .env
+.env.*
+!.env.example
+
+# Python cache and testing
+.pytest_cache/
+.mypy_cache/
+.coverage
+
+# Raw datasets
+data/raw/
+data/new_test/
+
+# Generated outputs
+outputs/
+
+# Generated model artifacts
+models/*.pkl
+models/*.joblib
+models/*.model
+
+# OS files
+.DS_Store
+Thumbs.db
