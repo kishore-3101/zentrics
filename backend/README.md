@@ -91,3 +91,39 @@ VITE_USE_MOCK=false
 VITE_API_TOKEN="tracemesh-hackathon-token-2026"
 ```
 The mock server automatically provides CORS headers (`Access-Control-Allow-Origin: *`) and supports live state mutations (e.g. freezing a ring in the UI updates the alert status and appends to the audit log).
+
+---
+
+## 6. Dataset Loaders & Validation (Module 5)
+
+Module 5 provides the robust ingestion engine to validate, reset, and bulk-load synthetic and benchmark datasets into PostgreSQL (Supabase / local Docker).
+
+### Architecture & Isolation
+- **Validator** ([`backend/validation.py`](./validation.py)): Pre-load integrity gate verifying all 10 invariants from `datasetguide.md` Section 10 (no orphan accounts, self-transfers, negative amounts, out-of-order timestamps, enum validity, mule/victim consistency). Fails with readable error reports before touching the database.
+- **Raw Loader** ([`backend/raw_loader.py`](./raw_loader.py)): Handles raw transactions and customer accounts. Registers active dataset metadata into `datasets` table. Provides helper to remove injected demo transactions.
+- **Ground-Truth Loader** ([`backend/gt_loader.py`](./gt_loader.py)): Strictly quarantined loader for `gt_rings`, `gt_accounts`, and `gt_transactions`. Quarantined from detector algorithms and feature extraction.
+- **CLI Orchestrator** ([`backend/loader.py`](./loader.py)): Single entrypoint enforcing transactional all-or-nothing atomicity, pre-load reset via `fn_reset_active_dataset()` (preserving analyst cases and audit log), and foreign-key dependency ordering:
+  `gt_rings` -> `accounts` -> `gt_accounts` -> `transactions` -> `gt_transactions`.
+
+### Usage & Commands
+
+```bash
+# 1. Validate a dataset folder without writing anything:
+python3 -m backend.loader --dataset toy --validate-only
+
+# 2. Preview full SQL transaction script (Dry Run):
+python3 -m backend.loader --dataset toy --dry-run
+
+# 3. Generate high-performance PostgreSQL \copy script:
+python3 -m backend.loader --dataset toy --format copy -o scripts/load_toy_copy.sql --dry-run
+
+# 4. Generate universal SQL INSERT script (for Supabase Browser SQL Editor):
+python3 -m backend.loader --dataset toy --format insert -o scripts/seed_toy_insert.sql --dry-run
+
+# 5. Execute load directly via psql into PostgreSQL:
+python3 -m backend.loader --dataset toy
+
+# 6. Run the Module 5 test suite (18 unit tests):
+python3 -m unittest tests/test_loaders.py -v
+```
+

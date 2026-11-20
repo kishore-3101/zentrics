@@ -1,0 +1,2 @@
+gt_ring_id,ring_type,difficulty,n_accounts,n_victims,first_inflow_ts,last_outflow_ts,amount_total,params_json
+GT_RING_BROKEN,unknown_type,extreme,2,0,2026-03-01T10:00:00Z,2026-03-01T11:00:00Z,1000.00,"{}"

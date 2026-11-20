@@ -1,0 +1,8 @@
+{
+  "dataset_id": "broken",
+  "name": "Deliberately Broken Dataset",
+  "role": "toy",
+  "seed": 999,
+  "n_accounts": 3,
+  "n_txns": 3
+}
