@@ -55,19 +55,15 @@ export function AlertKpiCards({ alerts }: AlertKpiCardsProps) {
   const ACCENTS = {
     gold: {
       chip: 'border-gold/35 bg-gold/10 text-gold-light',
-      glow: 'bg-[radial-gradient(circle,rgb(201_168_91/0.18),transparent_65%)]',
     },
     danger: {
       chip: 'border-danger/35 bg-danger/10 text-danger',
-      glow: 'bg-[radial-gradient(circle,rgb(239_68_68/0.18),transparent_65%)]',
     },
     warning: {
       chip: 'border-warning/35 bg-warning/10 text-warning',
-      glow: 'bg-[radial-gradient(circle,rgb(245_158_11/0.18),transparent_65%)]',
     },
     emerald: {
       chip: 'border-emerald/35 bg-emerald/10 text-emerald',
-      glow: 'bg-[radial-gradient(circle,rgb(0_200_120/0.18),transparent_65%)]',
     },
   };
 
@@ -84,11 +80,6 @@ export function AlertKpiCards({ alerts }: AlertKpiCardsProps) {
             delay={idx * 0.06}
             bodyClassName="relative p-5 overflow-hidden"
           >
-            <div
-              aria-hidden
-              className={`pointer-events-none absolute -right-12 -top-12 size-40 ${styles.glow}`}
-            />
-
             <div className="relative flex items-start justify-between gap-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
                 {card.label}

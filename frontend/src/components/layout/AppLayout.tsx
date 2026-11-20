@@ -77,14 +77,15 @@ export function AppLayout() {
         {isDesktop && <Sidebar collapsed={collapsed} onToggleCollapsed={toggleCollapsed} />}
         <MobileDrawer open={drawerOpen} onClose={closeDrawer} />
 
-        <div ref={scrollRef} className="flex min-w-0 flex-1 flex-col overflow-y-auto">
+        <div ref={scrollRef} className="flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto">
           <Header onOpenNavigation={openDrawer} />
-          <main id="main-content" data-anim="content" className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+          <main id="main-content" data-anim="content" className="w-full min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
             <motion.div
               key={pathname}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.28, ease: EASE_OUT }}
+              className="w-full min-w-0"
             >
               <ErrorBoundary fallbackTitle="View Failed to Render">
                 <Suspense fallback={<RouteFallback />}>

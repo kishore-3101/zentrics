@@ -21,11 +21,9 @@ export interface KpiCardProps {
 const ACCENTS = {
   emerald: {
     chip: 'border-emerald/30 bg-emerald/10 text-emerald',
-    glow: 'bg-[radial-gradient(circle,rgb(0_200_120/0.16),transparent_65%)]',
   },
   gold: {
     chip: 'border-gold/35 bg-gold/10 text-gold-light',
-    glow: 'bg-[radial-gradient(circle,rgb(201_168_91/0.18),transparent_65%)]',
   },
 } as const;
 
@@ -34,8 +32,6 @@ export function KpiCard({ label, icon: Icon, value, format, trend, description, 
 
   return (
     <DashboardCard interactive delay={delay} bodyClassName="relative">
-      <div aria-hidden className={cn('pointer-events-none absolute -right-14 -top-14 size-44', styles.glow)} />
-
       <div className="relative flex items-start justify-between gap-3">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</p>
         <span className={cn('grid size-9 shrink-0 place-items-center rounded-xl border', styles.chip)}>

@@ -62,7 +62,7 @@ export function CaseTable({
       ) : (
         <>
           {/* Desktop Table View */}
-          <div className="hidden lg:block overflow-x-auto">
+          <div className="hidden lg:block w-full min-w-0 overflow-x-auto">
             <table className="w-full min-w-[65rem] text-left text-sm">
               <thead className="border-b border-gold/15 bg-canvas/60">
                 <tr>

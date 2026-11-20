@@ -88,12 +88,10 @@ export function MetricKpiCards({ summary }: MetricKpiCardsProps) {
   const ACCENTS = {
     emerald: {
       chip: 'border-emerald/35 bg-emerald/10 text-emerald',
-      glow: 'bg-[radial-gradient(circle,rgb(0_200_120/0.18),transparent_65%)]',
       border: 'hover:border-emerald/40',
     },
     gold: {
       chip: 'border-gold/35 bg-gold/10 text-gold-light',
-      glow: 'bg-[radial-gradient(circle,rgb(201_168_91/0.18),transparent_65%)]',
       border: 'hover:border-gold/40',
     },
   };
@@ -112,11 +110,6 @@ export function MetricKpiCards({ summary }: MetricKpiCardsProps) {
             delay={idx * 0.04}
             bodyClassName={`relative p-4 overflow-hidden ${styles.border}`}
           >
-            <div
-              aria-hidden
-              className={`pointer-events-none absolute -right-10 -top-10 size-32 ${styles.glow}`}
-            />
-
             <div className="relative flex items-start justify-between gap-2">
               <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
                 {card.label}

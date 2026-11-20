@@ -25,11 +25,6 @@ export function PlaceholderPage({
   return (
     <section className="mx-auto w-full max-w-6xl">
       <div className="glass relative overflow-hidden rounded-2xl p-6 shadow-panel sm:p-8">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-20 -top-24 size-80 bg-[radial-gradient(circle,rgb(0_200_120/0.14),transparent_65%)]"
-        />
-
         <div className="relative flex items-start gap-4">
           <span className="grid size-12 shrink-0 place-items-center rounded-xl border border-gold/25 bg-linear-to-br from-emerald/15 to-gold/10 text-gold-light">
             <Icon className="size-6" strokeWidth={1.5} aria-hidden />

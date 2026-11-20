@@ -127,17 +127,12 @@ export function AlertFiltersBar({
                 key={type}
                 type="button"
                 onClick={() => toggleTypology(type)}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-all ${
+                className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium transition-all ${
                   active
                     ? 'border-gold-light bg-gold/20 text-gold-light shadow-sm'
                     : 'border-gold/15 bg-canvas/40 text-muted hover:border-gold/30 hover:text-ink'
                 }`}
               >
-                <span
-                  className="size-1.5 rounded-full"
-                  style={{ backgroundColor: meta.color }}
-                  aria-hidden
-                />
                 {meta.label}
               </button>
             );
