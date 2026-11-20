@@ -1,0 +1,25 @@
+{
+  "model_type": "XGBoostClassifier",
+  "training_date": "2026-11-18T21:45:21.738522",
+  "feature_count": 63,
+  "model_version": "1.0.0",
+  "train_samples": 24000,
+  "test_samples": 6000,
+  "metrics": {
+    "model": "XGBoost",
+    "accuracy": 0.9738333333333333,
+    "precision": 0.9162072767364939,
+    "recall": 0.9111842105263158,
+    "f1": 0.9136888400219901,
+    "roc_auc": 0.9813995176128213,
+    "pr_auc": 0.95643680318952,
+    "fpr": 0.014937106918238994,
+    "fnr": 0.08881578947368421,
+    "tn": 5012,
+    "fp": 76,
+    "fn": 81,
+    "tp": 831
+  },
+  "cv_f1_mean": 0.9269296987518025,
+  "cv_f1_std": 0.00825926414753172
+}
