@@ -76,7 +76,7 @@ export function FairnessBiasTable({ records }: FairnessBiasTableProps) {
         </button>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="w-full min-w-0 overflow-x-auto">
         <table className="w-full min-w-[36rem] text-left text-sm">
           <thead className="border-b border-gold/15 bg-canvas/60">
             <tr>

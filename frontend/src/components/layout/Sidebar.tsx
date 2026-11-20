@@ -32,6 +32,7 @@ function NavLinkItem({ item, active, collapsed, onNavigate }: NavLinkItemProps) 
         className={cn(
           'group relative flex h-11 items-center gap-3 overflow-hidden rounded-xl px-3.5 text-sm font-medium transition-colors duration-200',
           active ? 'text-gold-light' : 'text-muted hover:text-ink',
+          collapsed && 'justify-center px-0 gap-0',
         )}
       >
         {active ? (
@@ -56,7 +57,7 @@ function NavLinkItem({ item, active, collapsed, onNavigate }: NavLinkItemProps) 
         />
         <span
           aria-hidden={collapsed}
-          className={cn('relative whitespace-nowrap transition-opacity duration-150', collapsed && 'opacity-0')}
+          className={cn('relative whitespace-nowrap transition-opacity duration-150', collapsed ? 'hidden' : 'inline-block')}
         >
           {item.label}
         </span>
@@ -78,14 +79,14 @@ function SidebarBody({ collapsed, onNavigate, onClose, onToggleCollapsed }: Side
   const { pathname } = useLocation();
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
       <div
         className={cn(
-          'flex h-16 shrink-0 items-center border-b border-gold/10 px-5',
+          'flex h-16 shrink-0 items-center border-b border-gold/10 px-5 overflow-hidden',
           collapsed ? 'justify-center' : 'justify-between',
         )}
       >
-        <Link to="/" onClick={onNavigate} aria-label="TraceMesh home" className="rounded-lg">
+        <Link to="/overview" onClick={onNavigate} aria-label="TraceMesh home" className="rounded-lg">
           <BrandLockup compact={collapsed} />
         </Link>
         {onClose && (
@@ -95,12 +96,12 @@ function SidebarBody({ collapsed, onNavigate, onClose, onToggleCollapsed }: Side
         )}
       </div>
 
-      <nav aria-label="Primary" className="min-h-0 flex-1 overflow-y-auto px-3 py-5">
+      <nav aria-label="Primary" className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 py-5">
         <p
           aria-hidden
           className={cn(
             'mb-3 px-3.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted/70 transition-opacity duration-150',
-            collapsed && 'opacity-0',
+            collapsed ? 'hidden' : 'block',
           )}
         >
           Command center
@@ -119,7 +120,7 @@ function SidebarBody({ collapsed, onNavigate, onClose, onToggleCollapsed }: Side
       </nav>
 
       {onToggleCollapsed && (
-        <div className="shrink-0 border-t border-gold/10 p-3">
+        <div className="shrink-0 border-t border-gold/10 p-3 overflow-hidden">
           <button
             type="button"
             onClick={onToggleCollapsed}
@@ -135,9 +136,9 @@ function SidebarBody({ collapsed, onNavigate, onClose, onToggleCollapsed }: Side
             )}
             <span
               aria-hidden
-              className={cn('whitespace-nowrap transition-opacity duration-150', collapsed && 'opacity-0')}
+              className={cn('whitespace-nowrap transition-opacity duration-150', collapsed ? 'hidden' : 'inline-block')}
             >
-              Collapse
+              
             </span>
           </button>
         </div>
@@ -159,7 +160,7 @@ export function Sidebar({ collapsed, onToggleCollapsed }: SidebarProps) {
       initial={false}
       animate={{ width: collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH }}
       transition={{ duration: 0.3, ease: EASE_OUT }}
-      className="relative z-20 h-full shrink-0 border-r border-gold/12 bg-linear-to-b from-sidebar to-[#08130e]"
+      className="relative z-20 h-full shrink-0 border-r border-gold/12 bg-linear-to-b from-sidebar to-[#08130e] overflow-hidden"
     >
       <SidebarBody collapsed={collapsed} onToggleCollapsed={onToggleCollapsed} />
     </motion.aside>

@@ -39,7 +39,7 @@ export interface RouteMeta {
   crumbs: Crumb[];
 }
 
-const ROOT_CRUMB: Crumb = { label: 'TraceMesh', to: '/' };
+const ROOT_CRUMB: Crumb = { label: 'TraceMesh', to: '/overview' };
 
 export function getRouteMeta(pathname: string): RouteMeta {
   const item = NAV_ITEMS.find((candidate) => matchPath(candidate.matchPattern, pathname));

@@ -107,7 +107,7 @@ function OverviewContent({ data }: { data: OverviewData }) {
   const { activeRings } = useMemo(() => selectKpiSummary(data), [data]);
 
   return (
-    <div className="mx-auto w-full max-w-[1400px] space-y-5">
+    <div className="mx-auto w-full max-w-[1400px] min-w-0 space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted">
           Current detection run:{' '}
@@ -126,13 +126,13 @@ function OverviewContent({ data }: { data: OverviewData }) {
       </div>
 
       <div className="grid gap-5 xl:grid-cols-3">
-        <AlertVolumeTrendChart data={data.alertVolume} delay={0.3} className="xl:col-span-2" />
-        <TypologyDonutChart slices={typologySlices} delay={0.36} />
+        <AlertVolumeTrendChart data={data.alertVolume} delay={0.3} className="min-w-0 xl:col-span-2" />
+        <TypologyDonutChart slices={typologySlices} delay={0.36} className="min-w-0" />
       </div>
 
       <div className="grid gap-5 xl:grid-cols-3">
-        <TopCriticalRingsTable rings={topRings} delay={0.42} className="xl:col-span-2" />
-        <RecentActivityFeed events={data.activity} delay={0.48} />
+        <TopCriticalRingsTable rings={topRings} delay={0.42} className="min-w-0 xl:col-span-2" />
+        <RecentActivityFeed events={data.activity} delay={0.48} className="min-w-0" />
       </div>
     </div>
   );

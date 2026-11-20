@@ -39,8 +39,7 @@ function TrendTooltip({ active, payload, label }: TrendTooltipProps) {
       <ul className="mt-2 space-y-1.5">
         {rows.map((row) => (
           <li key={row.typology} className="flex items-center justify-between gap-6 text-xs">
-            <span className="flex items-center gap-2 text-muted">
-              <span className="size-2 rounded-full" style={{ backgroundColor: TYPOLOGY_META[row.typology].color }} aria-hidden />
+            <span className="text-muted">
               {TYPOLOGY_META[row.typology].label}
             </span>
             <span className="font-mono font-semibold tabular-nums text-ink">{row.value}</span>
@@ -100,15 +99,10 @@ export function AlertVolumeTrendChart({ data, delay = 0, className }: AlertVolum
                 aria-pressed={isOn}
                 onClick={() => toggle(typology)}
                 className={cn(
-                  'flex h-6 items-center gap-1.5 rounded-full border px-2 text-[11px] font-medium transition-colors duration-200',
-                  isOn ? 'border-gold/25 text-ink/90 hover:border-gold/50' : 'border-white/10 text-muted/60 hover:border-white/25',
+                  'flex h-6 items-center rounded-full border px-2.5 text-[11px] font-medium transition-colors duration-200',
+                  isOn ? 'border-gold/30 bg-gold/10 text-gold-light hover:border-gold/50' : 'border-white/10 text-muted/60 hover:border-white/25',
                 )}
               >
-                <span
-                  className="size-1.5 rounded-full transition-opacity"
-                  style={{ backgroundColor: TYPOLOGY_META[typology].color, opacity: isOn ? 1 : 0.3 }}
-                  aria-hidden
-                />
                 {TYPOLOGY_META[typology].label}
               </button>
             );
@@ -116,8 +110,8 @@ export function AlertVolumeTrendChart({ data, delay = 0, className }: AlertVolum
         </div>
       }
     >
-      <div className="h-72 w-full">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="h-72 w-full min-w-0 overflow-hidden">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={288}>
           <AreaChart data={data as AlertVolumePoint[]} margin={{ top: 8, right: 8, left: -14, bottom: 0 }}>
             <defs>
               {TYPOLOGY_ORDER.map((typology) => (

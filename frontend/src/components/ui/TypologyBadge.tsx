@@ -31,10 +31,9 @@ export function TypologyBadge({ typology }: TypologyBadgeProps) {
 
   return (
     <span
-      className="inline-flex h-6 items-center gap-2 whitespace-nowrap rounded-full border px-2.5 text-xs font-medium text-ink/90"
+      className="inline-flex h-6 items-center justify-center whitespace-nowrap rounded-full border px-2.5 text-xs font-medium text-ink/90"
       style={{ borderColor: `${resolvedColor}55`, backgroundColor: `${resolvedColor}14` }}
     >
-      <span className="size-1.5 rounded-full" style={{ backgroundColor: resolvedColor }} aria-hidden />
       {resolvedLabel}
     </span>
   );

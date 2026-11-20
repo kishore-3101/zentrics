@@ -103,6 +103,16 @@ export const CinematicBrandHeader = memo(function CinematicBrandHeader() {
       <p className="mt-1 text-[10px] font-mono uppercase tracking-[0.3em] text-emerald/80">
         AI-Powered Mule Account Ring Intelligence
       </p>
+
+      {/* Mission Headline */}
+      <div className="mt-3 max-w-2xl px-4 text-center">
+        <h2 className="font-display text-sm sm:text-base md:text-xl lg:text-2xl font-semibold tracking-tight text-ink drop-shadow-[0_2px_14px_rgba(0,0,0,0.9)]">
+          Detect mule account rings{' '}
+          <span className="text-gold-gradient font-bold drop-shadow-[0_0_16px_rgba(201,168,91,0.55)]">
+            before the money disappears.
+          </span>
+        </h2>
+      </div>
     </div>
   );
 });

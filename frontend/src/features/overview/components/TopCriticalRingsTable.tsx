@@ -55,8 +55,8 @@ export function TopCriticalRingsTable({ rings, delay = 0, className }: TopCritic
       ) : (
         <>
           {/* Desktop / tablet: table */}
-          <div className="hidden overflow-x-auto md:block">
-            <table className="w-full min-w-[44rem] text-left text-sm">
+          <div className="hidden w-full min-w-0 overflow-x-auto md:block">
+            <table className="w-full min-w-[34rem] lg:min-w-[38rem] text-left text-sm">
               <caption className="sr-only">Top five critical mule rings ranked by risk score</caption>
               <thead>
                 <tr className="border-b border-gold/10">
