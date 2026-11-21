@@ -127,3 +127,35 @@ python3 -m backend.loader --dataset toy
 python3 -m unittest tests/test_loaders.py -v
 ```
 
+---
+
+## 7. Pipeline Runner & Real Database API (Module 11)
+
+Module 11 unifies detection, feature extraction, neighbor risk contagion, risk score fusion, ring clustering, Jaccard case linking, and database persistence into an automated pipeline runner and real API service.
+
+### Components
+- **Case Linking Engine** ([`backend/case_linking.py`](./case_linking.py)): Deduplicates candidate rings across pipeline runs using Jaccard membership set similarity ($|A \cap B| / |A \cup B|$). If Jaccard similarity $\ge 0.60$, links to the existing case; if $< 0.60$, provisions a new case.
+- **Database Client** ([`backend/db.py`](./db.py)): Unified PostgreSQL / Supabase client with connection latency tracking, structured JSON querying, and seamless offline resilience.
+- **Pipeline Runner** ([`backend/pipeline.py`](./pipeline.py)): CLI orchestrator that loads active raw data, executes the 6 detectors, fuses risk scores, clusters rings, links cases, and commits the run transactionally to `pipeline_runs`, `account_scores`, `detector_hits`, `rings`, `ring_members`, and `ring_transactions`.
+- **Production API Server** ([`backend/real_server.py`](./real_server.py)): Database-backed REST API serving live queries from Supabase (`v_alerts`, `rings`, `cases`, `case_actions`, `account_scores`) with fallback to local fixtures when offline.
+
+### Usage & Commands
+
+```bash
+# 1. Run the end-to-end detection pipeline on canonical toy data (Dry Run):
+python3 -m backend.pipeline --dataset data/toy --run-id 1 --dry-run
+
+# 2. Export transactional SQL script for database execution:
+python3 -m backend.pipeline --dataset data/toy --run-id 1 -o scripts/run_pipeline_toy.sql
+
+# 3. Start the Production API Server (listening on http://localhost:8000):
+python3 backend/real_server.py 8000
+
+# 4. Run the full Module 11 test suite (12 unit tests):
+python3 -m unittest tests/test_pipeline.py -v
+
+# 5. Run all 40 backend unit tests (Modules 2, 5, 11):
+python3 -m unittest tests/test_mock_server.py tests/test_loaders.py tests/test_pipeline.py
+```
+
+
