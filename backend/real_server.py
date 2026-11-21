@@ -27,6 +27,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 from backend.db import DB
 from backend.mock_server import MockDataStore
+from backend.simulation import SIMULATOR
 
 logger = logging.getLogger("backend.real_server")
 
@@ -173,6 +174,20 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
         # Flatten query params
         filters = {k: v[0] if isinstance(v, list) and v else v for k, v in query.items()}
 
+        # Delta polling check (Module 12d)
+        if "since_event_id" in filters:
+            try:
+                sid = int(filters["since_event_id"])
+                events = SIMULATOR.get_events(since_event_id=sid)
+                self._send_json_response(HTTPStatus.OK, {
+                    "events": events,
+                    "latest_event_id": SIMULATOR.next_event_id,
+                    "count": len(events),
+                })
+                return
+            except ValueError:
+                pass
+
         # Attempt DB query from v_alerts view
         try:
             if DB.is_configured():
@@ -258,25 +273,28 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
         self._send_json_response(HTTPStatus.OK, res)
 
     def handle_simulation_state(self):
-        self._send_json_response(HTTPStatus.OK, STORE.get_simulation_state())
+        self._send_json_response(HTTPStatus.OK, SIMULATOR.get_state())
 
     def handle_simulation_action(self, action: str, payload: Dict[str, Any]):
         if action == "start":
-            STORE.simulation["status"] = "running"
+            res = SIMULATOR.start()
         elif action == "pause":
-            STORE.simulation["status"] = "paused"
+            res = SIMULATOR.pause()
+        elif action == "reset":
+            res = SIMULATOR.reset()
         elif action == "speed":
-            speed = payload.get("speed", 1.0)
-            STORE.simulation["speed"] = float(speed)
+            speed_val = payload.get("speed", 1.0)
+            res = SIMULATOR.set_speed(speed_val)
         elif action == "inject_ring":
             typology = payload.get("typology", "circular_flow")
-            STORE.simulation["active_injections"].append({
-                "injection_id": f"INJ_{int(time.time())}",
-                "typology": typology,
-                "injected_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-            })
+            difficulty = payload.get("difficulty", "medium")
+            amount = float(payload.get("amount", 250000.0))
+            res = SIMULATOR.inject_ring(typology=typology, difficulty=difficulty, amount_base=amount)
+        else:
+            self._send_json_response(HTTPStatus.BAD_REQUEST, {"error": f"Unknown simulation action '{action}'"})
+            return
 
-        self._send_json_response(HTTPStatus.OK, STORE.simulation)
+        self._send_json_response(HTTPStatus.OK, res)
 
 
 def run_server(port: int = 8000, host: str = "0.0.0.0"):

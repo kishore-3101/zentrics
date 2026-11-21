@@ -158,4 +158,26 @@ python3 -m unittest tests/test_pipeline.py -v
 python3 -m unittest tests/test_mock_server.py tests/test_loaders.py tests/test_pipeline.py
 ```
 
+---
+
+## 8. Streaming Simulation & Live Ring Injector (Module 12b)
+
+Module 12b delivers the real-time simulation engine powering the interactive presentation cockpit.
+
+### Capabilities
+- **Simulation Engine** ([`backend/simulation.py`](./simulation.py)): Virtual clock daemon advancing `cursor_ts` at variable speeds (1x, 5x, 20x, 60x). Controls playback lifecycle (`start`, `pause`, `reset`, `set_speed`).
+- **Delta Polling Support**: Sequentially numbered `alert_events` queue (`new_ring`, `ring_updated`, `injection_started`). Frontend polls `GET /alerts?since_event_id=X` every 2s to receive instantaneous live toast alerts.
+- **Dynamic Ring Injector (`inject_ring`)**: Synthesizes ad-hoc money laundering syndicates (`circular_flow`, `fan_in_burst`, `layering_chain`, `pass_through_hub`) with `is_injected = true` and unique `injection_id`, immediately triggering detection and publishing real-time events.
+
+### Usage & Commands
+
+```bash
+# 1. Run Module 12b unit tests (10 unit tests):
+python3 -m unittest tests/test_simulation.py -v
+
+# 2. Run all 50 backend unit tests (Modules 2, 5, 11, 12b):
+python3 -m unittest tests/test_mock_server.py tests/test_loaders.py tests/test_pipeline.py tests/test_simulation.py
+```
+
+
 
