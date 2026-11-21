@@ -34,6 +34,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 from backend.case_linking import CaseLinkingEngine, compute_fingerprint
 from backend.db import DB, resolve_db_url
+from backend.explanation import explain_ring
 
 logger = logging.getLogger("backend.pipeline")
 
@@ -510,14 +511,22 @@ class PipelineRunner:
                 priority=priority,
             )
 
-            explanation = (
-                f"Organized {ring_type.replace('_', ' ')} syndicate comprising {len(cluster)} accounts. "
-                f"Transferred ₹{amount_moved:,.0f} across {len(ring_txns)} transactions."
+            # Generate compliance explanation & recommendations (Module 15)
+            expl_data = explain_ring(
+                {
+                    "ring_id": ring_id,
+                    "ring_type": ring_type,
+                    "score": ring_score,
+                    "priority": priority,
+                    "amount_moved": amount_moved,
+                    "amount_cashed": amount_cashed,
+                    "amount_at_risk": amount_at_risk,
+                    "duration_min": 45.0,
+                    "members": roles,
+                },
+                account_scores=self.account_scores,
+                hits=self.hits,
             )
-
-            tags = [ring_type, f"score_{int(ring_score)}"]
-            if amount_cashed > 0:
-                tags.append("active_cashout")
 
             candidate = CandidateRing(
                 ring_id=ring_id,
@@ -532,9 +541,9 @@ class PipelineRunner:
                 n_victims=sum(1 for r in roles.values() if r == "victim"),
                 members=roles,
                 transactions=[t.txn_id for t in ring_txns],
-                explanation=explanation,
-                pattern_tags=tags,
-                recommended="Freeze all downstream mule wallets and flag collector account.",
+                explanation=expl_data["full_narrative"],
+                pattern_tags=expl_data["pattern_tags"],
+                recommended=expl_data["recommended_action"],
                 fingerprint=link_res["fingerprint"],
                 case_id=link_res["case_id"],
             )

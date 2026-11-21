@@ -179,5 +179,27 @@ python3 -m unittest tests/test_simulation.py -v
 python3 -m unittest tests/test_mock_server.py tests/test_loaders.py tests/test_pipeline.py tests/test_simulation.py
 ```
 
+---
+
+## 9. Explanation Engine & Compliance Dictionary (Module 15)
+
+Module 15 provides auditor-ready, deterministic AML compliance explanations, reason codes, and hallucination-free narratives.
+
+### Capabilities
+- **Reason-Code Dictionary** ([`docs/reason_codes.md`](../docs/reason_codes.md)): Institutional AML dictionary mapping structural anomalies (`CYCLE_DETECTED`, `BURST_INFLOW_RATIO`, `RAPID_PASS_THROUGH`, `LAYERING_CHAIN`, `DORMANT_ACTIVATION`) and mitigating profiles to standardized regulatory narratives.
+- **Deterministic Explanation Generator** ([`backend/explanation.py`](./explanation.py)): Computes executive headlines, verifiable facts (exact amounts, hop counts, durations), role breakdowns (guaranteeing victims are never flagged for freezing), and tiered compliance recommendations.
+- **Anti-Hallucination Numerical Guard** (`validate_narrative_numbers`): Verifies that every number, rupee amount, and percentage in any narrative appears verbatim in the verified source facts.
+
+### Usage & Commands
+
+```bash
+# 1. Run Module 15 unit tests (8 unit tests):
+python3 -m unittest tests/test_explanation.py -v
+
+# 2. Run all 58 backend unit tests (Modules 2, 5, 11, 12b, 15):
+python3 -m unittest tests/test_mock_server.py tests/test_loaders.py tests/test_pipeline.py tests/test_simulation.py tests/test_explanation.py
+```
+
+
 
 
