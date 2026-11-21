@@ -27,12 +27,17 @@ env/
 # Raw datasets
 data/raw/
 data/new_test/
+data/database/
+*.db
+*.sqlite
+*.sqlite3
 
 # Generated outputs
 outputs/
 
 # Generated model artifacts
 models/*.pkl
+!models/mule_detection_xgboost.pkl
 models/*.joblib
 models/*.model
 

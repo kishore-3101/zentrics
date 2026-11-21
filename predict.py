@@ -98,6 +98,14 @@ def main():
     risk_scores.to_csv(out, index=False)
     logger.info("Full risk scores      : %s", out)
 
+    # Persist execution, predictions and rings into database
+    try:
+        from src.database import save_pipeline_execution
+        run_id = save_pipeline_execution(risk_scores, rings)
+        logger.info("Persisted pipeline execution #%d to database.", run_id)
+    except Exception as e:
+        logger.warning("Could not persist run to database: %s", e)
+
 
 if __name__ == "__main__":
     main()
