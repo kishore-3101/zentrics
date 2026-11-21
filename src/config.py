@@ -12,29 +12,73 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 # ---------------------------------------------------------------------------
-# Data paths
+# Dynamic dataset and directory resolution (project-root relative)
 # ---------------------------------------------------------------------------
-DATA_RAW_DIR = PROJECT_ROOT / "data" / "raw"
+def _resolve_dataset_dir() -> Path:
+    """Dynamically locate the dataset directory relative to project root or environment."""
+    env_dir = os.environ.get("MULE_DATASET_DIR") or os.environ.get("DATASET_DIR")
+    if env_dir:
+        p = Path(env_dir)
+        if p.exists() and (p / "accounts.csv").exists():
+            return p
+
+    candidates = [
+        PROJECT_ROOT / "data" / "raw",
+        PROJECT_ROOT / "data",
+        PROJECT_ROOT / "mule_account_dataset",
+        PROJECT_ROOT.parent / "mule_account_dataset",
+        PROJECT_ROOT.parent / "data" / "raw",
+    ]
+    for c in candidates:
+        if c.exists() and (c / "accounts.csv").exists():
+            return c
+
+    # Fallback default
+    return PROJECT_ROOT / "data" / "raw"
+
+DATASET_DIR = _resolve_dataset_dir()
+
+# Data & output paths (all strictly relative to PROJECT_ROOT)
+DATA_RAW_DIR       = PROJECT_ROOT / "data" / "raw"
 DATA_PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
-OUTPUTS_DIR = PROJECT_ROOT / "outputs"
-PROCESSED_DIR = OUTPUTS_DIR / "processed"
-VIZ_DIR = OUTPUTS_DIR / "visualizations"
-REPORTS_DIR = OUTPUTS_DIR / "reports"
-MODELS_DIR = PROJECT_ROOT / "models"
+DATABASE_DIR       = PROJECT_ROOT / "data" / "database"
+OUTPUTS_DIR        = PROJECT_ROOT / "outputs"
+PROCESSED_DIR      = OUTPUTS_DIR / "processed"
+VIZ_DIR            = OUTPUTS_DIR / "visualizations"
+REPORTS_DIR        = OUTPUTS_DIR / "reports"
+MODELS_DIR         = PROJECT_ROOT / "models"
 
-# Source dataset location (original files – never overwritten)
-DATASET_DIR = Path("c:/Users/dell/Downloads/TENSORFLOW/mule_account_dataset")
+# Ensure directories exist
+for _dir in [DATA_RAW_DIR, DATA_PROCESSED_DIR, DATABASE_DIR, OUTPUTS_DIR, PROCESSED_DIR, VIZ_DIR, REPORTS_DIR, MODELS_DIR]:
+    _dir.mkdir(parents=True, exist_ok=True)
 
-# Input files
-ACCOUNTS_CSV       = DATA_RAW_DIR / "accounts.csv"
-TRANSACTIONS_CSV   = DATA_RAW_DIR / "transactions.csv"
-RING_LABELS_CSV    = DATA_RAW_DIR / "ring_labels.csv"       # optional
+# Database location (SQLite default with environment URL override)
+DEFAULT_DB_PATH = DATABASE_DIR / "tracemesh.db"
+DATABASE_URL    = os.environ.get("DATABASE_URL", f"sqlite:///{DEFAULT_DB_PATH}")
 
-# Fallback to original dataset dir if raw/ copies are absent
-ACCOUNTS_SRC       = DATASET_DIR / "accounts.csv"
-TRANSACTIONS_SRC   = DATASET_DIR / "transactions.csv"
-FRAUD_RINGS_SRC    = DATASET_DIR / "fraud_rings.csv"
-DAILY_SUMMARY_SRC  = DATASET_DIR / "account_daily_summary.csv"
+# Input files (searches data/raw first, then DATASET_DIR)
+def _find_dataset_file(filename: str) -> Path:
+    candidates = [
+        DATA_RAW_DIR / filename,
+        DATASET_DIR / filename,
+        PROJECT_ROOT / "data" / filename,
+        PROJECT_ROOT / filename,
+    ]
+    for p in candidates:
+        if p.exists():
+            return p
+    return DATA_RAW_DIR / filename
+
+ACCOUNTS_CSV       = _find_dataset_file("accounts.csv")
+TRANSACTIONS_CSV   = _find_dataset_file("transactions.csv")
+RING_LABELS_CSV    = _find_dataset_file("ring_labels.csv")
+FRAUD_RINGS_CSV    = _find_dataset_file("fraud_rings.csv")
+DAILY_SUMMARY_CSV  = _find_dataset_file("account_daily_summary.csv")
+
+ACCOUNTS_SRC       = ACCOUNTS_CSV
+TRANSACTIONS_SRC   = TRANSACTIONS_CSV
+FRAUD_RINGS_SRC    = FRAUD_RINGS_CSV
+DAILY_SUMMARY_SRC  = DAILY_SUMMARY_CSV
 
 # ---------------------------------------------------------------------------
 # Output files

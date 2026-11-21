@@ -118,6 +118,7 @@ def detect_rings(
             "ring_id"                  : ring_id,
             "account_count"            : len(accounts),
             "accounts"                 : str(accounts[:10]) + ("…" if len(accounts) > 10 else ""),
+            "member_accounts"          : accounts,
             "mean_risk_score"          : round(mean_risk, 2),
             "max_risk_score"           : round(acct_risk["account_risk_score"].max(), 2) if "account_risk_score" in acct_risk.columns else 0,
             "total_money_moved"        : round(ring_txns["amount"].sum(), 2),
