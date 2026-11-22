@@ -1,0 +1,4 @@
+account_id,open_date,kyc_level,account_type,city_cluster,declared_income_band,bank_id
+ACC_01,2020-01-01,super_kyc,savings,c1,mid,TRACE_BANK
+ACC_01,2020-01-01,full,savings,c1,mid,TRACE_BANK
+ACC_02,2020-01-01,full,invalid_type,c1,mid,TRACE_BANK

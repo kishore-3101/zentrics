@@ -1,0 +1,11 @@
+account_id,open_date,kyc_level,account_type,city_cluster,declared_income_band,bank_id
+ATM_SINK_MUMBAI,2020-01-01,full,sink,c1,high,CASH_OUT
+ACC_VIC_01,2021-05-10,full,savings,c1,mid,TRACE_BANK
+ACC_COLL_01,2026-02-15,minimal,savings,c1,low,TRACE_BANK
+ACC_MULE_01,2026-02-20,minimal,wallet,c1,low,TRACE_BANK
+ACC_MULE_02,2026-02-22,minimal,savings,c1,lower_mid,TRACE_BANK
+ACC_MULE_03,2026-02-25,minimal,wallet,c1,low,TRACE_BANK
+ACC_NORM_01,2022-03-15,full,savings,c2,mid,TRACE_BANK
+ACC_NORM_02,2023-08-20,full,current,c2,upper_mid,TRACE_BANK
+ACC_NORM_03,2024-01-11,full,savings,c1,mid,TRACE_BANK
+ACC_NORM_04,2025-06-05,full,wallet,c1,lower_mid,TRACE_BANK

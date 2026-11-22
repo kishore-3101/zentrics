@@ -1,0 +1,1137 @@
+[
+  {
+    "run_id": 1,
+    "ring_id": "R-104",
+    "fingerprint": "e89c31b0a8f89b6e828e83b4b0e8913b7728f11a",
+    "ring_type": "structural_cycle",
+    "score": 96.0,
+    "priority": 945600.0,
+    "amount_moved": 1420000.0,
+    "amount_cashed": 435000.0,
+    "amount_at_risk": 985000.0,
+    "duration_min": 34.0,
+    "n_accounts": 6,
+    "n_victims": 2,
+    "pattern_tags": [
+      "structural_cycle",
+      "circular_flow",
+      "high_velocity",
+      "cross_channel_upi"
+    ],
+    "recommended": "Immediate freeze of all circular intermediary accounts; file cyber-cell STR/SAR.",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "case_id": 104,
+    "status": "new",
+    "assigned_to": null,
+    "case_notes": null,
+    "explanation": "Closed circular routing detected: \u20b914,20,000 circulated across 4 intermediary mule accounts across 3 laps, with 3% commission decay per lap and partial cash-out at ATM sinks.",
+    "key_evidence": [
+      "Closed 4-hop directed cycle: ACC_MULE_401 -> ACC_MULE_402 -> ACC_MULE_403 -> ACC_MULE_404 -> ACC_MULE_401",
+      "3 completed circulation laps within 34 minutes",
+      "\u20b94,35,000 siphoned to ATM_SINK_MUMBAI during second lap"
+    ],
+    "key_accounts": [
+      {
+        "account_id": "ACC_VICTIM_401",
+        "role": "victim",
+        "amount": 750000.0
+      },
+      {
+        "account_id": "ACC_MULE_401",
+        "role": "collector",
+        "amount": 1420000.0
+      },
+      {
+        "account_id": "ATM_SINK_MUMBAI",
+        "role": "cash_out",
+        "amount": 435000.0
+      }
+    ]
+  },
+  {
+    "run_id": 1,
+    "ring_id": "R-101",
+    "fingerprint": "a1b2c3d4e5f67890123456789abcdef012345678",
+    "ring_type": "burst_fanin",
+    "score": 94.0,
+    "priority": 1128000.0,
+    "amount_moved": 1850000.0,
+    "amount_cashed": 650000.0,
+    "amount_at_risk": 1200000.0,
+    "duration_min": 28.0,
+    "n_accounts": 14,
+    "n_victims": 8,
+    "pattern_tags": [
+      "burst_fanin",
+      "fan_in_fan_out",
+      "rapid_aggregation"
+    ],
+    "recommended": "Freeze collector account ACC_COLL_101 and subordinate mule nodes.",
+    "detected_at": "2026-03-10T11:15:00Z",
+    "case_id": 101,
+    "status": "under_review",
+    "assigned_to": "Ananya Sharma",
+    "case_notes": "Identified high-frequency UPI deposits from 8 distinct states in under 30 minutes.",
+    "explanation": "High-velocity fan-in burst detected: 8 victim accounts transferred \u20b918,50,000 into collector ACC_COLL_101, which rapidly split funds among 4 mule accounts for cash-out.",
+    "key_evidence": [
+      "Inflow velocity: 8 distinct depositors within 28 minutes (14.2x baseline)",
+      "Pass-through ratio: 92% of funds forwarded within 8 minutes of arrival",
+      "Immediate ATM withdrawals detected at 2 different city clusters"
+    ],
+    "key_accounts": [
+      {
+        "account_id": "ACC_COLL_101",
+        "role": "collector",
+        "amount": 1850000.0
+      },
+      {
+        "account_id": "ACC_MULE_101",
+        "role": "mule",
+        "amount": 450000.0
+      },
+      {
+        "account_id": "ATM_SINK_DELHI",
+        "role": "cash_out",
+        "amount": 650000.0
+      }
+    ]
+  },
+  {
+    "run_id": 1,
+    "ring_id": "R-102",
+    "fingerprint": "b2c3d4e5f6a17890123456789abcdef012345678",
+    "ring_type": "rapid_pass_through",
+    "score": 91.0,
+    "priority": 746200.0,
+    "amount_moved": 820000.0,
+    "amount_cashed": 0.0,
+    "amount_at_risk": 820000.0,
+    "duration_min": 12.0,
+    "n_accounts": 5,
+    "n_victims": 2,
+    "pattern_tags": [
+      "rapid_pass_through",
+      "pass_through_hub",
+      "zero_retention"
+    ],
+    "recommended": "Initiate hot-stop on pass-through transit hub ACC_HUB_201.",
+    "detected_at": "2026-03-10T12:05:00Z",
+    "case_id": 102,
+    "status": "new",
+    "assigned_to": null,
+    "case_notes": null,
+    "explanation": "Rapid transit hub anomaly: Hub account ACC_HUB_201 received \u20b98,20,000 from 2 victim sources and forwarded 98.5% within 4.2 minutes across IMPS rails.",
+    "key_evidence": [
+      "Median forward delay: 4.2 minutes",
+      "Retention ratio: 1.5% (retained as operator fee)",
+      "Zero historical transaction profile before today"
+    ],
+    "key_accounts": [
+      {
+        "account_id": "ACC_HUB_201",
+        "role": "collector",
+        "amount": 820000.0
+      },
+      {
+        "account_id": "ACC_MULE_201",
+        "role": "mule",
+        "amount": 410000.0
+      },
+      {
+        "account_id": "ACC_MULE_202",
+        "role": "mule",
+        "amount": 400000.0
+      }
+    ]
+  },
+  {
+    "run_id": 1,
+    "ring_id": "R-103",
+    "fingerprint": "c3d4e5f6a1b27890123456789abcdef012345678",
+    "ring_type": "dormant_activation",
+    "score": 88.0,
+    "priority": 563200.0,
+    "amount_moved": 640000.0,
+    "amount_cashed": 180000.0,
+    "amount_at_risk": 460000.0,
+    "duration_min": 45.0,
+    "n_accounts": 4,
+    "n_victims": 1,
+    "pattern_tags": [
+      "dormant_activation",
+      "dormant_active",
+      "volume_spike"
+    ],
+    "recommended": "Request KYC re-verification; place temporary debit restriction.",
+    "detected_at": "2026-03-10T13:20:00Z",
+    "case_id": 103,
+    "status": "under_review",
+    "assigned_to": "Rohan Mehta",
+    "case_notes": "Account dormant for 142 days; suddenly received \u20b96.4L from cyber fraud victim.",
+    "explanation": "Dormancy activation spike: Account ACC_DORM_301, completely inactive for 142 days, suddenly moved \u20b96,40,000 (85x prior volume) within 45 minutes.",
+    "key_evidence": [
+      "Dormancy duration: 142 days with average balance < \u20b9500",
+      "Volume jump: 85x historical lifetime transaction volume",
+      "Instant pass-through to external bank gateway EXT_BANK_ICICI"
+    ],
+    "key_accounts": [
+      {
+        "account_id": "ACC_DORM_301",
+        "role": "mule",
+        "amount": 640000.0
+      },
+      {
+        "account_id": "EXT_BANK_ICICI",
+        "role": "cash_out",
+        "amount": 180000.0
+      }
+    ]
+  },
+  {
+    "run_id": 1,
+    "ring_id": "R-105",
+    "fingerprint": "d4e5f6a1b2c37890123456789abcdef012345678",
+    "ring_type": "layering_chain",
+    "score": 93.0,
+    "priority": 883500.0,
+    "amount_moved": 950000.0,
+    "amount_cashed": 0.0,
+    "amount_at_risk": 950000.0,
+    "duration_min": 52.0,
+    "n_accounts": 6,
+    "n_victims": 1,
+    "pattern_tags": [
+      "layering_chain",
+      "multi_hop",
+      "structuring"
+    ],
+    "recommended": "Escalate to FinCEN / FIU-IND compliance officer for multi-hop tracking.",
+    "detected_at": "2026-03-10T14:10:00Z",
+    "case_id": 105,
+    "status": "new",
+    "assigned_to": null,
+    "case_notes": null,
+    "explanation": "Multi-hop layering chain: \u20b99,50,000 routed through 5 serial mule accounts (A -> B -> C -> D -> E) with 2-4% commission decay at each hop over 52 minutes.",
+    "key_evidence": [
+      "5 sequential hops with mean hop delay of 9.4 minutes",
+      "Amounts structured just under \u20b92,00,000 reporting threshold",
+      "End destination points towards external cross-border payment gateway"
+    ],
+    "key_accounts": [
+      {
+        "account_id": "ACC_CHAIN_01",
+        "role": "collector",
+        "amount": 950000.0
+      },
+      {
+        "account_id": "ACC_CHAIN_03",
+        "role": "mule",
+        "amount": 890000.0
+      },
+      {
+        "account_id": "ACC_CHAIN_05",
+        "role": "mule",
+        "amount": 830000.0
+      }
+    ]
+  },
+  {
+    "run_id": 1,
+    "ring_id": "R-106",
+    "fingerprint": "e5f6a1b2c3d47890123456789abcdef012345678",
+    "ring_type": "mixed",
+    "score": 95.0,
+    "priority": 1472500.0,
+    "amount_moved": 2100000.0,
+    "amount_cashed": 550000.0,
+    "amount_at_risk": 1550000.0,
+    "duration_min": 68.0,
+    "n_accounts": 11,
+    "n_victims": 4,
+    "pattern_tags": [
+      "mixed",
+      "complex_syndicate",
+      "cycle_and_fanout"
+    ],
+    "recommended": "Coordinate inter-bank freeze across all identified syndicate accounts.",
+    "detected_at": "2026-03-10T15:00:00Z",
+    "case_id": 106,
+    "status": "frozen",
+    "assigned_to": "Kishore Kumar",
+    "case_notes": "Composite syndicate detected combining fan-in aggregation with circular obfuscation loop before ATM extraction.",
+    "explanation": "Hybrid multi-stage syndicate: 4 victim accounts funneled \u20b921,00,000 into 2 aggregators, who fed a 3-account circular loop before distributing to 5 mule cash-out nodes.",
+    "key_evidence": [
+      "Combines fan-in aggregation with circular obfuscation loop",
+      "11 accounts involved across savings, current, and wallet categories",
+      "\u20b95,50,000 extracted at ATM sinks in Chennai and Bengaluru"
+    ],
+    "key_accounts": [
+      {
+        "account_id": "ACC_SYN_AGG_1",
+        "role": "collector",
+        "amount": 1100000.0
+      },
+      {
+        "account_id": "ACC_SYN_AGG_2",
+        "role": "collector",
+        "amount": 1000000.0
+      },
+      {
+        "account_id": "ATM_SINK_BLR",
+        "role": "cash_out",
+        "amount": 350000.0
+      }
+    ]
+  },
+  {
+    "run_id": 1,
+    "ring_id": "R-107",
+    "fingerprint": "f6a1b2c3d4e57890123456789abcdef012345678",
+    "ring_type": "burst_fanin",
+    "score": 24.0,
+    "priority": 7200.0,
+    "amount_moved": 450000.0,
+    "amount_cashed": 0.0,
+    "amount_at_risk": 30000.0,
+    "duration_min": 480.0,
+    "n_accounts": 35,
+    "n_victims": 0,
+    "pattern_tags": [
+      "hard_negative_shop",
+      "kirana_merchant",
+      "high_retention"
+    ],
+    "recommended": "No enforcement needed; legitimate high-volume retail merchant.",
+    "detected_at": "2026-03-10T16:00:00Z",
+    "case_id": 107,
+    "status": "false_positive",
+    "assigned_to": "Ananya Sharma",
+    "case_notes": "Reviewed and verified as Sharma Supermarket (GST registered kirana). Funds retained for supplier payment.",
+    "explanation": "Benign merchant activity (Hard Negative): Retail grocery store with 34 micro-UPI customer payments (median \u20b9240). Retains 93.3% of funds; zero cash-out to sinks.",
+    "key_evidence": [
+      "34 inbound customer payments spread evenly over 8 business hours",
+      "High retention ratio (93.3%) with zero rapid forwarding",
+      "Registered merchant category with valid GSTIN and recurring distributor payments"
+    ],
+    "key_accounts": [
+      {
+        "account_id": "ACC_SHOP_KIRANA_01",
+        "role": "collector",
+        "amount": 450000.0
+      }
+    ]
+  },
+  {
+    "alert_id": "ALT-0001",
+    "ring_id": "R-100-21",
+    "ring_type": "circular_flow",
+    "score": 87.1,
+    "priority": 321642826.9,
+    "amount_at_risk": 3692799.39,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_in_burst",
+      "fan_out_split"
+    ],
+    "member_count": 35,
+    "explanation": "Closed circular routing detected: \u20b93,692,799.39 circulated across 18 intermediary mule accounts within 109320.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b93,692,799.39 at risk."
+  },
+  {
+    "alert_id": "ALT-0002",
+    "ring_id": "R-100-01",
+    "ring_type": "circular_flow",
+    "score": 87.5,
+    "priority": 319020920.8,
+    "amount_at_risk": 3645953.38,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_in_burst",
+      "fan_out_split"
+    ],
+    "member_count": 36,
+    "explanation": "Closed circular routing detected: \u20b93,645,953.38 circulated across 20 intermediary mule accounts within 117022.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b93,645,953.38 at risk."
+  },
+  {
+    "alert_id": "ALT-0003",
+    "ring_id": "R-100-14",
+    "ring_type": "circular_flow",
+    "score": 87.8,
+    "priority": 302184968.7,
+    "amount_at_risk": 3441742.24,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_in_burst",
+      "fan_out_split"
+    ],
+    "member_count": 33,
+    "explanation": "Closed circular routing detected: \u20b93,441,742.24 circulated across 21 intermediary mule accounts within 117214.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b93,441,742.24 at risk."
+  },
+  {
+    "alert_id": "ALT-0004",
+    "ring_id": "R-100-15",
+    "ring_type": "circular_flow",
+    "score": 87.6,
+    "priority": 233816735.8,
+    "amount_at_risk": 2669140.82,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_in_burst",
+      "fan_out_split"
+    ],
+    "member_count": 27,
+    "explanation": "Closed circular routing detected: \u20b92,669,140.82 circulated across 17 intermediary mule accounts within 118047.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,669,140.82 at risk."
+  },
+  {
+    "alert_id": "ALT-0005",
+    "ring_id": "R-100-07",
+    "ring_type": "circular_flow",
+    "score": 85.9,
+    "priority": 210235071.9,
+    "amount_at_risk": 2447439.72,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_out_split"
+    ],
+    "member_count": 27,
+    "explanation": "Closed circular routing detected: \u20b92,447,439.72 circulated across 19 intermediary mule accounts within 112674.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,447,439.72 at risk."
+  },
+  {
+    "alert_id": "ALT-0006",
+    "ring_id": "R-100-05",
+    "ring_type": "circular_flow",
+    "score": 86.0,
+    "priority": 208211281.3,
+    "amount_at_risk": 2421061.41,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_out_split"
+    ],
+    "member_count": 26,
+    "explanation": "Closed circular routing detected: \u20b92,421,061.41 circulated across 15 intermediary mule accounts within 116930.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,421,061.41 at risk."
+  },
+  {
+    "alert_id": "ALT-0007",
+    "ring_id": "R-100-08",
+    "ring_type": "circular_flow",
+    "score": 85.7,
+    "priority": 198963579.6,
+    "amount_at_risk": 2321628.7,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_out_split"
+    ],
+    "member_count": 31,
+    "explanation": "Closed circular routing detected: \u20b92,321,628.70 circulated across 20 intermediary mule accounts within 103864.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,321,628.70 at risk."
+  },
+  {
+    "alert_id": "ALT-0008",
+    "ring_id": "R-100-20",
+    "ring_type": "circular_flow",
+    "score": 86.8,
+    "priority": 193611047.3,
+    "amount_at_risk": 2230542.02,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_in_burst",
+      "fan_out_split"
+    ],
+    "member_count": 17,
+    "explanation": "Closed circular routing detected: \u20b92,230,542.02 circulated across 9 intermediary mule accounts within 101396.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,230,542.02 at risk."
+  },
+  {
+    "alert_id": "ALT-0009",
+    "ring_id": "R-100-17",
+    "ring_type": "circular_flow",
+    "score": 86.0,
+    "priority": 192034139.5,
+    "amount_at_risk": 2232955.11,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_in_burst",
+      "fan_out_split"
+    ],
+    "member_count": 27,
+    "explanation": "Closed circular routing detected: \u20b92,232,955.11 circulated across 15 intermediary mule accounts within 113553.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,232,955.11 at risk."
+  },
+  {
+    "alert_id": "ALT-0010",
+    "ring_id": "R-100-02",
+    "ring_type": "circular_flow",
+    "score": 86.3,
+    "priority": 189826784.0,
+    "amount_at_risk": 2199615.11,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_out_split"
+    ],
+    "member_count": 24,
+    "explanation": "Closed circular routing detected: \u20b92,199,615.11 circulated across 15 intermediary mule accounts within 112031.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,199,615.11 at risk."
+  },
+  {
+    "alert_id": "ALT-0011",
+    "ring_id": "R-100-10",
+    "ring_type": "circular_flow",
+    "score": 86.3,
+    "priority": 186583345.2,
+    "amount_at_risk": 2162031.81,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_out_split"
+    ],
+    "member_count": 20,
+    "explanation": "Closed circular routing detected: \u20b92,162,031.81 circulated across 11 intermediary mule accounts within 113794.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,162,031.81 at risk."
+  },
+  {
+    "alert_id": "ALT-0012",
+    "ring_id": "R-100-12",
+    "ring_type": "circular_flow",
+    "score": 87.3,
+    "priority": 184556018.5,
+    "amount_at_risk": 2114043.74,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_out_split"
+    ],
+    "member_count": 19,
+    "explanation": "Closed circular routing detected: \u20b92,114,043.74 circulated across 12 intermediary mule accounts within 96162.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,114,043.74 at risk."
+  },
+  {
+    "alert_id": "ALT-0013",
+    "ring_id": "R-100-09",
+    "ring_type": "circular_flow",
+    "score": 87.1,
+    "priority": 180922126.3,
+    "amount_at_risk": 2077177.11,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_out_split"
+    ],
+    "member_count": 19,
+    "explanation": "Closed circular routing detected: \u20b92,077,177.11 circulated across 13 intermediary mule accounts within 113520.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,077,177.11 at risk."
+  },
+  {
+    "alert_id": "ALT-0014",
+    "ring_id": "R-100-11",
+    "ring_type": "circular_flow",
+    "score": 85.2,
+    "priority": 173975090.8,
+    "amount_at_risk": 2041961.16,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_in_burst",
+      "fan_out_split"
+    ],
+    "member_count": 28,
+    "explanation": "Closed circular routing detected: \u20b92,041,961.16 circulated across 19 intermediary mule accounts within 90528.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,041,961.16 at risk."
+  },
+  {
+    "alert_id": "ALT-0015",
+    "ring_id": "R-100-13",
+    "ring_type": "circular_flow",
+    "score": 85.4,
+    "priority": 160037907.4,
+    "amount_at_risk": 1873980.18,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_out_split"
+    ],
+    "member_count": 22,
+    "explanation": "Closed circular routing detected: \u20b91,873,980.18 circulated across 13 intermediary mule accounts within 114955.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,873,980.18 at risk."
+  },
+  {
+    "alert_id": "ALT-0016",
+    "ring_id": "R-100-06",
+    "ring_type": "circular_flow",
+    "score": 84.9,
+    "priority": 156673724.8,
+    "amount_at_risk": 1845391.34,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_out_split"
+    ],
+    "member_count": 18,
+    "explanation": "Closed circular routing detected: \u20b91,845,391.34 circulated across 12 intermediary mule accounts within 117123.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,845,391.34 at risk."
+  },
+  {
+    "alert_id": "ALT-0017",
+    "ring_id": "R-100-22",
+    "ring_type": "circular_flow",
+    "score": 86.5,
+    "priority": 150396515.5,
+    "amount_at_risk": 1738688.04,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_in_burst",
+      "fan_out_split"
+    ],
+    "member_count": 20,
+    "explanation": "Closed circular routing detected: \u20b91,738,688.04 circulated across 12 intermediary mule accounts within 120955.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,738,688.04 at risk."
+  },
+  {
+    "alert_id": "ALT-0018",
+    "ring_id": "R-100-03",
+    "ring_type": "circular_flow",
+    "score": 86.1,
+    "priority": 136639866.6,
+    "amount_at_risk": 1586990.32,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_in_burst",
+      "fan_out_split"
+    ],
+    "member_count": 19,
+    "explanation": "Closed circular routing detected: \u20b91,586,990.32 circulated across 13 intermediary mule accounts within 74955.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,586,990.32 at risk."
+  },
+  {
+    "alert_id": "ALT-0019",
+    "ring_id": "R-100-18",
+    "ring_type": "circular_flow",
+    "score": 85.0,
+    "priority": 135970666.5,
+    "amount_at_risk": 1599654.9,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_out_split"
+    ],
+    "member_count": 22,
+    "explanation": "Closed circular routing detected: \u20b91,599,654.90 circulated across 10 intermediary mule accounts within 111020.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,599,654.90 at risk."
+  },
+  {
+    "alert_id": "ALT-0020",
+    "ring_id": "R-100-04",
+    "ring_type": "circular_flow",
+    "score": 86.3,
+    "priority": 117784745.3,
+    "amount_at_risk": 1364829.03,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_out_split"
+    ],
+    "member_count": 16,
+    "explanation": "Closed circular routing detected: \u20b91,364,829.03 circulated across 10 intermediary mule accounts within 93648.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,364,829.03 at risk."
+  },
+  {
+    "alert_id": "ALT-0021",
+    "ring_id": "R-100-16",
+    "ring_type": "circular_flow",
+    "score": 85.4,
+    "priority": 93977587.1,
+    "amount_at_risk": 1100440.13,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_out_split"
+    ],
+    "member_count": 15,
+    "explanation": "Closed circular routing detected: \u20b91,100,440.13 circulated across 8 intermediary mule accounts within 82642.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,100,440.13 at risk."
+  },
+  {
+    "alert_id": "ALT-0022",
+    "ring_id": "R-100-19",
+    "ring_type": "circular_flow",
+    "score": 82.3,
+    "priority": 73847747.2,
+    "amount_at_risk": 897299.48,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_out_split"
+    ],
+    "member_count": 13,
+    "explanation": "Closed circular routing detected: \u20b9897,299.48 circulated across 8 intermediary mule accounts within 96489.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9897,299.48 at risk."
+  },
+  {
+    "alert_id": "ALT-0023",
+    "ring_id": "R-100-30",
+    "ring_type": "circular_flow",
+    "score": 84.8,
+    "priority": 62445187.7,
+    "amount_at_risk": 736381.93,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "layering_chain"
+    ],
+    "member_count": 7,
+    "explanation": "Closed circular routing detected: \u20b9736,381.93 circulated across 6 intermediary mule accounts within 83780.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9736,381.93 at risk."
+  },
+  {
+    "alert_id": "ALT-0024",
+    "ring_id": "R-100-36",
+    "ring_type": "circular_flow",
+    "score": 86.0,
+    "priority": 54198997.4,
+    "amount_at_risk": 630220.9,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "layering_chain"
+    ],
+    "member_count": 5,
+    "explanation": "Closed circular routing detected: \u20b9630,220.90 circulated across 4 intermediary mule accounts within 106430.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9630,220.90 at risk."
+  },
+  {
+    "alert_id": "ALT-0025",
+    "ring_id": "R-100-31",
+    "ring_type": "circular_flow",
+    "score": 84.7,
+    "priority": 38619858.6,
+    "amount_at_risk": 455960.55,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "layering_chain"
+    ],
+    "member_count": 4,
+    "explanation": "Closed circular routing detected: \u20b9455,960.55 circulated across 3 intermediary mule accounts within 31653.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9455,960.55 at risk."
+  },
+  {
+    "alert_id": "ALT-0026",
+    "ring_id": "R-100-38",
+    "ring_type": "circular_flow",
+    "score": 85.3,
+    "priority": 38131474.8,
+    "amount_at_risk": 447027.84,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_in_burst"
+    ],
+    "member_count": 7,
+    "explanation": "Closed circular routing detected: \u20b9447,027.84 circulated across 3 intermediary mule accounts within 108161.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9447,027.84 at risk."
+  },
+  {
+    "alert_id": "ALT-0027",
+    "ring_id": "R-100-23",
+    "ring_type": "circular_flow",
+    "score": 92.4,
+    "priority": 31789333.9,
+    "amount_at_risk": 344040.41,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "layering_chain"
+    ],
+    "member_count": 3,
+    "explanation": "Closed circular routing detected: \u20b9344,040.41 circulated across 2 intermediary mule accounts within 15.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9344,040.41 at risk."
+  },
+  {
+    "alert_id": "ALT-0028",
+    "ring_id": "R-100-28",
+    "ring_type": "circular_flow",
+    "score": 82.3,
+    "priority": 30721028.8,
+    "amount_at_risk": 373281.03,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_out_split"
+    ],
+    "member_count": 4,
+    "explanation": "Closed circular routing detected: \u20b9373,281.03 circulated across 3 intermediary mule accounts within 61480.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9373,281.03 at risk."
+  },
+  {
+    "alert_id": "ALT-0029",
+    "ring_id": "R-100-39",
+    "ring_type": "circular_flow",
+    "score": 80.1,
+    "priority": 29959803.0,
+    "amount_at_risk": 374030.0,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_out_split"
+    ],
+    "member_count": 5,
+    "explanation": "Closed circular routing detected: \u20b9374,030.00 circulated across 2 intermediary mule accounts within 33042.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9374,030.00 at risk."
+  },
+  {
+    "alert_id": "ALT-0030",
+    "ring_id": "R-100-26",
+    "ring_type": "rapid_pass_through",
+    "score": 82.8,
+    "priority": 26853293.6,
+    "amount_at_risk": 324315.14,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "rapid_pass_through",
+      "dormant_activation",
+      "layering_chain"
+    ],
+    "member_count": 3,
+    "explanation": "Rapid pass-through hub network: \u20b9324,315.14 aggregated and immediately forwarded onward with high-velocity transit times (median 64.0 min)."
+  },
+  {
+    "alert_id": "ALT-0031",
+    "ring_id": "R-100-25",
+    "ring_type": "circular_flow",
+    "score": 91.2,
+    "priority": 26026759.1,
+    "amount_at_risk": 285381.13,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "layering_chain"
+    ],
+    "member_count": 3,
+    "explanation": "Closed circular routing detected: \u20b9285,381.13 circulated across 2 intermediary mule accounts within 36.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9285,381.13 at risk."
+  },
+  {
+    "alert_id": "ALT-0032",
+    "ring_id": "R-100-40",
+    "ring_type": "circular_flow",
+    "score": 86.3,
+    "priority": 25361620.5,
+    "amount_at_risk": 293877.41,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow"
+    ],
+    "member_count": 3,
+    "explanation": "Closed circular routing detected: \u20b9293,877.41 circulated across 3 intermediary mule accounts within 52.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9293,877.41 at risk."
+  },
+  {
+    "alert_id": "ALT-0033",
+    "ring_id": "R-100-41",
+    "ring_type": "circular_flow",
+    "score": 85.9,
+    "priority": 24716985.4,
+    "amount_at_risk": 287741.39,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow"
+    ],
+    "member_count": 3,
+    "explanation": "Closed circular routing detected: \u20b9287,741.39 circulated across 3 intermediary mule accounts within 74.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9287,741.39 at risk."
+  },
+  {
+    "alert_id": "ALT-0034",
+    "ring_id": "R-100-32",
+    "ring_type": "circular_flow",
+    "score": 83.2,
+    "priority": 23238771.7,
+    "amount_at_risk": 279312.16,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "layering_chain"
+    ],
+    "member_count": 4,
+    "explanation": "Closed circular routing detected: \u20b9279,312.16 circulated across 3 intermediary mule accounts within 4227.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9279,312.16 at risk."
+  },
+  {
+    "alert_id": "ALT-0035",
+    "ring_id": "R-100-35",
+    "ring_type": "circular_flow",
+    "score": 84.0,
+    "priority": 21110371.0,
+    "amount_at_risk": 251313.94,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_in_burst"
+    ],
+    "member_count": 5,
+    "explanation": "Closed circular routing detected: \u20b9251,313.94 circulated across 3 intermediary mule accounts within 56384.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9251,313.94 at risk."
+  },
+  {
+    "alert_id": "ALT-0036",
+    "ring_id": "R-100-29",
+    "ring_type": "rapid_pass_through",
+    "score": 79.0,
+    "priority": 19819534.2,
+    "amount_at_risk": 250880.18,
+    "status": "new",
+    "severity": "high",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "rapid_pass_through",
+      "dormant_activation",
+      "layering_chain",
+      "fan_out_split"
+    ],
+    "member_count": 3,
+    "explanation": "Rapid pass-through hub network: \u20b9250,880.18 aggregated and immediately forwarded onward with high-velocity transit times (median 61436.0 min)."
+  },
+  {
+    "alert_id": "ALT-0037",
+    "ring_id": "R-100-34",
+    "ring_type": "circular_flow",
+    "score": 91.1,
+    "priority": 17709159.5,
+    "amount_at_risk": 194392.53,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "layering_chain"
+    ],
+    "member_count": 3,
+    "explanation": "Closed circular routing detected: \u20b9194,392.53 circulated across 2 intermediary mule accounts within 19.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9194,392.53 at risk."
+  },
+  {
+    "alert_id": "ALT-0038",
+    "ring_id": "R-100-27",
+    "ring_type": "circular_flow",
+    "score": 81.9,
+    "priority": 15945931.6,
+    "amount_at_risk": 194700.02,
+    "status": "new",
+    "severity": "critical",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_in_burst"
+    ],
+    "member_count": 3,
+    "explanation": "Closed circular routing detected: \u20b9194,700.02 circulated across 2 intermediary mule accounts within 28372.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9194,700.02 at risk."
+  },
+  {
+    "alert_id": "ALT-0039",
+    "ring_id": "R-100-33",
+    "ring_type": "circular_flow",
+    "score": 79.5,
+    "priority": 13286756.3,
+    "amount_at_risk": 167129.01,
+    "status": "new",
+    "severity": "high",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "layering_chain",
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow",
+      "fan_in_burst",
+      "fan_out_split"
+    ],
+    "member_count": 6,
+    "explanation": "Closed circular routing detected: \u20b9167,129.01 circulated across 3 intermediary mule accounts within 112067.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9167,129.01 at risk."
+  },
+  {
+    "alert_id": "ALT-0040",
+    "ring_id": "R-100-24",
+    "ring_type": "circular_flow",
+    "score": 77.5,
+    "priority": 10540047.3,
+    "amount_at_risk": 136000.61,
+    "status": "new",
+    "severity": "high",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "rapid_pass_through",
+      "dormant_activation",
+      "circular_flow"
+    ],
+    "member_count": 3,
+    "explanation": "Closed circular routing detected: \u20b9136,000.61 circulated across 2 intermediary mule accounts within 93163.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9136,000.61 at risk."
+  },
+  {
+    "alert_id": "ALT-0041",
+    "ring_id": "R-100-37",
+    "ring_type": "rapid_pass_through",
+    "score": 73.2,
+    "priority": 3480441.9,
+    "amount_at_risk": 47547.02,
+    "status": "new",
+    "severity": "high",
+    "detected_at": "2026-03-10T10:45:00Z",
+    "pattern_tags": [
+      "rapid_pass_through",
+      "dormant_activation",
+      "layering_chain",
+      "fan_out_split"
+    ],
+    "member_count": 3,
+    "explanation": "Rapid pass-through hub network: \u20b947,547.02 aggregated and immediately forwarded onward with high-velocity transit times (median 50368.0 min)."
+  }
+]

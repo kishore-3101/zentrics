@@ -1,0 +1,1015 @@
+openapi: 3.1.0
+info:
+  title: TraceMesh Mule Ring Detection API
+  version: 1.0.0
+  description: |
+    Production API contract and mock server specification for TraceMesh: Hybrid Graph-ML Mule Ring Detection Dashboard.
+    Enforces clean separation between raw ingestion, graph detection, machine learning, and compliance analyst workflows.
+servers:
+  - url: http://localhost:8000
+    description: Local Mock Server / Development Server
+paths:
+  /health:
+    get:
+      summary: Health Check
+      description: Returns health status of the backend API and database connection.
+      tags:
+        - System
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+
+  /alerts:
+    get:
+      summary: Get Alert Queue
+      description: Returns list of detected candidate rings from the active run joined with case management state (reads `v_alerts`).
+      tags:
+        - Alerts
+      parameters:
+        - name: ring_type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/RingTypology'
+          description: Filter alerts by ring typology
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/RingStatus'
+          description: Filter alerts by triage case status
+        - name: min_score
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 0
+            maximum: 100
+          description: Minimum fused severity score
+        - name: min_priority
+          in: query
+          required: false
+          schema:
+            type: number
+          description: Minimum priority index (score * amount_at_risk)
+        - name: since_event_id
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Return alerts detected or updated after this event ID (for delta-polling)
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of alert records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AlertRecord'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /rings/{ring_id}:
+    get:
+      summary: Get Ring Graph Details
+      description: Returns full graph topology including accounts (nodes with roles and risk scores) and transactions (edges) for the requested ring.
+      tags:
+        - Rings
+      parameters:
+        - name: ring_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "R-104"
+      responses:
+        '200':
+          description: Complete ring graph structure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RingGraphData'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /rings/{ring_id}/timeline:
+    get:
+      summary: Get Ring Replay Timeline
+      description: Returns time-ordered sequence of transaction events within the ring for scrubbable playback animation.
+      tags:
+        - Rings
+      parameters:
+        - name: ring_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "R-104"
+      responses:
+        '200':
+          description: Chronological list of timeline events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimelineEvent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /rings/{ring_id}/action:
+    post:
+      summary: Execute Analyst Case Action
+      description: Executes an enforcement or triage action on a ring/case (freeze, escalate, false_positive, note) and records an immutable audit log in `case_actions`.
+      tags:
+        - Cases
+      parameters:
+        - name: ring_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "R-104"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseActionRequest'
+      responses:
+        '200':
+          description: Action executed and audit record logged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseActionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /cases/{case_id}/actions:
+    get:
+      summary: Get Case Audit Trail
+      description: Returns append-only compliance audit history for the specified case.
+      tags:
+        - Cases
+      parameters:
+        - name: case_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 104
+      responses:
+        '200':
+          description: Chronological audit history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CaseAction'
+
+  /accounts/{account_id}:
+    get:
+      summary: Get Account Profile & Anomaly Details
+      description: Returns comprehensive profile, fused risk scores, SHAP reason codes, rule hits, and ring affiliations for a single account.
+      tags:
+        - Accounts
+      parameters:
+        - name: account_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "ACC_MULE_401"
+      responses:
+        '200':
+          description: Detailed account anomaly profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /metrics:
+    get:
+      summary: Get Model Evaluation & Benchmark Metrics
+      description: Returns offline evaluation metrics, 4-way method comparison, precision-recall curve artifacts, and algorithmic fairness audit tables.
+      tags:
+        - Evaluation
+      responses:
+        '200':
+          description: Complete benchmark dataset
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsDataset'
+
+  /overview:
+    get:
+      summary: Get Executive Overview Dashboard Data
+      description: Returns top-level KPI metrics, alert volume trends over time, ring typology distribution, and top 5 highest-priority rings.
+      tags:
+        - Dashboard
+      responses:
+        '200':
+          description: Executive summary overview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OverviewData'
+
+  /simulation/state:
+    get:
+      summary: Get Simulation Clock & State
+      description: Returns live simulation state, status, cursor time, and speed multiplier.
+      tags:
+        - Simulation
+      responses:
+        '200':
+          description: Current simulation state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationState'
+
+  /simulation/start:
+    post:
+      summary: Start/Resume Simulation
+      description: Advances the virtual simulation clock and streaming transaction processor.
+      tags:
+        - Simulation
+      responses:
+        '200':
+          description: Simulation started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationState'
+
+  /simulation/pause:
+    post:
+      summary: Pause Simulation
+      description: Pauses the virtual simulation clock.
+      tags:
+        - Simulation
+      responses:
+        '200':
+          description: Simulation paused
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationState'
+
+  /simulation/speed:
+    post:
+      summary: Set Simulation Speed Multiplier
+      description: Adjusts playback speed (1x, 2x, 5x, 10x, 20x, 60x).
+      tags:
+        - Simulation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulationSpeedRequest'
+      responses:
+        '200':
+          description: Speed updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationState'
+
+  /simulation/inject_ring:
+    post:
+      summary: Inject Synthetic Ring for Live Stage Demo
+      description: Injects an ad-hoc mule ring into the live transaction stream for real-time presentation demonstration.
+      tags:
+        - Simulation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InjectRingRequest'
+      responses:
+        '200':
+          description: Ring injected successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  injected_ring_id:
+                    type: string
+                  txns_injected:
+                    type: integer
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid API authentication token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Requested entity does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: Invalid request parameters or body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    HealthStatus:
+      type: object
+      required:
+        - status
+        - service
+        - version
+        - timestamp
+      properties:
+        status:
+          type: string
+          example: "healthy"
+        service:
+          type: string
+          example: "TraceMesh Mock API"
+        version:
+          type: string
+          example: "1.0.0"
+        timestamp:
+          type: string
+          format: date-time
+        database:
+          type: string
+          example: "connected"
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          example: "NOT_FOUND"
+        message:
+          type: string
+          example: "Ring with ID 'R-999' was not found."
+
+    RingTypology:
+      type: string
+      enum:
+        - burst_fanin
+        - rapid_pass_through
+        - dormant_activation
+        - structural_cycle
+        - layering_chain
+        - mixed
+        - hard_negative_shop
+
+    RingStatus:
+      type: string
+      enum:
+        - new
+        - under_review
+        - frozen
+        - escalated
+        - false_positive
+
+    AccountRole:
+      type: string
+      enum:
+        - victim
+        - collector
+        - mule
+        - cash_out
+
+    TransactionChannel:
+      type: string
+      enum:
+        - UPI
+        - IMPS
+        - NEFT
+        - ATM_WITHDRAWAL
+
+    AlertRecord:
+      type: object
+      required:
+        - run_id
+        - ring_id
+        - fingerprint
+        - ring_type
+        - score
+        - priority
+        - amount_moved
+        - amount_cashed
+        - amount_at_risk
+        - duration_min
+        - n_accounts
+        - n_victims
+        - pattern_tags
+        - detected_at
+        - case_id
+        - status
+      properties:
+        run_id:
+          type: integer
+          example: 1
+        ring_id:
+          type: string
+          example: "R-104"
+        fingerprint:
+          type: string
+          example: "e89c31b0a8f89b6e828e83b4b0e8913b7728f11a"
+        ring_type:
+          $ref: '#/components/schemas/RingTypology'
+        score:
+          type: number
+          minimum: 0
+          maximum: 100
+          example: 96.0
+        priority:
+          type: number
+          example: 945600.0
+        amount_moved:
+          type: number
+          example: 1420000.00
+        amount_cashed:
+          type: number
+          example: 435000.00
+        amount_at_risk:
+          type: number
+          example: 985000.00
+        duration_min:
+          type: number
+          example: 34.0
+        n_accounts:
+          type: integer
+          example: 6
+        n_victims:
+          type: integer
+          example: 2
+        pattern_tags:
+          type: array
+          items:
+            type: string
+          example: ["structural_cycle", "circular_flow", "high_velocity"]
+        recommended:
+          type: string
+          example: "Immediate freeze of all circular intermediary accounts."
+        detected_at:
+          type: string
+          format: date-time
+          example: "2026-03-10T10:45:00Z"
+        case_id:
+          type: integer
+          example: 104
+        status:
+          $ref: '#/components/schemas/RingStatus'
+        assigned_to:
+          type: string
+          nullable: true
+          example: "Ananya Sharma"
+        case_notes:
+          type: string
+          nullable: true
+          example: "Reviewed loop structure."
+        explanation:
+          type: string
+          example: "Closed circular routing detected across 4 intermediary accounts."
+        key_evidence:
+          type: array
+          items:
+            type: string
+        key_accounts:
+          type: array
+          items:
+            type: object
+            properties:
+              account_id:
+                type: string
+              role:
+                $ref: '#/components/schemas/AccountRole'
+              amount:
+                type: number
+
+    ShapReasonCode:
+      type: object
+      required:
+        - code
+        - label
+        - weight
+        - direction
+      properties:
+        code:
+          type: string
+          example: "CYCLE_PARTICIPATION"
+        label:
+          type: string
+          example: "Key anchor in circular fund loop"
+        weight:
+          type: number
+          example: 34.0
+        direction:
+          type: string
+          enum:
+            - increases_risk
+            - decreases_risk
+
+    AccountNodeData:
+      type: object
+      required:
+        - account_id
+        - role
+        - risk_score
+        - total_incoming
+        - total_outgoing
+        - transaction_count
+        - reason_codes
+      properties:
+        account_id:
+          type: string
+          example: "ACC_MULE_401"
+        role:
+          $ref: '#/components/schemas/AccountRole'
+        risk_score:
+          type: number
+          example: 94.0
+        ml_prob:
+          type: number
+          example: 0.95
+        rule_score:
+          type: number
+          example: 0.92
+        neighbor_risk:
+          type: number
+          example: 0.88
+        open_date:
+          type: string
+          format: date
+          example: "2026-02-14"
+        kyc_level:
+          type: string
+          enum: [minimal, full]
+        account_type:
+          type: string
+          enum: [savings, current, wallet, sink]
+        city_cluster:
+          type: string
+          example: "MUMBAI"
+        declared_income_band:
+          type: string
+          enum: [low, lower_mid, mid, upper_mid, high]
+        bank_id:
+          type: string
+          example: "TRACE_BANK"
+        total_incoming:
+          type: number
+          example: 1420000.00
+        total_outgoing:
+          type: number
+          example: 1390000.00
+        transaction_count:
+          type: integer
+          example: 12
+        reason_codes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShapReasonCode'
+        is_frozen:
+          type: boolean
+          default: false
+        position:
+          type: array
+          items:
+            type: number
+          example: [-80, 120, 0]
+
+    TransactionEdgeData:
+      type: object
+      required:
+        - txn_id
+        - src_account
+        - dst_account
+        - amount
+        - channel
+        - ts
+        - hop_index
+        - is_suspicious
+      properties:
+        txn_id:
+          type: string
+          example: "TXN_401_01"
+        src_account:
+          type: string
+          example: "ACC_VICTIM_401"
+        dst_account:
+          type: string
+          example: "ACC_MULE_401"
+        amount:
+          type: number
+          example: 750000.00
+        channel:
+          $ref: '#/components/schemas/TransactionChannel'
+        ts:
+          type: string
+          format: date-time
+          example: "2026-03-10T10:15:00Z"
+        hop_index:
+          type: integer
+          example: 1
+        is_suspicious:
+          type: boolean
+          example: true
+
+    RingGraphData:
+      type: object
+      required:
+        - ring_id
+        - ring_type
+        - score
+        - priority
+        - amount_moved
+        - amount_cashed
+        - amount_at_risk
+        - duration_min
+        - status
+        - detected_at
+        - pattern_tags
+        - explanation
+        - nodes
+        - edges
+      properties:
+        ring_id:
+          type: string
+          example: "R-104"
+        fingerprint:
+          type: string
+          example: "e89c31b0a8f89b6e828e83b4b0e8913b7728f11a"
+        ring_type:
+          $ref: '#/components/schemas/RingTypology'
+        score:
+          type: number
+          example: 96.0
+        priority:
+          type: number
+          example: 945600.0
+        amount_moved:
+          type: number
+          example: 1420000.00
+        amount_cashed:
+          type: number
+          example: 435000.00
+        amount_at_risk:
+          type: number
+          example: 985000.00
+        duration_min:
+          type: number
+          example: 34.0
+        status:
+          $ref: '#/components/schemas/RingStatus'
+        detected_at:
+          type: string
+          format: date-time
+          example: "2026-03-10T10:45:00Z"
+        pattern_tags:
+          type: array
+          items:
+            type: string
+        explanation:
+          type: string
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountNodeData'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionEdgeData'
+
+    TimelineEvent:
+      type: object
+      required:
+        - txn_id
+        - ts
+        - timestampMs
+        - src_account
+        - dst_account
+        - amount
+        - channel
+        - hop_index
+        - is_suspicious
+        - progress
+      properties:
+        txn_id:
+          type: string
+          example: "TXN_401_01"
+        ts:
+          type: string
+          format: date-time
+          example: "2026-03-10T10:15:00Z"
+        timestampMs:
+          type: number
+          example: 0
+        src_account:
+          type: string
+          example: "ACC_VICTIM_401"
+        dst_account:
+          type: string
+          example: "ACC_MULE_401"
+        amount:
+          type: number
+          example: 750000.00
+        channel:
+          $ref: '#/components/schemas/TransactionChannel'
+        hop_index:
+          type: integer
+          example: 1
+        is_suspicious:
+          type: boolean
+          example: true
+        progress:
+          type: number
+          minimum: 0.0
+          maximum: 1.0
+          example: 0.14
+
+    CaseAction:
+      type: object
+      required:
+        - action_id
+        - case_id
+        - actor
+        - action
+        - ts
+      properties:
+        action_id:
+          type: integer
+          example: 1004
+        case_id:
+          type: integer
+          example: 106
+        actor:
+          type: string
+          example: "Kishore Kumar"
+        action:
+          type: string
+          enum: [freeze, escalate, false_positive, note, status_change]
+        from_status:
+          type: string
+          nullable: true
+          example: "under_review"
+        to_status:
+          type: string
+          nullable: true
+          example: "frozen"
+        note:
+          type: string
+          nullable: true
+          example: "Debit freeze executed."
+        ts:
+          type: string
+          format: date-time
+          example: "2026-03-10T15:15:00Z"
+
+    CaseActionRequest:
+      type: object
+      required:
+        - action
+      properties:
+        action:
+          type: string
+          enum: [freeze, escalate, false_positive, note, status_change]
+        actor:
+          type: string
+          default: "analyst_on_duty"
+          example: "Kishore Kumar"
+        note:
+          type: string
+          example: "Emergency freeze on mule transit account."
+        to_status:
+          $ref: '#/components/schemas/RingStatus'
+        assigned_to:
+          type: string
+          example: "Ananya Sharma"
+
+    CaseActionResponse:
+      type: object
+      required:
+        - alert
+        - action
+      properties:
+        alert:
+          $ref: '#/components/schemas/AlertRecord'
+        action:
+          $ref: '#/components/schemas/CaseAction'
+
+    AccountDetail:
+      type: object
+      required:
+        - account_id
+        - risk_score
+        - total_incoming
+        - total_outgoing
+      properties:
+        account_id:
+          type: string
+          example: "ACC_MULE_401"
+        open_date:
+          type: string
+          format: date
+        kyc_level:
+          type: string
+        account_type:
+          type: string
+        city_cluster:
+          type: string
+        declared_income_band:
+          type: string
+        bank_id:
+          type: string
+        risk_score:
+          type: number
+        ml_prob:
+          type: number
+        rule_score:
+          type: number
+        neighbor_risk:
+          type: number
+        total_incoming:
+          type: number
+        total_outgoing:
+          type: number
+        transaction_count:
+          type: integer
+        is_frozen:
+          type: boolean
+        reason_codes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShapReasonCode'
+        features:
+          type: object
+        detector_hits:
+          type: array
+          items:
+            type: object
+        rings:
+          type: array
+          items:
+            type: object
+
+    MetricsDataset:
+      type: object
+      required:
+        - overall
+        - comparison
+        - curves
+        - by_typology_difficulty
+        - fairness
+        - alert_reduction
+      properties:
+        overall:
+          type: object
+          properties:
+            precision: {type: number}
+            recall: {type: number}
+            f1: {type: number}
+            pr_auc: {type: number}
+            ring_recall: {type: number}
+            fpr: {type: number}
+        comparison:
+          type: array
+          items:
+            type: object
+        curves:
+          type: object
+        by_typology_difficulty:
+          type: array
+          items:
+            type: object
+        fairness:
+          type: array
+          items:
+            type: object
+        alert_reduction:
+          type: object
+          properties:
+            baseline_alerts: {type: integer}
+            ring_cases: {type: integer}
+            reduction_pct: {type: number}
+
+    OverviewData:
+      type: object
+      required:
+        - kpis
+        - rings
+        - alertVolume
+        - activity
+      properties:
+        kpis:
+          type: object
+        rings:
+          type: array
+          items:
+            type: object
+        alertVolume:
+          type: array
+          items:
+            type: object
+        activity:
+          type: array
+          items:
+            type: object
+        detectionRate:
+          type: number
+        previousPeriod:
+          type: object
+
+    SimulationState:
+      type: object
+      required:
+        - status
+        - speed
+        - cursor_ts
+        - window_minutes
+      properties:
+        status:
+          type: string
+          enum: [stopped, running, paused]
+          example: "running"
+        speed:
+          type: number
+          example: 1.0
+        cursor_ts:
+          type: string
+          format: date-time
+          example: "2026-03-10T10:00:00Z"
+        window_minutes:
+          type: integer
+          example: 60
+        elapsed_seconds:
+          type: number
+          example: 45.0
+
+    SimulationSpeedRequest:
+      type: object
+      required:
+        - speed
+      properties:
+        speed:
+          type: number
+          enum: [1, 2, 5, 10, 20, 60]
+          example: 5
+
+    InjectRingRequest:
+      type: object
+      required:
+        - ring_type
+      properties:
+        ring_type:
+          $ref: '#/components/schemas/RingTypology'
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+          default: "medium"

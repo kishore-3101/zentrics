@@ -1,0 +1,2 @@
+account_id,true_is_mule,train_label,gt_ring_id,role,scenario
+ACC_01,false,false,GT_RING_BROKEN,mule,unknown_scenario

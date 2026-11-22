@@ -1,0 +1,11 @@
+account_id,true_is_mule,train_label,gt_ring_id,role,scenario
+ATM_SINK_MUMBAI,false,false,,normal,normal
+ACC_VIC_01,false,false,GT_RING_01,victim,circular_flow
+ACC_COLL_01,true,true,GT_RING_01,collector,circular_flow
+ACC_MULE_01,true,true,GT_RING_01,mule,circular_flow
+ACC_MULE_02,true,true,GT_RING_01,mule,circular_flow
+ACC_MULE_03,true,true,GT_RING_01,cash_out,circular_flow
+ACC_NORM_01,false,false,,normal,normal
+ACC_NORM_02,false,false,,normal,normal
+ACC_NORM_03,false,false,,normal,normal
+ACC_NORM_04,false,false,,normal,normal

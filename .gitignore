@@ -1,26 +1,46 @@
-# Python byte-code / cache
+
+# Python
 __pycache__/
 *.py[cod]
-*$py.class
+*.pyo
+*.pyd
 
-# Pytest & Coverage
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Environments
-.env
+# Virtual environments
+venv/
 .venv/
 env/
-venv/
 
-# Streamlit
-.streamlit/
+# IDE
+.vscode/
+.idea/
 
-# OS / Editor temporary files
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Python cache and testing
+.pytest_cache/
+.mypy_cache/
+.coverage
+
+# Raw datasets
+data/raw/
+data/new_test/
+data/database/
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated outputs
+outputs/
+
+# Generated model artifacts
+models/*.pkl
+!models/mule_detection_xgboost.pkl
+models/*.joblib
+models/*.model
+
+# OS files
 .DS_Store
 Thumbs.db
-*.swp
-*.swo
-*~
-*.tmp
