@@ -30,7 +30,7 @@ interface CustomTooltipProps {
 function ComparisonTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload || payload.length === 0) return null;
 
-  const fullFusionVal = payload.find((p) => p.name === 'TraceMesh Full Fusion')?.value ?? 0;
+  const fullFusionVal = payload.find((p) => p.name === 'MuleNet Full Fusion')?.value ?? 0;
   const baselineVal = payload.find((p) => p.name === 'Baseline Rules')?.value ?? 0;
   const ppAdvantage = (fullFusionVal - baselineVal).toFixed(1);
 
@@ -165,7 +165,7 @@ export function FourWayComparisonChart({ comparison }: FourWayComparisonChartPro
             />
             <Bar
               dataKey="full_fusion"
-              name="TraceMesh Full Fusion"
+              name="MuleNet Full Fusion"
               fill={THEME.emerald}
               radius={[4, 4, 0, 0]}
             />
@@ -174,7 +174,7 @@ export function FourWayComparisonChart({ comparison }: FourWayComparisonChartPro
       </div>
 
       <div className="rounded-xl border border-gold/15 bg-canvas/30 p-2.5 text-[11px] text-muted leading-relaxed">
-        <strong className="text-gold-light font-semibold">Percentage-Point Note:</strong> TraceMesh Full Fusion closes a <strong className="text-ink font-mono">+42.2 pp</strong> gap in precision and a <strong className="text-ink font-mono">+52.7 pp</strong> gap in ring recall compared to per-account baseline threshold rules, proving that graph topology and neighbor risk are essential for mule ring detection.
+        <strong className="text-gold-light font-semibold">Percentage-Point Note:</strong> MuleNet Full Fusion closes a <strong className="text-ink font-mono">+42.2 pp</strong> gap in precision and a <strong className="text-ink font-mono">+52.7 pp</strong> gap in ring recall compared to per-account baseline threshold rules, proving that graph topology and neighbor risk are essential for mule ring detection.
       </div>
     </DashboardCard>
   );

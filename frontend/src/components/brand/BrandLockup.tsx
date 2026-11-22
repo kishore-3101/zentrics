@@ -50,7 +50,7 @@ export function BrandLockup({ compact = false, className }: BrandLockupProps) {
       {!compact && (
         <span className="flex flex-col leading-none">
           <span className="font-display text-[15px] font-bold tracking-[0.16em] text-ink">
-            TRACE <span className="text-gold-gradient">MESH</span>
+            MULE <span className="text-gold-gradient">NET</span>
           </span>
           <span className="mt-1.5 font-mono text-[9px] font-medium tracking-[0.24em] text-muted">
             FINANCIAL INTELLIGENCE

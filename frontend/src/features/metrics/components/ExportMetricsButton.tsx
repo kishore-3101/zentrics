@@ -12,7 +12,7 @@ export function ExportMetricsButton({ data }: ExportMetricsButtonProps) {
   const exportJSON = () => {
     const payload = {
       designation: 'DEMO DATA / SIMULATED BENCHMARK ARTIFACTS',
-      provenance: 'TraceMesh Module 10 Validation Run #4 (Synthetic Hold-Out Split: test_v1_seed42)',
+      provenance: 'MuleNet Module 10 Validation Run #4 (Synthetic Hold-Out Split: test_v1_seed42)',
       protocol: 'Module 10 Evaluation Harness with clean labels & 70% ring recall threshold',
       exported_at: new Date().toISOString(),
       dataset: data,
@@ -24,7 +24,7 @@ export function ExportMetricsButton({ data }: ExportMetricsButtonProps) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `tracemesh-benchmark-run4-simulated-${new Date().toISOString().slice(0, 10)}.json`;
+    link.download = `mulenet-benchmark-run4-simulated-${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -48,7 +48,7 @@ export function ExportMetricsButton({ data }: ExportMetricsButtonProps) {
       `False Positive Rate,${data.overall.fpr},%`,
       '',
       '--- FOUR-WAY MODEL ARCHITECTURAL COMPARISON ---',
-      'Metric,Baseline Rules (%),Graph Rules (%),Tabular ML Only (%),TraceMesh Full Fusion (%),Full Fusion Lead (pp)',
+      'Metric,Baseline Rules (%),Graph Rules (%),Tabular ML Only (%),MuleNet Full Fusion (%),Full Fusion Lead (pp)',
       ...data.comparison.map(
         (c) =>
           `"${c.metric}",${c.baseline_rules},${c.graph_rules},${c.ml_only},${c.full_fusion},${(
@@ -81,7 +81,7 @@ export function ExportMetricsButton({ data }: ExportMetricsButtonProps) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `tracemesh-benchmark-run4-simulated-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `mulenet-benchmark-run4-simulated-${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

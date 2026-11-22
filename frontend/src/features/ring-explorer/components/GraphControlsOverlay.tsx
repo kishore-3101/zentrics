@@ -1,4 +1,4 @@
-import { Eye, EyeOff, Search } from 'lucide-react';
+import { Compass, Eye, EyeOff, MapPin, Search } from 'lucide-react';
 import type { AccountRole } from '../../../types/ring-graph';
 
 interface GraphControlsOverlayProps {
@@ -8,6 +8,7 @@ interface GraphControlsOverlayProps {
   onToggleRole: (role: AccountRole) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  onSelectPreset?: (preset: string) => void;
 }
 
 const ROLES: { id: AccountRole; label: string; color: string }[] = [
@@ -24,65 +25,121 @@ export function GraphControlsOverlay({
   onToggleRole,
   searchQuery,
   onSearchChange,
+  onSelectPreset,
 }: GraphControlsOverlayProps) {
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between w-full">
-      {/* Search Input */}
-      <div className="relative max-w-xs">
-        <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted" />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Find account in graph..."
-          className="h-8 w-full rounded-xl border border-gold/20 bg-card/80 pl-8 pr-3 text-xs text-ink placeholder:text-muted/60 focus:border-gold/60 focus:outline-none"
-        />
-        {searchQuery && (
+    <div className="flex flex-col gap-2.5 w-full">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between w-full">
+        {/* Search Input */}
+        <div className="relative w-full max-w-xs">
+          <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Search account ID (e.g. ACC-9481)..."
+            className="h-8 w-full rounded-xl border border-gold/25 bg-[#0B1812]/90 pl-8 pr-3 text-xs text-ink placeholder:text-muted/60 focus:border-gold/60 focus:outline-none backdrop-blur-md shadow-md"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => onSearchChange('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-muted hover:text-ink"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {/* Role filter toggles & Label switch */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {ROLES.map((r) => {
+            const active = selectedRoles.has(r.id);
+            return (
+              <button
+                key={r.id}
+                type="button"
+                onClick={() => onToggleRole(r.id)}
+                className={`inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-medium transition-colors backdrop-blur-xs ${
+                  active
+                    ? 'border-gold/40 bg-gold/20 text-gold-light font-semibold'
+                    : 'border-gold/10 bg-[#0B1812]/70 text-muted/60 hover:text-muted'
+                }`}
+              >
+                <span
+                  className="size-1.5 rounded-full"
+                  style={{ backgroundColor: active ? r.color : '#8B9B8F' }}
+                />
+                {r.label}
+              </button>
+            );
+          })}
+
+          {/* Label Toggle */}
           <button
             type="button"
-            onClick={() => onSearchChange('')}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-muted hover:text-ink"
+            onClick={onToggleLabels}
+            title={showLabels ? 'Hide account tags' : 'Show account tags'}
+            className="inline-flex items-center gap-1 rounded-lg border border-gold/25 bg-[#0B1812]/85 px-2.5 py-1 text-[11px] font-medium text-gold-light hover:bg-gold/20 transition-colors backdrop-blur-xs"
           >
-            ✕
+            {showLabels ? <Eye className="size-3" /> : <EyeOff className="size-3" />}
+            <span>{showLabels ? 'Tags ON' : 'Tags OFF'}</span>
           </button>
-        )}
+        </div>
       </div>
 
-      {/* Role filter toggles & Label switch */}
-      <div className="flex items-center gap-1.5 flex-wrap">
-        {ROLES.map((r) => {
-          const active = selectedRoles.has(r.id);
-          return (
-            <button
-              key={r.id}
-              type="button"
-              onClick={() => onToggleRole(r.id)}
-              className={`inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-medium transition-colors ${
-                active
-                  ? 'border-gold/40 bg-gold/20 text-gold-light'
-                  : 'border-gold/10 bg-card/60 text-muted/60 hover:text-muted'
-              }`}
-            >
-              <span
-                className="size-1.5 rounded-full"
-                style={{ backgroundColor: active ? r.color : '#8B9B8F' }}
-              />
-              {r.label}
-            </button>
-          );
-        })}
-
-        {/* Label Toggle */}
-        <button
-          type="button"
-          onClick={onToggleLabels}
-          title={showLabels ? 'Hide account tags' : 'Show account tags'}
-          className="inline-flex items-center gap-1 rounded-lg border border-gold/20 bg-card/75 px-2.5 py-1 text-[11px] font-medium text-gold-light hover:bg-gold/15 transition-colors"
-        >
-          {showLabels ? <Eye className="size-3" /> : <EyeOff className="size-3" />}
-          <span>{showLabels ? 'Labels ON' : 'Labels OFF'}</span>
-        </button>
-      </div>
+      {/* Corridor Quick-Jump Presets */}
+      {onSelectPreset && (
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="text-[10px] uppercase font-bold tracking-wider text-muted/70 mr-1 flex items-center gap-1">
+            <Compass className="size-3 text-gold-light" /> Corridors:
+          </span>
+          <button
+            type="button"
+            onClick={() => onSelectPreset('overview')}
+            className="inline-flex items-center gap-1 rounded-lg border border-gold/20 bg-[#0B1812]/75 px-2 py-0.5 text-[10px] font-medium text-muted hover:border-gold hover:text-gold-light transition-colors backdrop-blur-xs"
+          >
+            All India Overview
+          </button>
+          <button
+            type="button"
+            onClick={() => onSelectPreset('south')}
+            className="inline-flex items-center gap-1 rounded-lg border border-gold/20 bg-[#0B1812]/75 px-2 py-0.5 text-[10px] font-medium text-muted hover:border-gold hover:text-gold-light transition-colors backdrop-blur-xs"
+          >
+            <MapPin className="size-2.5 text-emerald" /> Chennai → Bengaluru
+          </button>
+          <button
+            type="button"
+            onClick={() => onSelectPreset('mumbai')}
+            className="inline-flex items-center gap-1 rounded-lg border border-gold/20 bg-[#0B1812]/75 px-2 py-0.5 text-[10px] font-medium text-muted hover:border-gold hover:text-gold-light transition-colors backdrop-blur-xs"
+          >
+            <MapPin className="size-2.5 text-gold-light" /> Mumbai Layering
+          </button>
+          <button
+            type="button"
+            onClick={() => onSelectPreset('kolkata')}
+            className="inline-flex items-center gap-1 rounded-lg border border-gold/20 bg-[#0B1812]/75 px-2 py-0.5 text-[10px] font-medium text-muted hover:border-gold hover:text-gold-light transition-colors backdrop-blur-xs"
+          >
+            <MapPin className="size-2.5 text-danger" /> Kolkata Terminal Sink
+          </button>
+          <button
+            type="button"
+            onClick={() => onSelectPreset('north')}
+            className="inline-flex items-center gap-1 rounded-lg border border-gold/20 bg-[#0B1812]/75 px-2 py-0.5 text-[10px] font-medium text-muted hover:border-gold hover:text-gold-light transition-colors backdrop-blur-xs"
+          >
+            Delhi / Jaipur
+          </button>
+          <button
+            type="button"
+            onClick={() => onSelectPreset('dubai')}
+            className="inline-flex items-center gap-1 rounded-lg border border-gold/20 bg-[#0B1812]/75 px-2 py-0.5 text-[10px] font-medium text-muted hover:border-gold hover:text-gold-light transition-colors backdrop-blur-xs"
+          >
+            Dubai Offshore
+          </button>
+        </div>
+      )}
     </div>
   );
 }
+
+export default GraphControlsOverlay;

@@ -1,7 +1,9 @@
 import { AlertTriangle, RotateCw } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { AccountInspector } from '../features/ring-explorer/components/AccountInspector';
 import { SceneContainer } from '../features/ring-explorer/components/canvas/SceneContainer';
+import { CityInspector } from '../features/ring-explorer/components/CityInspector';
 import { GraphControlsOverlay } from '../features/ring-explorer/components/GraphControlsOverlay';
 import { GraphLegend } from '../features/ring-explorer/components/GraphLegend';
 import { RingExplorerHeader } from '../features/ring-explorer/components/RingExplorerHeader';
@@ -11,6 +13,9 @@ import { TimelineReplayBar } from '../features/ring-explorer/components/Timeline
 import { TransactionInspector } from '../features/ring-explorer/components/TransactionInspector';
 import { useRingGraph } from '../features/ring-explorer/hooks/useRingGraph';
 import { useTimelineReplay } from '../features/ring-explorer/hooks/useTimelineReplay';
+import type { GeoCityCoordinate } from '../features/ring-explorer/types/geo';
+import { buildGeoGraph } from '../features/ring-explorer/utils/geoData';
+import type { AccountNodeData } from '../types/ring-graph';
 
 export default function RingExplorer() {
   const { id } = useParams<{ id: string }>();
@@ -54,6 +59,33 @@ export default function RingExplorer() {
     durationMinutes: graph?.duration_min || 34,
   });
 
+  // 3D Geographic & Camera Preset State
+  const [selectedCity, setSelectedCity] = useState<GeoCityCoordinate | null>(null);
+  const [cameraPreset, setCameraPreset] = useState<string | null>(null);
+
+  // Compute GeoGraph summary for City Inspector drawer
+  const rawGeoGraph = useMemo(() => {
+    if (!graph) return null;
+    return buildGeoGraph(graph, 4.8);
+  }, [graph]);
+
+  // Selected city location object for CityInspector
+  const selectedCityLocation = useMemo(() => {
+    if (!selectedCity || !rawGeoGraph) return null;
+    return rawGeoGraph.locations.find((l) => l.id === selectedCity.id) || null;
+  }, [selectedCity, rawGeoGraph]);
+
+  const handleSelectCameraPreset = useCallback((preset: string) => {
+    setSelectedNode(null);
+    setCameraPreset(preset);
+  }, [setSelectedNode]);
+
+  const handleCloseInspectors = useCallback(() => {
+    setSelectedNode(null);
+    setSelectedEdge(null);
+    setSelectedCity(null);
+  }, [setSelectedNode, setSelectedEdge]);
+
   if (loading) {
     return (
       <div className="mx-auto w-full max-w-[1440px] space-y-4">
@@ -81,18 +113,20 @@ export default function RingExplorer() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] space-y-4 pb-8">
+    <div className="mx-auto w-full max-w-[1440px] space-y-4 pb-8 min-w-0">
       {/* 1. Header with Ring ID, Risk Score, Status, Ring Switcher */}
       <RingExplorerHeader graph={graph} />
 
-      {/* 2. Compact Top Summary Bar */}
-      <RingSummaryBar graph={graph} />
+      {/* 2. Top Bar: Summary KPIs (Total accounts, Victims, Collectors, Mules, Sinks, Volume, At Risk) */}
+      <div className="min-w-0">
+        <RingSummaryBar graph={graph} />
+      </div>
 
-      {/* 3. 3D Transaction Network Command Center */}
-      <div className="relative h-[640px] w-full rounded-2xl border border-gold/20 bg-[#07110D] shadow-2xl overflow-hidden">
-        {/* Top Floating Controls & Legend Overlay */}
-        <div className="absolute left-4 right-4 top-4 z-20 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between pointer-events-auto">
-          <div className="flex-1 max-w-xl">
+      {/* 3. Integrated 3D Network & Real Geographic Map Command Center */}
+      <div className="relative h-[680px] w-full rounded-2xl border border-gold/20 bg-[#030A06] shadow-2xl overflow-hidden min-w-0">
+        {/* Top Floating Controls & Corridor Quick-Jumps Overlay */}
+        <div className="absolute left-4 right-4 top-4 z-20 flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between pointer-events-auto">
+          <div className="flex-1 max-w-2xl">
             <GraphControlsOverlay
               showLabels={showLabels}
               onToggleLabels={() => setShowLabels((prev) => !prev)}
@@ -100,17 +134,19 @@ export default function RingExplorer() {
               onToggleRole={handleToggleRole}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
+              onSelectPreset={handleSelectCameraPreset}
             />
           </div>
           <GraphLegend />
         </div>
 
-        {/* Center 3D WebGL Canvas */}
+        {/* Center 3D WebGL Canvas: Unified Geography + Animated Network Graph */}
         <SceneContainer
           nodes={nodes}
           edges={edges}
           selectedNode={selectedNode}
           selectedEdge={selectedEdge}
+          selectedCity={selectedCity}
           onSelectNode={(node) => {
             setSelectedEdge(null);
             setSelectedNode(node);
@@ -119,12 +155,25 @@ export default function RingExplorer() {
             setSelectedNode(null);
             setSelectedEdge(edge);
           }}
+          onSelectCity={(city) => {
+            setSelectedCity(city);
+          }}
           showLabels={showLabels}
           activeTxnIds={activeTxnIds}
           speedMultiplier={speed}
+          cameraPreset={cameraPreset}
         />
 
-        {/* Account Node Inspector Slide-out Drawer */}
+        {/* City Inspector Slide-Out Drawer (when clicking city ground beacon) */}
+        <CityInspector
+          location={selectedCityLocation}
+          onClose={() => setSelectedCity(null)}
+          onSelectAccount={(acc: AccountNodeData) => {
+            setSelectedNode(acc);
+          }}
+        />
+
+        {/* Account Inspector Slide-out Drawer */}
         <AccountInspector
           account={selectedNode}
           onClose={() => setSelectedNode(null)}
@@ -133,7 +182,7 @@ export default function RingExplorer() {
         {/* Transaction Edge Inspector Floating Card */}
         <TransactionInspector
           edge={selectedEdge}
-          onClose={() => setSelectedEdge(null)}
+          onClose={handleCloseInspectors}
         />
 
         {/* Bottom Floating Cinematic Timeline Replay Bar */}
@@ -151,6 +200,14 @@ export default function RingExplorer() {
             onScrub={scrubTo}
             onSpeedChange={setSpeed}
           />
+        </div>
+
+        {/* Bottom-Left Geospatial Provenance Disclaimer */}
+        <div className="absolute bottom-20 left-4 z-20 pointer-events-none hidden sm:block max-w-md">
+          <div className="rounded-lg border border-gold/20 bg-[#0B1812]/85 px-3 py-1.5 text-[10px] text-muted backdrop-blur-md">
+            <span className="text-gold-light font-semibold">3D GIS PROVENANCE: </span>
+            Accounts anchored to coordinates above real Indian state boundaries & regional hubs.
+          </div>
         </div>
       </div>
     </div>

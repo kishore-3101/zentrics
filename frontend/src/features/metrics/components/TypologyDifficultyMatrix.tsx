@@ -149,7 +149,7 @@ export function TypologyDifficultyMatrix({ metrics }: TypologyDifficultyMatrixPr
       </div>
 
       <div className="rounded-xl border border-gold/15 bg-canvas/30 p-2.5 text-[11px] text-muted leading-relaxed">
-        <strong className="text-gold-light font-semibold">Robustness Insight:</strong> Even under Hard difficulty parameters (e.g. multi-hop cycles with delayed forwarding and smurfing amounts), TraceMesh preserves &ge;85.0% recall and &ge;88.0% F1, proving robustness against sophisticated laundering evasions.
+        <strong className="text-gold-light font-semibold">Robustness Insight:</strong> Even under Hard difficulty parameters (e.g. multi-hop cycles with delayed forwarding and smurfing amounts), MuleNet preserves &ge;85.0% recall and &ge;88.0% F1, proving robustness against sophisticated laundering evasions.
       </div>
     </DashboardCard>
   );

@@ -10,17 +10,17 @@ import { Globe3DBackground } from './components/Globe3DBackground';
 import { HudCornerOverlays } from './components/HudCornerOverlays';
 import { TransactionNetworkFlow } from './components/TransactionNetworkFlow';
 
-interface TraceMeshLoadingScreenProps {
+interface MuleNetLoadingScreenProps {
   onComplete?: () => void;
   minDurationMs?: number; // Default: ~3600ms
   autoComplete?: boolean; // Default: true
 }
 
-export function TraceMeshLoadingScreen({
+export function MuleNetLoadingScreen({
   onComplete,
   minDurationMs = 3600,
   autoComplete = true,
-}: TraceMeshLoadingScreenProps) {
+}: MuleNetLoadingScreenProps) {
   const [progress, setProgress] = useState(0);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -79,7 +79,7 @@ export function TraceMeshLoadingScreen({
           {/* Layer 2: Corner Tactical HUD Overlays */}
           <HudCornerOverlays />
 
-          {/* Layer 3: Top TRACE-MESH Brand Pill Header */}
+          {/* Layer 3: Top MULE-NET Brand Pill Header */}
           <div className="relative z-30 pt-4">
             <CinematicBrandHeader />
           </div>
@@ -101,3 +101,6 @@ export function TraceMeshLoadingScreen({
     </AnimatePresence>
   );
 }
+
+// Backwards-compatibility alias
+export const TraceMeshLoadingScreen = MuleNetLoadingScreen;
