@@ -340,7 +340,13 @@
       "fan_out_split"
     ],
     "member_count": 35,
-    "explanation": "Closed circular routing detected: \u20b93,692,799.39 circulated across 18 intermediary mule accounts within 109320.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b93,692,799.39 at risk."
+    "explanation": "Closed circular routing detected: \u20b93,692,799.39 circulated across 18 intermediary mule accounts within 109320.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b93,692,799.39 at risk.",
+    "fingerprint": "fp_r-100-21",
+    "amount_moved": 3692799.39,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 35,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0002",
@@ -361,7 +367,13 @@
       "fan_out_split"
     ],
     "member_count": 36,
-    "explanation": "Closed circular routing detected: \u20b93,645,953.38 circulated across 20 intermediary mule accounts within 117022.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b93,645,953.38 at risk."
+    "explanation": "Closed circular routing detected: \u20b93,645,953.38 circulated across 20 intermediary mule accounts within 117022.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b93,645,953.38 at risk.",
+    "fingerprint": "fp_r-100-01",
+    "amount_moved": 3645953.38,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 36,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0003",
@@ -382,7 +394,13 @@
       "fan_out_split"
     ],
     "member_count": 33,
-    "explanation": "Closed circular routing detected: \u20b93,441,742.24 circulated across 21 intermediary mule accounts within 117214.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b93,441,742.24 at risk."
+    "explanation": "Closed circular routing detected: \u20b93,441,742.24 circulated across 21 intermediary mule accounts within 117214.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b93,441,742.24 at risk.",
+    "fingerprint": "fp_r-100-14",
+    "amount_moved": 3441742.24,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 33,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0004",
@@ -403,7 +421,13 @@
       "fan_out_split"
     ],
     "member_count": 27,
-    "explanation": "Closed circular routing detected: \u20b92,669,140.82 circulated across 17 intermediary mule accounts within 118047.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,669,140.82 at risk."
+    "explanation": "Closed circular routing detected: \u20b92,669,140.82 circulated across 17 intermediary mule accounts within 118047.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,669,140.82 at risk.",
+    "fingerprint": "fp_r-100-15",
+    "amount_moved": 2669140.82,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 27,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0005",
@@ -423,7 +447,13 @@
       "fan_out_split"
     ],
     "member_count": 27,
-    "explanation": "Closed circular routing detected: \u20b92,447,439.72 circulated across 19 intermediary mule accounts within 112674.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,447,439.72 at risk."
+    "explanation": "Closed circular routing detected: \u20b92,447,439.72 circulated across 19 intermediary mule accounts within 112674.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,447,439.72 at risk.",
+    "fingerprint": "fp_r-100-07",
+    "amount_moved": 2447439.72,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 27,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0006",
@@ -443,7 +473,13 @@
       "fan_out_split"
     ],
     "member_count": 26,
-    "explanation": "Closed circular routing detected: \u20b92,421,061.41 circulated across 15 intermediary mule accounts within 116930.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,421,061.41 at risk."
+    "explanation": "Closed circular routing detected: \u20b92,421,061.41 circulated across 15 intermediary mule accounts within 116930.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,421,061.41 at risk.",
+    "fingerprint": "fp_r-100-05",
+    "amount_moved": 2421061.41,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 26,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0007",
@@ -463,7 +499,13 @@
       "fan_out_split"
     ],
     "member_count": 31,
-    "explanation": "Closed circular routing detected: \u20b92,321,628.70 circulated across 20 intermediary mule accounts within 103864.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,321,628.70 at risk."
+    "explanation": "Closed circular routing detected: \u20b92,321,628.70 circulated across 20 intermediary mule accounts within 103864.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,321,628.70 at risk.",
+    "fingerprint": "fp_r-100-08",
+    "amount_moved": 2321628.7,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 31,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0008",
@@ -484,7 +526,13 @@
       "fan_out_split"
     ],
     "member_count": 17,
-    "explanation": "Closed circular routing detected: \u20b92,230,542.02 circulated across 9 intermediary mule accounts within 101396.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,230,542.02 at risk."
+    "explanation": "Closed circular routing detected: \u20b92,230,542.02 circulated across 9 intermediary mule accounts within 101396.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,230,542.02 at risk.",
+    "fingerprint": "fp_r-100-20",
+    "amount_moved": 2230542.02,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 17,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0009",
@@ -505,7 +553,13 @@
       "fan_out_split"
     ],
     "member_count": 27,
-    "explanation": "Closed circular routing detected: \u20b92,232,955.11 circulated across 15 intermediary mule accounts within 113553.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,232,955.11 at risk."
+    "explanation": "Closed circular routing detected: \u20b92,232,955.11 circulated across 15 intermediary mule accounts within 113553.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,232,955.11 at risk.",
+    "fingerprint": "fp_r-100-17",
+    "amount_moved": 2232955.11,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 27,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0010",
@@ -525,7 +579,13 @@
       "fan_out_split"
     ],
     "member_count": 24,
-    "explanation": "Closed circular routing detected: \u20b92,199,615.11 circulated across 15 intermediary mule accounts within 112031.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,199,615.11 at risk."
+    "explanation": "Closed circular routing detected: \u20b92,199,615.11 circulated across 15 intermediary mule accounts within 112031.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,199,615.11 at risk.",
+    "fingerprint": "fp_r-100-02",
+    "amount_moved": 2199615.11,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 24,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0011",
@@ -545,7 +605,13 @@
       "fan_out_split"
     ],
     "member_count": 20,
-    "explanation": "Closed circular routing detected: \u20b92,162,031.81 circulated across 11 intermediary mule accounts within 113794.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,162,031.81 at risk."
+    "explanation": "Closed circular routing detected: \u20b92,162,031.81 circulated across 11 intermediary mule accounts within 113794.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,162,031.81 at risk.",
+    "fingerprint": "fp_r-100-10",
+    "amount_moved": 2162031.81,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 20,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0012",
@@ -565,7 +631,13 @@
       "fan_out_split"
     ],
     "member_count": 19,
-    "explanation": "Closed circular routing detected: \u20b92,114,043.74 circulated across 12 intermediary mule accounts within 96162.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,114,043.74 at risk."
+    "explanation": "Closed circular routing detected: \u20b92,114,043.74 circulated across 12 intermediary mule accounts within 96162.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,114,043.74 at risk.",
+    "fingerprint": "fp_r-100-12",
+    "amount_moved": 2114043.74,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 19,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0013",
@@ -585,7 +657,13 @@
       "fan_out_split"
     ],
     "member_count": 19,
-    "explanation": "Closed circular routing detected: \u20b92,077,177.11 circulated across 13 intermediary mule accounts within 113520.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,077,177.11 at risk."
+    "explanation": "Closed circular routing detected: \u20b92,077,177.11 circulated across 13 intermediary mule accounts within 113520.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,077,177.11 at risk.",
+    "fingerprint": "fp_r-100-09",
+    "amount_moved": 2077177.11,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 19,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0014",
@@ -606,7 +684,13 @@
       "fan_out_split"
     ],
     "member_count": 28,
-    "explanation": "Closed circular routing detected: \u20b92,041,961.16 circulated across 19 intermediary mule accounts within 90528.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,041,961.16 at risk."
+    "explanation": "Closed circular routing detected: \u20b92,041,961.16 circulated across 19 intermediary mule accounts within 90528.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b92,041,961.16 at risk.",
+    "fingerprint": "fp_r-100-11",
+    "amount_moved": 2041961.16,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 28,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0015",
@@ -626,7 +710,13 @@
       "fan_out_split"
     ],
     "member_count": 22,
-    "explanation": "Closed circular routing detected: \u20b91,873,980.18 circulated across 13 intermediary mule accounts within 114955.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,873,980.18 at risk."
+    "explanation": "Closed circular routing detected: \u20b91,873,980.18 circulated across 13 intermediary mule accounts within 114955.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,873,980.18 at risk.",
+    "fingerprint": "fp_r-100-13",
+    "amount_moved": 1873980.18,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 22,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0016",
@@ -646,7 +736,13 @@
       "fan_out_split"
     ],
     "member_count": 18,
-    "explanation": "Closed circular routing detected: \u20b91,845,391.34 circulated across 12 intermediary mule accounts within 117123.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,845,391.34 at risk."
+    "explanation": "Closed circular routing detected: \u20b91,845,391.34 circulated across 12 intermediary mule accounts within 117123.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,845,391.34 at risk.",
+    "fingerprint": "fp_r-100-06",
+    "amount_moved": 1845391.34,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 18,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0017",
@@ -667,7 +763,13 @@
       "fan_out_split"
     ],
     "member_count": 20,
-    "explanation": "Closed circular routing detected: \u20b91,738,688.04 circulated across 12 intermediary mule accounts within 120955.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,738,688.04 at risk."
+    "explanation": "Closed circular routing detected: \u20b91,738,688.04 circulated across 12 intermediary mule accounts within 120955.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,738,688.04 at risk.",
+    "fingerprint": "fp_r-100-22",
+    "amount_moved": 1738688.04,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 20,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0018",
@@ -688,7 +790,13 @@
       "fan_out_split"
     ],
     "member_count": 19,
-    "explanation": "Closed circular routing detected: \u20b91,586,990.32 circulated across 13 intermediary mule accounts within 74955.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,586,990.32 at risk."
+    "explanation": "Closed circular routing detected: \u20b91,586,990.32 circulated across 13 intermediary mule accounts within 74955.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,586,990.32 at risk.",
+    "fingerprint": "fp_r-100-03",
+    "amount_moved": 1586990.32,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 19,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0019",
@@ -708,7 +816,13 @@
       "fan_out_split"
     ],
     "member_count": 22,
-    "explanation": "Closed circular routing detected: \u20b91,599,654.90 circulated across 10 intermediary mule accounts within 111020.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,599,654.90 at risk."
+    "explanation": "Closed circular routing detected: \u20b91,599,654.90 circulated across 10 intermediary mule accounts within 111020.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,599,654.90 at risk.",
+    "fingerprint": "fp_r-100-18",
+    "amount_moved": 1599654.9,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 22,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0020",
@@ -728,7 +842,13 @@
       "fan_out_split"
     ],
     "member_count": 16,
-    "explanation": "Closed circular routing detected: \u20b91,364,829.03 circulated across 10 intermediary mule accounts within 93648.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,364,829.03 at risk."
+    "explanation": "Closed circular routing detected: \u20b91,364,829.03 circulated across 10 intermediary mule accounts within 93648.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,364,829.03 at risk.",
+    "fingerprint": "fp_r-100-04",
+    "amount_moved": 1364829.03,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 16,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0021",
@@ -748,7 +868,13 @@
       "fan_out_split"
     ],
     "member_count": 15,
-    "explanation": "Closed circular routing detected: \u20b91,100,440.13 circulated across 8 intermediary mule accounts within 82642.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,100,440.13 at risk."
+    "explanation": "Closed circular routing detected: \u20b91,100,440.13 circulated across 8 intermediary mule accounts within 82642.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b91,100,440.13 at risk.",
+    "fingerprint": "fp_r-100-16",
+    "amount_moved": 1100440.13,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 15,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0022",
@@ -768,7 +894,13 @@
       "fan_out_split"
     ],
     "member_count": 13,
-    "explanation": "Closed circular routing detected: \u20b9897,299.48 circulated across 8 intermediary mule accounts within 96489.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9897,299.48 at risk."
+    "explanation": "Closed circular routing detected: \u20b9897,299.48 circulated across 8 intermediary mule accounts within 96489.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9897,299.48 at risk.",
+    "fingerprint": "fp_r-100-19",
+    "amount_moved": 897299.48,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 13,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0023",
@@ -787,7 +919,13 @@
       "layering_chain"
     ],
     "member_count": 7,
-    "explanation": "Closed circular routing detected: \u20b9736,381.93 circulated across 6 intermediary mule accounts within 83780.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9736,381.93 at risk."
+    "explanation": "Closed circular routing detected: \u20b9736,381.93 circulated across 6 intermediary mule accounts within 83780.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9736,381.93 at risk.",
+    "fingerprint": "fp_r-100-30",
+    "amount_moved": 736381.93,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 7,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0024",
@@ -806,7 +944,13 @@
       "layering_chain"
     ],
     "member_count": 5,
-    "explanation": "Closed circular routing detected: \u20b9630,220.90 circulated across 4 intermediary mule accounts within 106430.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9630,220.90 at risk."
+    "explanation": "Closed circular routing detected: \u20b9630,220.90 circulated across 4 intermediary mule accounts within 106430.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9630,220.90 at risk.",
+    "fingerprint": "fp_r-100-36",
+    "amount_moved": 630220.9,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 5,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0025",
@@ -825,7 +969,13 @@
       "layering_chain"
     ],
     "member_count": 4,
-    "explanation": "Closed circular routing detected: \u20b9455,960.55 circulated across 3 intermediary mule accounts within 31653.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9455,960.55 at risk."
+    "explanation": "Closed circular routing detected: \u20b9455,960.55 circulated across 3 intermediary mule accounts within 31653.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9455,960.55 at risk.",
+    "fingerprint": "fp_r-100-31",
+    "amount_moved": 455960.55,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 4,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0026",
@@ -845,7 +995,13 @@
       "fan_in_burst"
     ],
     "member_count": 7,
-    "explanation": "Closed circular routing detected: \u20b9447,027.84 circulated across 3 intermediary mule accounts within 108161.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9447,027.84 at risk."
+    "explanation": "Closed circular routing detected: \u20b9447,027.84 circulated across 3 intermediary mule accounts within 108161.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9447,027.84 at risk.",
+    "fingerprint": "fp_r-100-38",
+    "amount_moved": 447027.84,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 7,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0027",
@@ -864,7 +1020,13 @@
       "layering_chain"
     ],
     "member_count": 3,
-    "explanation": "Closed circular routing detected: \u20b9344,040.41 circulated across 2 intermediary mule accounts within 15.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9344,040.41 at risk."
+    "explanation": "Closed circular routing detected: \u20b9344,040.41 circulated across 2 intermediary mule accounts within 15.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9344,040.41 at risk.",
+    "fingerprint": "fp_r-100-23",
+    "amount_moved": 344040.41,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 3,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0028",
@@ -884,7 +1046,13 @@
       "fan_out_split"
     ],
     "member_count": 4,
-    "explanation": "Closed circular routing detected: \u20b9373,281.03 circulated across 3 intermediary mule accounts within 61480.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9373,281.03 at risk."
+    "explanation": "Closed circular routing detected: \u20b9373,281.03 circulated across 3 intermediary mule accounts within 61480.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9373,281.03 at risk.",
+    "fingerprint": "fp_r-100-28",
+    "amount_moved": 373281.03,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 4,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0029",
@@ -904,7 +1072,13 @@
       "fan_out_split"
     ],
     "member_count": 5,
-    "explanation": "Closed circular routing detected: \u20b9374,030.00 circulated across 2 intermediary mule accounts within 33042.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9374,030.00 at risk."
+    "explanation": "Closed circular routing detected: \u20b9374,030.00 circulated across 2 intermediary mule accounts within 33042.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9374,030.00 at risk.",
+    "fingerprint": "fp_r-100-39",
+    "amount_moved": 374030.0,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 5,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0030",
@@ -922,7 +1096,13 @@
       "layering_chain"
     ],
     "member_count": 3,
-    "explanation": "Rapid pass-through hub network: \u20b9324,315.14 aggregated and immediately forwarded onward with high-velocity transit times (median 64.0 min)."
+    "explanation": "Rapid pass-through hub network: \u20b9324,315.14 aggregated and immediately forwarded onward with high-velocity transit times (median 64.0 min).",
+    "fingerprint": "fp_r-100-26",
+    "amount_moved": 324315.14,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 3,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0031",
@@ -941,7 +1121,13 @@
       "layering_chain"
     ],
     "member_count": 3,
-    "explanation": "Closed circular routing detected: \u20b9285,381.13 circulated across 2 intermediary mule accounts within 36.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9285,381.13 at risk."
+    "explanation": "Closed circular routing detected: \u20b9285,381.13 circulated across 2 intermediary mule accounts within 36.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9285,381.13 at risk.",
+    "fingerprint": "fp_r-100-25",
+    "amount_moved": 285381.13,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 3,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0032",
@@ -959,7 +1145,13 @@
       "circular_flow"
     ],
     "member_count": 3,
-    "explanation": "Closed circular routing detected: \u20b9293,877.41 circulated across 3 intermediary mule accounts within 52.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9293,877.41 at risk."
+    "explanation": "Closed circular routing detected: \u20b9293,877.41 circulated across 3 intermediary mule accounts within 52.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9293,877.41 at risk.",
+    "fingerprint": "fp_r-100-40",
+    "amount_moved": 293877.41,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 3,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0033",
@@ -977,7 +1169,13 @@
       "circular_flow"
     ],
     "member_count": 3,
-    "explanation": "Closed circular routing detected: \u20b9287,741.39 circulated across 3 intermediary mule accounts within 74.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9287,741.39 at risk."
+    "explanation": "Closed circular routing detected: \u20b9287,741.39 circulated across 3 intermediary mule accounts within 74.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9287,741.39 at risk.",
+    "fingerprint": "fp_r-100-41",
+    "amount_moved": 287741.39,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 3,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0034",
@@ -996,7 +1194,13 @@
       "layering_chain"
     ],
     "member_count": 4,
-    "explanation": "Closed circular routing detected: \u20b9279,312.16 circulated across 3 intermediary mule accounts within 4227.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9279,312.16 at risk."
+    "explanation": "Closed circular routing detected: \u20b9279,312.16 circulated across 3 intermediary mule accounts within 4227.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9279,312.16 at risk.",
+    "fingerprint": "fp_r-100-32",
+    "amount_moved": 279312.16,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 4,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0035",
@@ -1016,7 +1220,13 @@
       "fan_in_burst"
     ],
     "member_count": 5,
-    "explanation": "Closed circular routing detected: \u20b9251,313.94 circulated across 3 intermediary mule accounts within 56384.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9251,313.94 at risk."
+    "explanation": "Closed circular routing detected: \u20b9251,313.94 circulated across 3 intermediary mule accounts within 56384.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9251,313.94 at risk.",
+    "fingerprint": "fp_r-100-35",
+    "amount_moved": 251313.94,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 5,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0036",
@@ -1035,7 +1245,13 @@
       "fan_out_split"
     ],
     "member_count": 3,
-    "explanation": "Rapid pass-through hub network: \u20b9250,880.18 aggregated and immediately forwarded onward with high-velocity transit times (median 61436.0 min)."
+    "explanation": "Rapid pass-through hub network: \u20b9250,880.18 aggregated and immediately forwarded onward with high-velocity transit times (median 61436.0 min).",
+    "fingerprint": "fp_r-100-29",
+    "amount_moved": 250880.18,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 3,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0037",
@@ -1054,7 +1270,13 @@
       "layering_chain"
     ],
     "member_count": 3,
-    "explanation": "Closed circular routing detected: \u20b9194,392.53 circulated across 2 intermediary mule accounts within 19.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9194,392.53 at risk."
+    "explanation": "Closed circular routing detected: \u20b9194,392.53 circulated across 2 intermediary mule accounts within 19.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9194,392.53 at risk.",
+    "fingerprint": "fp_r-100-34",
+    "amount_moved": 194392.53,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 3,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0038",
@@ -1074,7 +1296,13 @@
       "fan_in_burst"
     ],
     "member_count": 3,
-    "explanation": "Closed circular routing detected: \u20b9194,700.02 circulated across 2 intermediary mule accounts within 28372.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9194,700.02 at risk."
+    "explanation": "Closed circular routing detected: \u20b9194,700.02 circulated across 2 intermediary mule accounts within 28372.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9194,700.02 at risk.",
+    "fingerprint": "fp_r-100-27",
+    "amount_moved": 194700.02,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 3,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0039",
@@ -1095,7 +1323,13 @@
       "fan_out_split"
     ],
     "member_count": 6,
-    "explanation": "Closed circular routing detected: \u20b9167,129.01 circulated across 3 intermediary mule accounts within 112067.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9167,129.01 at risk."
+    "explanation": "Closed circular routing detected: \u20b9167,129.01 circulated across 3 intermediary mule accounts within 112067.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9167,129.01 at risk.",
+    "fingerprint": "fp_r-100-33",
+    "amount_moved": 167129.01,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 6,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0040",
@@ -1113,7 +1347,13 @@
       "circular_flow"
     ],
     "member_count": 3,
-    "explanation": "Closed circular routing detected: \u20b9136,000.61 circulated across 2 intermediary mule accounts within 93163.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9136,000.61 at risk."
+    "explanation": "Closed circular routing detected: \u20b9136,000.61 circulated across 2 intermediary mule accounts within 93163.0 minutes, with partial cash-out of \u20b90.00 leaving \u20b9136,000.61 at risk.",
+    "fingerprint": "fp_r-100-24",
+    "amount_moved": 136000.61,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 3,
+    "n_victims": 1
   },
   {
     "alert_id": "ALT-0041",
@@ -1132,6 +1372,12 @@
       "fan_out_split"
     ],
     "member_count": 3,
-    "explanation": "Rapid pass-through hub network: \u20b947,547.02 aggregated and immediately forwarded onward with high-velocity transit times (median 50368.0 min)."
+    "explanation": "Rapid pass-through hub network: \u20b947,547.02 aggregated and immediately forwarded onward with high-velocity transit times (median 50368.0 min).",
+    "fingerprint": "fp_r-100-37",
+    "amount_moved": 47547.02,
+    "amount_cashed": 0.0,
+    "duration_min": 30.0,
+    "n_accounts": 3,
+    "n_victims": 1
   }
 ]

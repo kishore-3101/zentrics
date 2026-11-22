@@ -42,6 +42,19 @@ class MockDataStore:
             # Load alerts
             with open(FIXTURES_DIR / "alerts.json", "r", encoding="utf-8") as f:
                 self.alerts: List[Dict[str, Any]] = json.load(f)
+            for a in self.alerts:
+                if not a.get("fingerprint"):
+                    a["fingerprint"] = f"fp_{a.get('ring_id', 'unknown').lower()}"
+                if "amount_moved" not in a:
+                    a["amount_moved"] = a.get("amount_at_risk", 0.0)
+                if "amount_cashed" not in a:
+                    a["amount_cashed"] = 0.0
+                if "duration_min" not in a:
+                    a["duration_min"] = 30.0
+                if "n_accounts" not in a:
+                    a["n_accounts"] = a.get("member_count", 3)
+                if "n_victims" not in a:
+                    a["n_victims"] = 1
 
             # Load rings
             with open(FIXTURES_DIR / "rings.json", "r", encoding="utf-8") as f:
