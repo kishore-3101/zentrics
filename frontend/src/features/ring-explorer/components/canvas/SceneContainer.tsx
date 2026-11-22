@@ -1,15 +1,11 @@
 import { OrbitControls } from '@react-three/drei';
-import { Canvas, useThree } from '@react-three/fiber';
-import gsap from 'gsap';
-import { useEffect, useMemo, useRef } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { useMemo, useRef } from 'react';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import type { AccountNodeData, TransactionEdgeData } from '../../../../types/ring-graph';
-import type { GeoCityCoordinate } from '../../types/geo';
-import { resolveCityCoord } from '../../utils/geoData';
 import { AccountNode3D } from './AccountNode3D';
 import { EnvironmentBackground } from './EnvironmentBackground';
 import { FlowParticles3D } from './FlowParticles3D';
-import { GeographicSurface3D } from './GeographicSurface3D';
 import { TransactionEdge3D } from './TransactionEdge3D';
 
 interface SceneContainerProps {
@@ -17,88 +13,11 @@ interface SceneContainerProps {
   edges: TransactionEdgeData[];
   selectedNode: AccountNodeData | null;
   selectedEdge: TransactionEdgeData | null;
-  selectedCity?: GeoCityCoordinate | null;
   onSelectNode: (node: AccountNodeData) => void;
   onSelectEdge: (edge: TransactionEdgeData) => void;
-  onSelectCity?: (city: GeoCityCoordinate) => void;
   showLabels: boolean;
   activeTxnIds: Set<string>;
   speedMultiplier?: number;
-  cameraPreset?: string | null;
-}
-
-function CameraPresetHandler({
-  preset,
-  selectedNode,
-}: {
-  preset?: string | null;
-  selectedNode: AccountNodeData | null;
-}) {
-  const { camera } = useThree();
-  const controls = useThree((state) => state.controls as OrbitControlsImpl | null);
-
-  useEffect(() => {
-    if (!controls) return;
-
-    if (selectedNode) {
-      // Smoothly focus camera on selected account node
-      const [nx, ny, nz] = selectedNode.position;
-      gsap.to(camera.position, {
-        x: nx + 3.5,
-        y: ny + 4.5,
-        z: nz + 6.5,
-        duration: 1.2,
-        ease: 'power2.out',
-      });
-      gsap.to(controls.target, {
-        x: nx,
-        y: ny,
-        z: nz,
-        duration: 1.2,
-        ease: 'power2.out',
-      });
-      return;
-    }
-
-    if (!preset) return;
-
-    let targetCam = [0, 20, 24];
-    let targetLook = [0, 0, 2];
-
-    if (preset === 'south') {
-      targetCam = [1.2, 12, 14];
-      targetLook = [0.5, 1.2, 7.5];
-    } else if (preset === 'north') {
-      targetCam = [-1.5, 12, -1.5];
-      targetLook = [-1.5, 1.2, -6];
-    } else if (preset === 'mumbai') {
-      targetCam = [-4.5, 12, 7];
-      targetLook = [-5, 1.2, 1.8];
-    } else if (preset === 'kolkata') {
-      targetCam = [9.5, 12, 4];
-      targetLook = [9.0, 1.2, -1.5];
-    } else if (preset === 'dubai') {
-      targetCam = [-19, 12, 2];
-      targetLook = [-21, 1.2, -3.8];
-    }
-
-    gsap.to(camera.position, {
-      x: targetCam[0],
-      y: targetCam[1],
-      z: targetCam[2],
-      duration: 1.2,
-      ease: 'power2.out',
-    });
-    gsap.to(controls.target, {
-      x: targetLook[0],
-      y: targetLook[1],
-      z: targetLook[2],
-      duration: 1.2,
-      ease: 'power2.out',
-    });
-  }, [preset, selectedNode, camera, controls]);
-
-  return null;
 }
 
 export function SceneContainer({
@@ -106,14 +25,11 @@ export function SceneContainer({
   edges,
   selectedNode,
   selectedEdge,
-  selectedCity,
   onSelectNode,
   onSelectEdge,
-  onSelectCity,
   showLabels,
   activeTxnIds,
   speedMultiplier = 1,
-  cameraPreset,
 }: SceneContainerProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
 
@@ -122,16 +38,6 @@ export function SceneContainer({
     const map = new Map<string, [number, number, number]>();
     nodes.forEach((n) => map.set(n.account_id, n.position));
     return map;
-  }, [nodes]);
-
-  // Set of active city IDs from currently visible nodes
-  const activeCityIds = useMemo(() => {
-    const set = new Set<string>();
-    nodes.forEach((n) => {
-      const coord = resolveCityCoord(n.city_cluster, n.account_id);
-      set.add(coord.id);
-    });
-    return set;
   }, [nodes]);
 
   // Set of account IDs directly connected to the currently selected node
@@ -146,46 +52,36 @@ export function SceneContainer({
   }, [selectedNode, edges]);
 
   return (
-    <div className="relative h-full w-full select-none bg-[#030A06]">
+    <div className="relative h-full w-full select-none bg-[#07110D]">
       <Canvas
-        camera={{ position: [0, 20, 24], fov: 44 }}
+        camera={{ position: [0, 7, 24], fov: 46 }}
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: false }}
         onPointerMissed={() => {
-          // Clicking empty canvas space
+          // Clicking empty canvas space deselects
         }}
       >
-        {/* Atmosphere & Lighting */}
-        <color attach="background" args={['#030A06']} />
-        <ambientLight intensity={0.9} color="#EAFFF4" />
-        <directionalLight position={[10, 24, 12]} intensity={1.4} color="#FFFFFF" />
-        <pointLight position={[-12, 16, 6]} intensity={1.8} color="#C9A85B" distance={50} />
-        <pointLight position={[12, 14, -8]} intensity={1.4} color="#00C878" distance={45} />
+        {/* Atmosphere & Ambient Lighting */}
+        <color attach="background" args={['#07110D']} />
+        <ambientLight intensity={0.7} />
+        <directionalLight position={[10, 16, 12]} intensity={1.2} color="#00C878" />
+        <pointLight position={[-6, 10, 6]} intensity={1.6} color="#C9A85B" distance={30} />
+        <pointLight position={[6, -4, 4]} intensity={0.9} color="#2FB5A6" distance={25} />
 
-        {/* Orbit Camera Controls with Tilt Bounds */}
+        {/* Orbit Camera Controls */}
         <OrbitControls
           ref={controlsRef}
           enableDamping
           dampingFactor={0.06}
-          minDistance={5}
-          maxDistance={70}
-          maxPolarAngle={Math.PI / 2 - 0.05} // Keep camera above the geographical map ground
+          minDistance={6}
+          maxDistance={42}
+          maxPolarAngle={Math.PI / 2 + 0.15}
         />
 
-        {/* Camera Preset Handler */}
-        <CameraPresetHandler preset={cameraPreset} selectedNode={selectedNode} />
-
-        {/* Cyber Atmosphere Starfield */}
+        {/* Cyber Environment Particles & Grid from first commit */}
         <EnvironmentBackground />
 
-        {/* 3D Real Geographical Surface underneath the network */}
-        <GeographicSurface3D
-          activeCityIds={activeCityIds}
-          onSelectCity={onSelectCity}
-          selectedCityId={selectedCity?.id}
-        />
-
-        {/* 3D Curved Transaction Edges connecting geographical locations */}
+        {/* Transaction Edges */}
         {edges.map((edge) => {
           const srcPos = nodePositionMap.get(edge.src_account);
           const dstPos = nodePositionMap.get(edge.dst_account);
@@ -210,7 +106,7 @@ export function SceneContainer({
           );
         })}
 
-        {/* Moving Money Flow Particles traveling along real geographical paths */}
+        {/* Traveling Money Flow Particles */}
         <FlowParticles3D
           edges={edges}
           nodePositions={nodePositionMap}
@@ -218,7 +114,7 @@ export function SceneContainer({
           speedMultiplier={speedMultiplier}
         />
 
-        {/* Glowing 3D Account Nodes hovering above their real-world cities */}
+        {/* Account Nodes */}
         {nodes.map((node) => {
           const isSelected = selectedNode?.account_id === node.account_id;
           const isHighlighted = connectedAccountIds.has(node.account_id);

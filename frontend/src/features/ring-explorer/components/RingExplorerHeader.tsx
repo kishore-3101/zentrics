@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronDown, Network } from 'lucide-react';
+import { ArrowLeft, Box, ChevronDown, Compass, Network } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { RingStatusPill } from '../../../components/ui/RingStatusPill';
 import { RiskScoreMeter } from '../../../components/ui/RiskScoreMeter';
@@ -10,9 +10,15 @@ import { MOCK_RING_GRAPHS } from '../data/mockRingGraphData';
 
 interface RingExplorerHeaderProps {
   graph: RingGraphData;
+  viewMode: 'map' | 'canvas';
+  onViewModeChange: (mode: 'map' | 'canvas') => void;
 }
 
-export function RingExplorerHeader({ graph }: RingExplorerHeaderProps) {
+export function RingExplorerHeader({
+  graph,
+  viewMode,
+  onViewModeChange,
+}: RingExplorerHeaderProps) {
   const navigate = useNavigate();
   const availableRings = Object.keys(MOCK_RING_GRAPHS).filter((k) => k !== 'demo-ring');
 
@@ -68,8 +74,37 @@ export function RingExplorerHeader({ graph }: RingExplorerHeaderProps) {
         </div>
       </div>
 
-      {/* Risk Meter on Right */}
-      <div className="flex items-center gap-3 self-end sm:self-auto">
+      {/* Right: View Mode Slider (Maps | 3D Canvas) & Severity Meter */}
+      <div className="flex items-center gap-4 self-end sm:self-auto">
+        {/* View Mode Slider Segmented Pill */}
+        <div className="flex items-center rounded-xl border border-gold/25 bg-canvas/90 p-1 shadow-md backdrop-blur-md">
+          <button
+            type="button"
+            onClick={() => onViewModeChange('map')}
+            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+              viewMode === 'map'
+                ? 'bg-gold/25 text-gold-light border border-gold/50 shadow-sm'
+                : 'text-muted hover:text-ink border border-transparent hover:bg-gold/10'
+            }`}
+          >
+            <Compass className="size-3.5 text-gold-light" />
+            Maps
+          </button>
+          <button
+            type="button"
+            onClick={() => onViewModeChange('canvas')}
+            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+              viewMode === 'canvas'
+                ? 'bg-gold/25 text-gold-light border border-gold/50 shadow-sm'
+                : 'text-muted hover:text-ink border border-transparent hover:bg-gold/10'
+            }`}
+          >
+            <Box className="size-3.5 text-gold-light" />
+            3D Canvas
+          </button>
+        </div>
+
+        {/* Severity Meter */}
         <div className="flex flex-col items-end">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
             Aggregate Severity
@@ -80,3 +115,5 @@ export function RingExplorerHeader({ graph }: RingExplorerHeaderProps) {
     </div>
   );
 }
+
+export default RingExplorerHeader;

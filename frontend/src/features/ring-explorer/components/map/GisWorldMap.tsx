@@ -1,16 +1,12 @@
 import {
+  Box,
   Compass,
-  Layers,
-  MapPin,
-  RotateCcw,
-  Search,
   ZoomIn,
   ZoomOut,
 } from 'lucide-react';
 import {
   Map,
   Marker,
-  LngLatBounds,
   type MapLibreInstance,
   type MapLibreMarker,
   type StyleSpecification,
@@ -22,12 +18,69 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { GeoGraphData, GeoLocationNode, GeoTransactionArc } from '../../types/geo';
 import { createCurvedLineCoordinates } from '../../utils/geoData';
+import type { AccountNodeData } from '../../../../types/ring-graph';
 
-// 1. Primary Vector Style: OpenFreeMap Dark (100% Free, Zero API Key, No Tracking, Zero Watermarks)
-const OPEN_FREE_MAP_DARK_STYLE = 'https://tiles.openfreemap.org/styles/dark';
+// 1. Google Earth Hybrid: High-resolution satellite photography + labels, borders & transport networks
+export const GOOGLE_EARTH_HYBRID_STYLE: StyleSpecification = {
+  version: 8,
+  sources: {
+    'google-hybrid-base': {
+      type: 'raster',
+      tiles: [
+        'https://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',
+        'https://mt1.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',
+        'https://mt2.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',
+        'https://mt3.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',
+      ],
+      tileSize: 256,
+      attribution: '© Google Earth / Google Maps, Maxar Technologies',
+      maxzoom: 22,
+    },
+  },
+  layers: [
+    {
+      id: 'google-hybrid-layer',
+      type: 'raster',
+      source: 'google-hybrid-base',
+      minzoom: 0,
+      maxzoom: 22,
+    },
+  ],
+};
 
-// 2. Fallback Raster Style: Esri World Dark Gray Canvas (Watermark-free public basemap)
-const ESRI_DARK_GRAY_FALLBACK_STYLE: StyleSpecification = {
+// 2. Google Earth Pure Satellite: Raw photorealistic satellite photography
+export const GOOGLE_EARTH_SATELLITE_STYLE: StyleSpecification = {
+  version: 8,
+  sources: {
+    'google-sat-base': {
+      type: 'raster',
+      tiles: [
+        'https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}',
+        'https://mt1.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}',
+        'https://mt2.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}',
+        'https://mt3.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}',
+      ],
+      tileSize: 256,
+      attribution: '© Google Earth / Google Maps, Maxar Technologies',
+      maxzoom: 22,
+    },
+  },
+  layers: [
+    {
+      id: 'google-sat-layer',
+      type: 'raster',
+      source: 'google-sat-base',
+      minzoom: 0,
+      maxzoom: 22,
+    },
+  ],
+};
+
+// 3. Vector Style: OpenFreeMap Dark
+export const OPEN_FREE_MAP_DARK_STYLE = 'https://tiles.openfreemap.org/styles/dark';
+
+// 4. Fallback Raster Style: Esri World Dark Gray Canvas
+export const ESRI_DARK_GRAY_FALLBACK_STYLE: StyleSpecification = {
   version: 8,
   sources: {
     'esri-dark-base': {
@@ -64,14 +117,43 @@ const ESRI_DARK_GRAY_FALLBACK_STYLE: StyleSpecification = {
   ],
 };
 
+export type BasemapMode = 'google-hybrid' | 'google-satellite' | 'tactical-dark' | 'esri-gray';
+
+export const BASEMAP_CONFIGS: Record<BasemapMode, { name: string; style: string | StyleSpecification; label: string }> = {
+  'google-hybrid': {
+    name: 'Google Earth Hybrid',
+    style: GOOGLE_EARTH_HYBRID_STYLE,
+    label: '🛰️ Earth Hybrid',
+  },
+  'google-satellite': {
+    name: 'Google Satellite',
+    style: GOOGLE_EARTH_SATELLITE_STYLE,
+    label: '🌍 Satellite',
+  },
+  'tactical-dark': {
+    name: 'Tactical Dark',
+    style: OPEN_FREE_MAP_DARK_STYLE,
+    label: '🌑 Tactical Dark',
+  },
+  'esri-gray': {
+    name: 'Esri Dark Canvas',
+    style: ESRI_DARK_GRAY_FALLBACK_STYLE,
+    label: '🗺️ Esri Gray',
+  },
+};
+
 interface GisWorldMapProps {
   geoGraph: GeoGraphData;
   selectedCity: GeoLocationNode | null;
   selectedArc: GeoTransactionArc | null;
   activeTxnIds: Set<string>;
   reducedMotion?: boolean;
+  cameraPreset?: string | null;
+  searchQuery?: string;
+  filterRole?: 'all' | 'victim' | 'mule' | 'cash_out';
   onSelectCity: (loc: GeoLocationNode | null) => void;
   onSelectArc: (arc: GeoTransactionArc | null) => void;
+  onSelectAccount?: (acc: AccountNodeData) => void;
 }
 
 export const GisWorldMap = memo(function GisWorldMap({
@@ -80,47 +162,20 @@ export const GisWorldMap = memo(function GisWorldMap({
   selectedArc,
   activeTxnIds,
   reducedMotion = false,
+  cameraPreset,
+  searchQuery = '',
+  filterRole = 'all',
   onSelectCity,
   onSelectArc,
+  onSelectAccount,
 }: GisWorldMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreInstance | null>(null);
   const markersRef = useRef<MapLibreMarker[]>([]);
   const animFrameRef = useRef<number | null>(null);
 
-  const [currentZoom, setCurrentZoom] = useState<number>(4.4);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterRole, setFilterRole] = useState<'all' | 'victim' | 'mule' | 'cash_out'>('all');
-
-  // Progressive Zoom Level Calculation
-  const zoomLevelMeta = useMemo(() => {
-    if (currentZoom < 3.2) {
-      return {
-        level: 1,
-        name: 'Level 1 · Global View',
-        desc: 'Showing continents, international routes & cross-border hubs',
-      };
-    }
-    if (currentZoom < 5.2) {
-      return {
-        level: 2,
-        name: 'Level 2 · National / Country View',
-        desc: 'Showing country borders & national remittance corridors',
-      };
-    }
-    if (currentZoom < 7.8) {
-      return {
-        level: 3,
-        name: 'Level 3 · State & Jurisdiction View',
-        desc: 'Revealing Indian state boundaries & interstate syndicates',
-      };
-    }
-    return {
-      level: 4,
-      name: 'Level 4 · City & Account Hub View',
-      desc: 'Showing precision city coordinates & account nodes',
-    };
-  }, [currentZoom]);
+  const [basemap, setBasemap] = useState<BasemapMode>('google-hybrid');
+  const [is3dPitch, setIs3dPitch] = useState<boolean>(true);
 
   // Compute curved GeoJSON routes
   const routesGeoJson = useMemo(() => {
@@ -163,90 +218,119 @@ export const GisWorldMap = memo(function GisWorldMap({
   const routesGeoJsonRef = useRef(routesGeoJson);
   routesGeoJsonRef.current = routesGeoJson;
 
-  // 1. Initialize MapLibre GL Map
+  // Setup routes source & layers helper
+  const setupRouteLayers = useCallback((map: MapLibreInstance) => {
+    if (!map.getSource('routes-source')) {
+      map.addSource('routes-source', {
+        type: 'geojson',
+        data: routesGeoJsonRef.current,
+      });
+    }
+
+    // Layer 1: Dark Casing for high contrast over satellite landmasses and oceans
+    if (!map.getLayer('routes-casing')) {
+      map.addLayer({
+        id: 'routes-casing',
+        type: 'line',
+        source: 'routes-source',
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: {
+          'line-color': '#020604',
+          'line-width': 5.5,
+          'line-opacity': 0.95,
+        },
+      });
+    }
+
+    // Layer 2: Glowing Translucent Glow under routes
+    if (!map.getLayer('routes-glow')) {
+      map.addLayer({
+        id: 'routes-glow',
+        type: 'line',
+        source: 'routes-source',
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: {
+          'line-color': ['get', 'color'],
+          'line-width': 9,
+          'line-opacity': 0.55,
+          'line-blur': 3.5,
+        },
+      });
+    }
+
+    // Layer 3: Sharp Main Transaction Core Line
+    if (!map.getLayer('routes-core')) {
+      map.addLayer({
+        id: 'routes-core',
+        type: 'line',
+        source: 'routes-source',
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: {
+          'line-color': ['get', 'color'],
+          'line-width': [
+            'case',
+            ['boolean', ['get', 'is_selected'], false],
+            4.2,
+            ['boolean', ['get', 'is_active'], false],
+            3.4,
+            2.2,
+          ],
+          'line-opacity': [
+            'case',
+            ['boolean', ['get', 'is_active'], false],
+            1.0,
+            0.85,
+          ],
+        },
+      });
+    }
+  }, []);
+
+  // Setup animated particles layer helper
+  const setupParticleLayer = useCallback((map: MapLibreInstance) => {
+    if (!map.getSource('particle-source')) {
+      map.addSource('particle-source', {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] },
+      });
+    }
+
+    if (!map.getLayer('particle-layer')) {
+      map.addLayer({
+        id: 'particle-layer',
+        type: 'circle',
+        source: 'particle-source',
+        paint: {
+          'circle-radius': 4.0,
+          'circle-color': '#FFF8D6',
+          'circle-stroke-color': ['get', 'color'],
+          'circle-stroke-width': 2.0,
+        },
+      });
+    }
+  }, []);
+
+  // 1. Initialize MapLibre GL Map with Google Earth Satellite Style & 3D oblique tilt
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
     const map = new Map({
       container: mapContainerRef.current,
-      style: OPEN_FREE_MAP_DARK_STYLE,
+      style: GOOGLE_EARTH_HYBRID_STYLE,
       center: [78.9629, 22.5937], // Centered on India
-      zoom: 4.4,
+      zoom: 4.5,
+      pitch: 48, // Authentic Google Earth 3D oblique tilt
+      bearing: -10,
       minZoom: 1.5,
-      maxZoom: 16,
+      maxZoom: 20,
       attributionControl: false,
     });
 
     mapRef.current = map;
 
-    map.on('zoom', () => {
-      setCurrentZoom(map.getZoom());
-    });
-
-    // Setup routes source & layers
-    const setupRouteLayers = () => {
-      if (!map.getSource('routes-source')) {
-        map.addSource('routes-source', {
-          type: 'geojson',
-          data: routesGeoJsonRef.current,
-        });
-
-        // Layer 1: Dark Casing for high contrast over landmasses
-        map.addLayer({
-          id: 'routes-casing',
-          type: 'line',
-          source: 'routes-source',
-          layout: { 'line-join': 'round', 'line-cap': 'round' },
-          paint: {
-            'line-color': '#030A06',
-            'line-width': 4.5,
-            'line-opacity': 0.85,
-          },
-        });
-
-        // Layer 2: Glowing Translucent Glow under routes
-        map.addLayer({
-          id: 'routes-glow',
-          type: 'line',
-          source: 'routes-source',
-          layout: { 'line-join': 'round', 'line-cap': 'round' },
-          paint: {
-            'line-color': ['get', 'color'],
-            'line-width': 7,
-            'line-opacity': 0.35,
-            'line-blur': 2,
-          },
-        });
-
-        // Layer 3: Sharp Main Transaction Core Line
-        map.addLayer({
-          id: 'routes-core',
-          type: 'line',
-          source: 'routes-source',
-          layout: { 'line-join': 'round', 'line-cap': 'round' },
-          paint: {
-            'line-color': ['get', 'color'],
-            'line-width': [
-              'case',
-              ['boolean', ['get', 'is_selected'], false],
-              3.5,
-              ['boolean', ['get', 'is_active'], false],
-              2.8,
-              1.8,
-            ],
-            'line-opacity': [
-              'case',
-              ['boolean', ['get', 'is_active'], false],
-              1.0,
-              0.75,
-            ],
-          },
-        });
-      }
-    };
-
     map.on('load', () => {
-      setupRouteLayers();
+      setupRouteLayers(map);
+      setupParticleLayer(map);
 
       // Click on route to inspect transaction
       map.on('click', 'routes-core', (e: MapLayerMouseEvent) => {
@@ -278,14 +362,15 @@ export const GisWorldMap = memo(function GisWorldMap({
       });
     });
 
-    // Fallback handler if primary style fails
+    // Fallback handler if satellite style encounters network restrictions
     map.on('error', (e) => {
       if (!map.isStyleLoaded() && e.error) {
-        console.warn('Switching to watermark-free Esri Dark Gray fallback style');
+        console.warn('Satellite style unreachable, falling back to Esri Dark Canvas');
         try {
           map.setStyle(ESRI_DARK_GRAY_FALLBACK_STYLE);
           map.once('style.load', () => {
-            setupRouteLayers();
+            setupRouteLayers(map);
+            setupParticleLayer(map);
           });
         } catch {}
       }
@@ -295,7 +380,109 @@ export const GisWorldMap = memo(function GisWorldMap({
       map.remove();
       mapRef.current = null;
     };
+  }, [geoGraph, onSelectArc, onSelectCity, setupRouteLayers, setupParticleLayer]);
+
+  // Handle Basemap Switch
+  const handleSelectBasemap = useCallback(
+    (mode: BasemapMode) => {
+      setBasemap(mode);
+      const map = mapRef.current;
+      if (!map) return;
+      const config = BASEMAP_CONFIGS[mode];
+      map.setStyle(config.style);
+      map.once('style.load', () => {
+        setupRouteLayers(map);
+        setupParticleLayer(map);
+      });
+    },
+    [setupRouteLayers, setupParticleLayer],
+  );
+
+  // Toggle 3D Tilt Orbit
+  const toggle3dPitch = useCallback(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const nextPitch = !is3dPitch;
+    setIs3dPitch(nextPitch);
+    map.easeTo({
+      pitch: nextPitch ? 52 : 0,
+      bearing: nextPitch ? -15 : 0,
+      duration: 1000,
+    });
+  }, [is3dPitch]);
+
+  // Reset North Orientation
+  const handleResetNorth = useCallback(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    map.easeTo({
+      bearing: 0,
+      duration: 800,
+    });
   }, []);
+
+  // Sync Camera Presets (e.g. from Corridor Quick Jumps)
+  useEffect(() => {
+    if (!cameraPreset || !mapRef.current) return;
+    const map = mapRef.current;
+
+    switch (cameraPreset) {
+      case 'overview':
+        map.flyTo({
+          center: [78.9629, 22.5937],
+          zoom: 4.5,
+          pitch: 48,
+          bearing: 0,
+          duration: 1400,
+        });
+        break;
+      case 'south':
+        map.flyTo({
+          center: [78.9, 13.0],
+          zoom: 6.8,
+          pitch: 52,
+          bearing: 18,
+          duration: 1600,
+        });
+        break;
+      case 'mumbai':
+        map.flyTo({
+          center: [73.3, 18.8],
+          zoom: 7.5,
+          pitch: 55,
+          bearing: -22,
+          duration: 1600,
+        });
+        break;
+      case 'kolkata':
+        map.flyTo({
+          center: [88.3639, 22.5726],
+          zoom: 7.6,
+          pitch: 50,
+          bearing: 15,
+          duration: 1600,
+        });
+        break;
+      case 'north':
+        map.flyTo({
+          center: [76.5, 27.7],
+          zoom: 6.5,
+          pitch: 48,
+          bearing: -12,
+          duration: 1600,
+        });
+        break;
+      case 'dubai':
+        map.flyTo({
+          center: [55.2708, 25.2048],
+          zoom: 6.2,
+          pitch: 50,
+          bearing: -30,
+          duration: 1800,
+        });
+        break;
+    }
+  }, [cameraPreset]);
 
   // 2. Update routes source when geoGraph, activeTxnIds or selection changes
   useEffect(() => {
@@ -465,181 +652,91 @@ export const GisWorldMap = memo(function GisWorldMap({
     };
   }, [geoGraph, reducedMotion]);
 
-  // Fit bounds to show all ring hubs
-  const handleFitAll = useCallback(() => {
-    const map = mapRef.current;
-    if (!map || geoGraph.locations.length === 0) return;
-
-    const bounds = new LngLatBounds();
-    geoGraph.locations.forEach((loc) => bounds.extend([loc.lon, loc.lat]));
-
-    map.fitBounds(bounds, {
-      padding: { top: 70, bottom: 80, left: 60, right: 60 },
-      maxZoom: 8,
-      duration: 1200,
-    });
-  }, [geoGraph]);
-
-  // Reset to India Overview
-  const handleResetIndia = useCallback(() => {
-    mapRef.current?.flyTo({
-      center: [78.9629, 22.5937],
-      zoom: 4.4,
-      duration: 1000,
-    });
-  }, []);
-
-  // Zoom to Global View
-  const handleGlobalView = useCallback(() => {
-    mapRef.current?.flyTo({
-      center: [68.0, 20.0],
-      zoom: 2.2,
-      duration: 1200,
-    });
-  }, []);
-
-  // Search input handler
-  const handleSearch = (q: string) => {
-    setSearchQuery(q);
-    if (!q.trim()) return;
-    const term = q.toLowerCase().trim();
+  // Search and fly to matching city or account when searchQuery changes
+  useEffect(() => {
+    if (!searchQuery || !searchQuery.trim() || !mapRef.current) return;
+    const term = searchQuery.toLowerCase().trim();
     const match = geoGraph.locations.find(
       (l) =>
         l.city.toLowerCase().includes(term) ||
         l.accounts.some((a) => a.account_id.toLowerCase().includes(term)),
     );
-    if (match && mapRef.current) {
+    if (match) {
       onSelectCity(match);
+      const matchedAccount = match.accounts.find((a) =>
+        a.account_id.toLowerCase().includes(term),
+      );
+      if (matchedAccount && onSelectAccount) {
+        onSelectAccount(matchedAccount);
+      }
       mapRef.current.flyTo({
         center: [match.lon, match.lat],
         zoom: 7.8,
         duration: 1200,
       });
     }
-  };
+  }, [searchQuery, geoGraph, onSelectCity, onSelectAccount]);
 
   return (
     <div className="relative size-full overflow-hidden bg-[#07110D] select-none">
       {/* 1. Primary MapLibre Container */}
       <div ref={mapContainerRef} className="size-full" />
 
-      {/* 2. Top-Center Progressive Zoom Level Indicator */}
-      <div className="pointer-events-none absolute left-1/2 top-4 -translate-x-1/2 z-20">
-        <div className="flex items-center gap-2 rounded-xl border border-gold/30 bg-[#0B1812]/90 px-3.5 py-1.5 shadow-panel backdrop-blur-md">
-          <Layers className="size-3.5 text-gold-light" />
-          <div className="flex flex-col items-center">
-            <span className="font-mono text-xs font-bold text-gold-light tracking-wide">
-              {zoomLevelMeta.name}
-            </span>
-            <span className="text-[10px] text-muted hidden sm:inline">
-              {zoomLevelMeta.desc}
-            </span>
-          </div>
-        </div>
+      {/* 2. Sleek Basemap Switcher: Satellite vs Dark (Bottom-Left) */}
+      <div className="absolute bottom-20 left-4 z-20 hidden sm:flex items-center rounded-xl border border-gold/30 bg-[#0B1812]/95 p-1 shadow-md backdrop-blur-md">
+        <button
+          type="button"
+          onClick={() => handleSelectBasemap('google-hybrid')}
+          className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
+            basemap === 'google-hybrid'
+              ? 'border border-gold/60 bg-gold/25 text-gold-light shadow-[0_0_8px_rgba(201,168,91,0.3)]'
+              : 'border border-transparent text-muted hover:text-ink'
+          }`}
+        >
+          🛰️ Satellite
+        </button>
+        <button
+          type="button"
+          onClick={() => handleSelectBasemap('tactical-dark')}
+          className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
+            basemap === 'tactical-dark'
+              ? 'border border-gold/60 bg-gold/25 text-gold-light shadow-[0_0_8px_rgba(201,168,91,0.3)]'
+              : 'border border-transparent text-muted hover:text-ink'
+          }`}
+        >
+          🌑 Dark Canvas
+        </button>
       </div>
 
-      {/* 3. Top-Left Tactical Search & Preset Navigation Bar */}
-      <div className="absolute left-4 top-4 z-20 flex flex-col gap-2 max-w-sm">
-        {/* Search Input */}
-        <div className="relative w-64">
-          <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
-            placeholder="Search city or account (e.g. Delhi, ACC-9481)..."
-            className="h-8 w-full rounded-xl border border-gold/25 bg-[#0B1812]/90 pl-8 pr-7 text-xs text-ink placeholder:text-muted/60 focus:border-gold/60 focus:outline-none backdrop-blur-md shadow-md"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => handleSearch('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-muted hover:text-ink"
-            >
-              ✕
-            </button>
-          )}
-        </div>
-
-        {/* Quick View Presets & Role Filters */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <button
-            type="button"
-            onClick={handleGlobalView}
-            className="inline-flex items-center gap-1 rounded-lg border border-gold/20 bg-[#0B1812]/80 px-2.5 py-1 text-[11px] font-medium text-muted hover:border-gold/40 hover:text-gold-light transition-colors backdrop-blur-xs shadow-sm"
-          >
-            <Compass className="size-3" />
-            Global
-          </button>
-          <button
-            type="button"
-            onClick={handleResetIndia}
-            className="inline-flex items-center gap-1 rounded-lg border border-gold/20 bg-[#0B1812]/80 px-2.5 py-1 text-[11px] font-medium text-muted hover:border-gold/40 hover:text-gold-light transition-colors backdrop-blur-xs shadow-sm"
-          >
-            <MapPin className="size-3 text-emerald" />
-            India
-          </button>
-          <button
-            type="button"
-            onClick={handleFitAll}
-            className="inline-flex items-center gap-1 rounded-lg border border-gold/30 bg-gold/10 px-2.5 py-1 text-[11px] font-medium text-gold-light hover:bg-gold/20 transition-colors backdrop-blur-xs shadow-sm"
-          >
-            <RotateCcw className="size-3" />
-            Fit Ring Hubs
-          </button>
-        </div>
-
-        {/* Entity Role Filter Pill Bar */}
-        <div className="flex items-center gap-1">
-          {(
-            [
-              { key: 'all', label: 'All Roles' },
-              { key: 'victim', label: 'Victims' },
-              { key: 'mule', label: 'Mules' },
-              { key: 'cash_out', label: 'Sinks' },
-            ] as const
-          ).map((item) => (
-            <button
-              key={item.key}
-              type="button"
-              onClick={() => setFilterRole(item.key)}
-              className={`rounded-md border px-2 py-0.5 text-[10px] font-medium transition-colors backdrop-blur-xs ${
-                filterRole === item.key
-                  ? 'border-gold bg-gold/20 text-gold-light font-semibold'
-                  : 'border-gold/15 bg-[#0B1812]/70 text-muted hover:text-ink'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 4. Top-Right Route & Entity Legend */}
-      <div className="absolute right-4 top-4 z-20 hidden md:flex flex-col gap-1.5 rounded-xl border border-gold/20 bg-[#0B1812]/90 p-3 text-xs shadow-panel backdrop-blur-md">
-        <span className="text-[10px] uppercase font-bold tracking-wider text-gold-light border-b border-gold/15 pb-1">
-          GIS Entity & Route Legend
-        </span>
-        <div className="flex items-center gap-2 text-[11px]">
-          <span className="size-2 rounded-full bg-emerald shadow-[0_0_8px_#00C878]" />
-          <span className="text-ink/90">Victims & Inflows</span>
-        </div>
-        <div className="flex items-center gap-2 text-[11px]">
-          <span className="size-2 rounded-full bg-gold-light shadow-[0_0_8px_#C9A85B]" />
-          <span className="text-ink/90">Collectors & Mule Conduit</span>
-        </div>
-        <div className="flex items-center gap-2 text-[11px]">
-          <span className="size-2 rounded-full bg-danger shadow-[0_0_8px_#EF4444]" />
-          <span className="text-ink/90">Cash-Out Terminals (Sinks)</span>
-        </div>
-        <div className="flex items-center gap-2 text-[11px] pt-0.5 border-t border-gold/10 text-muted">
-          <span className="size-1.5 rounded-full bg-[#FFF8D6]" />
-          <span>Moving Flow Particles</span>
-        </div>
-      </div>
-
-      {/* 5. Bottom-Right Interactive Zoom Control Buttons */}
+      {/* 3. Navigation Controls: 3D Tilt, Compass North, Zoom (Bottom-Right) */}
       <div className="absolute bottom-20 right-4 z-20 flex flex-col gap-1.5">
+        {/* 3D Tilt Orbit Toggle */}
+        <button
+          type="button"
+          onClick={toggle3dPitch}
+          aria-label={is3dPitch ? 'Switch to 2D Top-Down' : 'Switch to 3D Orbit'}
+          title={is3dPitch ? '3D Orbit Active (Click for 2D)' : '2D Top-Down Active (Click for 3D)'}
+          className={`grid size-8 place-items-center rounded-lg border text-xs font-bold transition-colors shadow-md backdrop-blur-md ${
+            is3dPitch
+              ? 'border-gold/60 bg-gold/20 text-gold-light'
+              : 'border-gold/25 bg-[#0B1812]/90 text-muted hover:text-ink'
+          }`}
+        >
+          <Box className="size-4" />
+        </button>
+
+        {/* Compass Reset North */}
+        <button
+          type="button"
+          onClick={handleResetNorth}
+          aria-label="Reset North"
+          title="Reset North Orientation"
+          className="grid size-8 place-items-center rounded-lg border border-gold/25 bg-[#0B1812]/90 text-gold-light hover:border-gold/60 hover:bg-gold/15 transition-colors shadow-md backdrop-blur-md"
+        >
+          <Compass className="size-4" />
+        </button>
+
+        {/* Zoom In */}
         <button
           type="button"
           onClick={() => mapRef.current?.zoomIn()}
@@ -648,6 +745,8 @@ export const GisWorldMap = memo(function GisWorldMap({
         >
           <ZoomIn className="size-4" />
         </button>
+
+        {/* Zoom Out */}
         <button
           type="button"
           onClick={() => mapRef.current?.zoomOut()}
@@ -658,11 +757,11 @@ export const GisWorldMap = memo(function GisWorldMap({
         </button>
       </div>
 
-      {/* 6. Bottom-Left Synthetic Geospatial Disclaimer */}
-      <div className="absolute bottom-20 left-4 z-20 pointer-events-none hidden sm:block max-w-md">
-        <div className="rounded-lg border border-gold/20 bg-[#0B1812]/85 px-3 py-1.5 text-[10px] text-muted backdrop-blur-md">
-          <span className="text-gold-light font-semibold">GIS PROVENANCE: </span>
-          Synthetic demo coordinates projected from account cluster metadata ({geoGraph.locations.length} active hubs).
+      {/* 4. Bottom-Left Photorealistic Earth Engine Disclaimer */}
+      <div className="absolute bottom-4 left-4 z-20 pointer-events-none hidden md:block max-w-lg">
+        <div className="rounded-lg border border-gold/20 bg-[#0B1812]/90 px-3 py-1 text-[10px] text-muted backdrop-blur-md">
+          <span className="text-gold-light font-semibold">GOOGLE EARTH SATELLITE ENGINE: </span>
+          High-resolution satellite terrain imagery synchronized with active mule ring corridors ({geoGraph.locations.length} regional hubs).
         </div>
       </div>
     </div>

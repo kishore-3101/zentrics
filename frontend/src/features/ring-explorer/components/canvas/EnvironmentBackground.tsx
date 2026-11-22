@@ -2,20 +2,20 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 
 export function EnvironmentBackground() {
-  // Generate random ambient star particles in deep space
-  const particleCount = 280;
+  // Generate random ambient star particles
+  const particleCount = 200;
   const [positions, colors] = useMemo(() => {
     const pos = new Float32Array(particleCount * 3);
     const col = new Float32Array(particleCount * 3);
 
     const emerald = new THREE.Color('#00C878');
     const gold = new THREE.Color('#C9A85B');
-    const darkMuted = new THREE.Color('#0E2E20');
+    const darkMuted = new THREE.Color('#10251B');
 
     for (let i = 0; i < particleCount; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 90;
-      pos[i * 3 + 1] = 6 + Math.random() * 32; // Floating above the map in 3D atmosphere
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 70;
+      pos[i * 3] = (Math.random() - 0.5) * 60;
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 40;
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 60;
 
       const mixed = Math.random() > 0.6 ? emerald : Math.random() > 0.3 ? gold : darkMuted;
       col[i * 3] = mixed.r;
@@ -27,7 +27,7 @@ export function EnvironmentBackground() {
 
   return (
     <group>
-      {/* Subtle atmospheric depth starfield */}
+      {/* Subtle depth starfield */}
       <points>
         <bufferGeometry>
           <bufferAttribute
@@ -40,13 +40,21 @@ export function EnvironmentBackground() {
           />
         </bufferGeometry>
         <pointsMaterial
-          size={0.16}
+          size={0.12}
           vertexColors
           transparent
-          opacity={0.45}
+          opacity={0.35}
           sizeAttenuation
         />
       </points>
+
+      {/* Cybernetic grid plane below nodes */}
+      <gridHelper
+        args={[48, 24, '#C9A85B', '#10251B']}
+        position={[0, -6.5, 0]}
+      />
     </group>
   );
 }
+
+export default EnvironmentBackground;
