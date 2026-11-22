@@ -1,0 +1,35 @@
+{
+  "timestamp": "2026-11-22T12:21:37.003327",
+  "summary": {
+    "total_nodes_evaluated": 30000,
+    "total_detector_hits": 2008,
+    "total_rings_discovered": 215
+  },
+  "detectors": {
+    "detector_code": "all_detectors",
+    "total_hits": 2008,
+    "flagged_accounts": 1758,
+    "true_positives": 550,
+    "false_positives": 1208,
+    "false_negatives": 4011,
+    "true_negatives": 24231,
+    "precision": 0.3129,
+    "recall": 0.1206,
+    "f1_score": 0.1741,
+    "false_positive_rate": 0.0475
+  },
+  "rings": {
+    "total_gt_rings": 3243,
+    "total_detected_rings": 215,
+    "matched_gt_rings_count": 8,
+    "pure_detected_rings_count": 105,
+    "ring_recall": 0.0025,
+    "ring_precision": 0.4884,
+    "f1_score": 0.0049
+  },
+  "timings_ms": {
+    "construction_ms": 766,
+    "detectors_ms": 40645,
+    "clustering_ms": 221
+  }
+}
