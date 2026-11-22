@@ -12,7 +12,7 @@ import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { Header } from './Header';
 import { MobileDrawer, Sidebar } from './Sidebar';
 
-const COLLAPSE_STORAGE_KEY = 'tracemesh:sidebar-collapsed';
+const COLLAPSE_STORAGE_KEY = 'mulenet:sidebar-collapsed';
 
 function readStoredCollapsed(): boolean {
   try {
@@ -55,7 +55,7 @@ export function AppLayout() {
   }, [reducedMotion]);
 
   useEffect(() => {
-    document.title = `${getRouteMeta(pathname).title} · TraceMesh`;
+    document.title = `${getRouteMeta(pathname).title} · MuleNet`;
     scrollRef.current?.scrollTo({ top: 0 });
   }, [pathname]);
 

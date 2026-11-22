@@ -8,7 +8,7 @@ export default function NotFound() {
       icon={Compass}
       title="Page not found"
       moduleLabel="404"
-      description="This route does not exist in TraceMesh."
+      description="This route does not exist in MuleNet."
       planned={['Executive Overview', 'Alert Queue', 'Ring Explorer', 'Models & Evaluation']}
     >
       <Link

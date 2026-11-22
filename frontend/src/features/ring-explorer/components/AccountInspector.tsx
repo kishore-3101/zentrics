@@ -29,7 +29,7 @@ export function AccountInspector({ account, onClose }: AccountInspectorProps) {
         animate={{ x: 0, opacity: 1 }}
         exit={{ x: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-        className="absolute bottom-16 right-4 top-4 z-30 w-80 max-w-[90vw] overflow-y-auto rounded-2xl border border-gold/25 bg-card/90 p-5 shadow-2xl backdrop-blur-md"
+        className="absolute bottom-16 right-4 top-4 z-40 w-80 max-w-[90vw] overflow-y-auto rounded-2xl border border-gold/25 bg-card/90 p-5 shadow-2xl backdrop-blur-md"
       >
         {/* Header */}
         <div className="flex items-start justify-between border-b border-gold/15 pb-3">
