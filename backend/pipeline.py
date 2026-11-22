@@ -32,6 +32,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
+# Ensure project root is in sys.path for direct script execution
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from backend.case_linking import CaseLinkingEngine, compute_fingerprint
 from backend.db import DB, resolve_db_url
 from backend.explanation import explain_ring

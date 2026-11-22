@@ -1,0 +1,15 @@
+*   [33m11da227[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m fix: dynamic path resolved and unified db schema.
+[31m|[m[32m\[m  
+[31m|[m * [33md399cf7[m[33m ([m[1;31morigin/THE-ML-TRAINED-MODEL[m[33m, [m[1;32mTHE-ML-TRAINED-MODEL[m[33m)[m feat: track mule_detection_xgboost.pkl, resolve project-root paths, and unify database schema
+* [32m|[m [33m3b4e36e[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m feat: developed explaination engine and reason code dictionary
+* [32m|[m [33m95c9fb7[m feat: implement streaming simulation engine and ring injector
+* [32m|[m [33m9760178[m feat: integrated real api and implemented pipeline runner
+* [32m|[m [33me40ae84[m feat(ml): merge trained ML model, feature engineering pipeline, and rule detectors
+[33m|[m[32m\[m[32m|[m 
+[33m|[m * [33mfc92802[m Add Mule Account Ring Detection ML model
+* [34m|[m [33m80316fe[m feat: implement dataset loader, validation engine and toy data
+* [34m|[m   [33mac427ef[m Merge pull request #2 from kishore-3101/feat/frontend-dashboard
+[34m|[m[36m\[m [34m\[m  
+[34m|[m [36m|[m[34m/[m  
+[34m|[m[34m/[m[36m|[m   
+[34m|[m * [33ma5dcdf0[m[33m ([m[1;31morigin/feat/frontend-dashboard[m[33m)[m UI changes
