@@ -3,8 +3,9 @@ import type { RingTypology } from '../../../types/ring';
 
 /**
  * Deterministic 3D Graph Layout Engine.
- * Computes 3D coordinates [x, y, z] for accounts while strictly preserving
- * all underlying transaction topology and cycle paths.
+ * Arranges nodes along a clean isometric forensic perspective plane matching the
+ * TraceMesh command center design:
+ * Inflow Victims (Left) -> Collectors (Mid-Left) -> Layering Mules (Mid-Right) -> Cash-Out Sinks (Right)
  */
 
 export function computeGraphLayout(
@@ -31,35 +32,35 @@ function computeCyclicLayout(rawNodes: Omit<AccountNodeData, 'position'>[]): Acc
   const cashOutNodes = rawNodes.filter((n) => n.role === 'cash_out');
 
   const positionedNodes: AccountNodeData[] = [];
-  const cycleRadius = 6.5;
+  const cycleRadius = 6.0;
   const cycleCount = Math.max(cycleNodes.length, 1);
 
-  // Position cyclic nodes in an X-Z circular loop
+  // Position cyclic nodes in an X-Z circular loop near Y = 0
   cycleNodes.forEach((node, i) => {
     const angle = (i / cycleCount) * Math.PI * 2;
-    const x = Math.cos(angle) * cycleRadius;
+    const x = Math.cos(angle) * cycleRadius + 2.0;
     const z = Math.sin(angle) * cycleRadius;
-    const y = Math.sin(angle * 2) * 1.2; // subtle wave for depth
+    const y = 0.5 + Math.sin(angle * 2) * 0.8;
     positionedNodes.push({ ...node, position: [x, y, z] });
   });
 
-  // Position victim feeder nodes to the left/exterior
+  // Position victim feeder nodes to the left
   victimNodes.forEach((node, i) => {
-    const angle = Math.PI + ((i - (victimNodes.length - 1) / 2) * 0.5);
-    const radius = 10.5;
-    const x = Math.cos(angle) * radius - 2;
-    const z = Math.sin(angle) * radius;
-    const y = ((i % 3) - 1) * 2;
+    const count = victimNodes.length;
+    const offset = i - (count - 1) / 2;
+    const x = -10.0 + (i % 2 === 0 ? -1.0 : 1.0);
+    const y = 0.5 + offset * 1.5;
+    const z = ((i % 4) - 1.5) * 2.5;
     positionedNodes.push({ ...node, position: [x, y, z] });
   });
 
-  // Position cash-out sinks to the right/exterior
+  // Position cash-out sinks to the right
   cashOutNodes.forEach((node, i) => {
-    const angle = ((i - (cashOutNodes.length - 1) / 2) * 0.5);
-    const radius = 10.5;
-    const x = Math.cos(angle) * radius + 2;
-    const z = Math.sin(angle) * radius;
-    const y = ((i % 3) - 1) * 2;
+    const count = cashOutNodes.length;
+    const offset = i - (count - 1) / 2;
+    const x = 11.5;
+    const y = 0.5 + offset * 2.0;
+    const z = ((i % 3) - 1) * 2.0;
     positionedNodes.push({ ...node, position: [x, y, z] });
   });
 
@@ -67,7 +68,9 @@ function computeCyclicLayout(rawNodes: Omit<AccountNodeData, 'position'>[]): Acc
 }
 
 /**
- * Hierarchical tiered layout for Fan-in, Layering Chain, Rapid Pass-Through, and Dormant Activation.
+ * Hierarchical tiered layout matching the reference screenshot:
+ * Victims clustered in columns on the left, collectors in diamond focal points,
+ * mules in orbital planetary rings, and cash-out in a solid red terminal box on the right.
  */
 function computeTieredFlowLayout(rawNodes: Omit<AccountNodeData, 'position'>[]): AccountNodeData[] {
   const byRole: Record<AccountRole, Omit<AccountNodeData, 'position'>[]> = {
@@ -83,39 +86,55 @@ function computeTieredFlowLayout(rawNodes: Omit<AccountNodeData, 'position'>[]):
 
   const positionedNodes: AccountNodeData[] = [];
 
-  // Helper to space nodes evenly in a vertical/depth fan
-  const layoutTier = (
-    nodes: Omit<AccountNodeData, 'position'>[],
-    baseX: number,
-    spreadY: number,
-    spreadZ: number,
-  ) => {
-    const count = nodes.length;
-    nodes.forEach((node, idx) => {
-      // Centered index around 0
-      const offset = idx - (count - 1) / 2;
-      const x = baseX + (Math.sin(idx) * 0.8);
-      const y = offset * spreadY;
-      const z = Math.sin(offset * 1.1) * spreadZ;
-      positionedNodes.push({ ...node, position: [x, y, z] });
-    });
-  };
+  // 1. Victims: Clustered on Left in columns (X: -10 to -7)
+  const victims = byRole.victim;
+  const victimCount = victims.length;
+  victims.forEach((node, idx) => {
+    // 3 subtle staggered sub-columns
+    const col = idx % 3;
+    const row = Math.floor(idx / 3);
+    const rowsTotal = Math.ceil(victimCount / 3);
+    const rowOffset = row - (rowsTotal - 1) / 2;
 
-  // 1. Victims: Left boundary (X: -10)
-  const victimSpreadY = Math.min(2.2, 12 / Math.max(byRole.victim.length, 1));
-  layoutTier(byRole.victim, -9.5, victimSpreadY, 4.5);
+    const x = -11.0 + col * 2.2 + (Math.sin(idx * 1.7) * 0.4);
+    const y = 0.6 + rowOffset * 1.6;
+    const z = (col - 1) * 2.2 + (Math.cos(idx * 1.2) * 0.8);
 
-  // 2. Collectors: Aggregation focal hub (X: -3)
-  const collectorSpreadY = Math.min(3.5, 8 / Math.max(byRole.collector.length, 1));
-  layoutTier(byRole.collector, -2.5, collectorSpreadY, 3.0);
+    positionedNodes.push({ ...node, position: [x, y, z] });
+  });
 
-  // 3. Mules: Layering intermediaries (X: 3.5)
-  const muleSpreadY = Math.min(3.0, 10 / Math.max(byRole.mule.length, 1));
-  layoutTier(byRole.mule, 4.0, muleSpreadY, 3.8);
+  // 2. Collectors: Aggregation focal hub (X: -2.5)
+  const collectors = byRole.collector;
+  const colCount = collectors.length;
+  collectors.forEach((node, idx) => {
+    const offset = idx - (colCount - 1) / 2;
+    const x = -2.5;
+    const y = 0.6 + offset * 2.6;
+    const z = Math.sin(offset * 1.5) * 1.8;
+    positionedNodes.push({ ...node, position: [x, y, z] });
+  });
 
-  // 4. Cash-out sinks: Terminal right boundary (X: 10)
-  const cashOutSpreadY = Math.min(3.5, 8 / Math.max(byRole.cash_out.length, 1));
-  layoutTier(byRole.cash_out, 10.0, cashOutSpreadY, 3.0);
+  // 3. Mules: Layering intermediaries (X: 3.8 to 4.5)
+  const mules = byRole.mule;
+  const muleCount = mules.length;
+  mules.forEach((node, idx) => {
+    const offset = idx - (muleCount - 1) / 2;
+    const x = 3.8 + (idx % 2 === 0 ? 0.8 : -0.5);
+    const y = 0.6 + offset * 2.4;
+    const z = (idx % 2 === 0 ? 1.5 : -1.5);
+    positionedNodes.push({ ...node, position: [x, y, z] });
+  });
+
+  // 4. Cash-out sinks: Terminal right boundary (X: 9.8)
+  const cashOuts = byRole.cash_out;
+  const cashCount = cashOuts.length;
+  cashOuts.forEach((node, idx) => {
+    const offset = idx - (cashCount - 1) / 2;
+    const x = 9.8;
+    const y = 0.6 + offset * 2.8;
+    const z = 0;
+    positionedNodes.push({ ...node, position: [x, y, z] });
+  });
 
   return positionedNodes;
 }

@@ -653,3 +653,21 @@ export const MOCK_RING_GRAPHS: Record<string, RingGraphData> = {
 
 // Aliases and fallback support
 MOCK_RING_GRAPHS['demo-ring'] = MOCK_RING_GRAPHS['R-104'];
+
+// Merge all 191 generated benchmark candidate rings (RING_0001 to RING_0191)
+import generatedRings from './generatedRingsData.json';
+Object.keys(generatedRings).forEach((key) => {
+  if (!MOCK_RING_GRAPHS[key]) {
+    // Cast and bind dynamically
+    const rawRing = (generatedRings as Record<string, any>)[key];
+    MOCK_RING_GRAPHS[key] = {
+      ...rawRing,
+      // Ensure layout positioning is valid
+      nodes: computeGraphLayout(rawRing.nodes || [], rawRing.edges || [], rawRing.ring_type),
+      edges: (rawRing.edges || []).map((e: any) => ({
+        ...e,
+        ts: e.timestamp || e.ts || '2026-08-20T10:00:00Z',
+      })),
+    };
+  }
+});

@@ -48,11 +48,21 @@ export function EnvironmentBackground() {
         />
       </points>
 
-      {/* Cybernetic grid plane below nodes */}
+      {/* Primary Cybernetic Forensic Grid Floor */}
       <gridHelper
-        args={[48, 24, '#C9A85B', '#10251B']}
-        position={[0, -6.5, 0]}
+        args={[44, 28, '#C9A85B', '#112D22']}
+        position={[0, -3.2, 0]}
       />
+
+      {/* Axis separator lines (gold centerline) */}
+      <mesh position={[0, -3.18, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[0.08, 30]} />
+        <meshBasicMaterial color="#C9A85B" transparent opacity={0.65} />
+      </mesh>
+      <mesh position={[0, -3.18, 0]} rotation={[-Math.PI / 2, 0, Math.PI / 2]}>
+        <planeGeometry args={[0.08, 44]} />
+        <meshBasicMaterial color="#C9A85B" transparent opacity={0.65} />
+      </mesh>
     </group>
   );
 }

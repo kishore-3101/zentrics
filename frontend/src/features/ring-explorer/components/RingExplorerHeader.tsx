@@ -6,14 +6,15 @@ import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { TypologyBadge } from '../../../components/ui/TypologyBadge';
 import type { RingGraphData } from '../../../types/ring-graph';
 
+import { MOCK_RING_GRAPHS } from '../data/mockRingGraphData';
+
 interface RingExplorerHeaderProps {
   graph: RingGraphData;
 }
 
-const AVAILABLE_RINGS = ['R-104', 'R-089', 'R-097'];
-
 export function RingExplorerHeader({ graph }: RingExplorerHeaderProps) {
   const navigate = useNavigate();
+  const availableRings = Object.keys(MOCK_RING_GRAPHS).filter((k) => k !== 'demo-ring');
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-gold/15 pb-4">
@@ -41,9 +42,9 @@ export function RingExplorerHeader({ graph }: RingExplorerHeaderProps) {
               <select
                 value={graph.ring_id}
                 onChange={(e) => navigate(`/rings/${e.target.value}`)}
-                className="appearance-none rounded-lg border border-gold/25 bg-canvas/80 py-0.5 pl-2 pr-6 font-mono text-xs font-semibold text-gold-light focus:border-gold focus:outline-none cursor-pointer"
+                className="appearance-none rounded-lg border border-gold/25 bg-canvas/80 py-0.5 pl-2 pr-6 font-mono text-xs font-semibold text-gold-light focus:border-gold focus:outline-none cursor-pointer max-w-[140px]"
               >
-                {AVAILABLE_RINGS.map((rid) => (
+                {availableRings.map((rid) => (
                   <option key={rid} value={rid}>
                     {rid}
                   </option>
