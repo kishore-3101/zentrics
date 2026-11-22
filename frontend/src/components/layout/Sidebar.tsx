@@ -41,7 +41,15 @@ function NavLinkItem({ item, active, collapsed, onNavigate }: NavLinkItemProps) 
             transition={{ type: 'spring', stiffness: 380, damping: 34 }}
             className="absolute inset-0 rounded-xl border border-gold/25 bg-linear-to-r from-emerald/12 via-gold/8 to-transparent"
           >
-            <span className="absolute inset-y-2.5 left-0 w-0.5 rounded-full bg-gold-light shadow-glow-gold" />
+            {/* Active accent border: covers full height on the left and curves around the top & bottom corners */}
+            <span
+              className="pointer-events-none absolute inset-0 rounded-xl border-2 border-transparent border-l-gold-light border-t-gold-light border-b-gold-light shadow-[0_0_12px_rgba(201,168,91,0.45)]"
+              style={{
+                WebkitMaskImage: 'linear-gradient(to right, black 0%, black 24px, transparent 64px)',
+                maskImage: 'linear-gradient(to right, black 0%, black 24px, transparent 64px)',
+              }}
+              aria-hidden
+            />
           </motion.span>
         ) : (
           <span className="absolute inset-0 rounded-xl bg-white/0 transition-colors duration-200 group-hover:bg-white/4" />
@@ -86,7 +94,7 @@ function SidebarBody({ collapsed, onNavigate, onClose, onToggleCollapsed }: Side
           collapsed ? 'justify-center' : 'justify-between',
         )}
       >
-        <Link to="/overview" onClick={onNavigate} aria-label="TraceMesh home" className="rounded-lg">
+        <Link to="/overview" onClick={onNavigate} aria-label="MuleNet home" className="rounded-lg">
           <BrandLockup compact={collapsed} />
         </Link>
         {onClose && (

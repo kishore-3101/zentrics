@@ -1,121 +1,75 @@
-import type { AccountNodeData, AccountRole, TransactionEdgeData } from '../../../types/ring-graph';
+import type { AccountNodeData, TransactionEdgeData } from '../../../types/ring-graph';
 import type { RingTypology } from '../../../types/ring';
+import { resolveCityCoord } from './geoData';
+import { geoTo3D } from './geo3DData';
 
 /**
- * Deterministic 3D Graph Layout Engine.
- * Computes 3D coordinates [x, y, z] for accounts while strictly preserving
- * all underlying transaction topology and cycle paths.
+ * 3D Geographic Network Layout Engine.
+ * Positions each account node directly above its real-world geographical
+ * city coordinates (latitude & longitude) on the 3D map surface, applying
+ * subtle orbital cluster dispersion so co-located accounts are individually
+ * visible, clickable, and inspectable in 3D space.
  */
-
 export function computeGraphLayout(
   rawNodes: Omit<AccountNodeData, 'position'>[],
   _edges: TransactionEdgeData[],
-  ringType: RingTypology,
+  _ringType?: RingTypology,
 ): AccountNodeData[] {
-  // If Structural Cycle, arrange cycle nodes in a distinct ring orbit
-  if (ringType === 'structural_cycle') {
-    return computeCyclicLayout(rawNodes);
-  }
-
-  // Tiered Flow Layout (Inflow -> Aggregation -> Layering -> Outflow)
-  return computeTieredFlowLayout(rawNodes);
-}
-
-/**
- * Arranges cyclic graph nodes in an open 3D circle/cylinder so cyclic edges
- * loop visibly back around without edge crossing.
- */
-function computeCyclicLayout(rawNodes: Omit<AccountNodeData, 'position'>[]): AccountNodeData[] {
-  const cycleNodes = rawNodes.filter((n) => n.role === 'mule' || n.role === 'collector');
-  const victimNodes = rawNodes.filter((n) => n.role === 'victim');
-  const cashOutNodes = rawNodes.filter((n) => n.role === 'cash_out');
-
-  const positionedNodes: AccountNodeData[] = [];
-  const cycleRadius = 6.5;
-  const cycleCount = Math.max(cycleNodes.length, 1);
-
-  // Position cyclic nodes in an X-Z circular loop
-  cycleNodes.forEach((node, i) => {
-    const angle = (i / cycleCount) * Math.PI * 2;
-    const x = Math.cos(angle) * cycleRadius;
-    const z = Math.sin(angle) * cycleRadius;
-    const y = Math.sin(angle * 2) * 1.2; // subtle wave for depth
-    positionedNodes.push({ ...node, position: [x, y, z] });
-  });
-
-  // Position victim feeder nodes to the left/exterior
-  victimNodes.forEach((node, i) => {
-    const angle = Math.PI + ((i - (victimNodes.length - 1) / 2) * 0.5);
-    const radius = 10.5;
-    const x = Math.cos(angle) * radius - 2;
-    const z = Math.sin(angle) * radius;
-    const y = ((i % 3) - 1) * 2;
-    positionedNodes.push({ ...node, position: [x, y, z] });
-  });
-
-  // Position cash-out sinks to the right/exterior
-  cashOutNodes.forEach((node, i) => {
-    const angle = ((i - (cashOutNodes.length - 1) / 2) * 0.5);
-    const radius = 10.5;
-    const x = Math.cos(angle) * radius + 2;
-    const z = Math.sin(angle) * radius;
-    const y = ((i % 3) - 1) * 2;
-    positionedNodes.push({ ...node, position: [x, y, z] });
-  });
-
-  return positionedNodes;
-}
-
-/**
- * Hierarchical tiered layout for Fan-in, Layering Chain, Rapid Pass-Through, and Dormant Activation.
- */
-function computeTieredFlowLayout(rawNodes: Omit<AccountNodeData, 'position'>[]): AccountNodeData[] {
-  const byRole: Record<AccountRole, Omit<AccountNodeData, 'position'>[]> = {
-    victim: [],
-    collector: [],
-    mule: [],
-    cash_out: [],
-  };
+  // 1. Group nodes by their canonical city coordinate ID
+  const cityGroups = new Map<string, Omit<AccountNodeData, 'position'>[]>();
 
   rawNodes.forEach((node) => {
-    byRole[node.role].push(node);
+    const coord = resolveCityCoord(node.city_cluster, node.account_id);
+    let group = cityGroups.get(coord.id);
+    if (!group) {
+      group = [];
+      cityGroups.set(coord.id, group);
+    }
+    group.push(node);
   });
 
   const positionedNodes: AccountNodeData[] = [];
 
-  // Helper to space nodes evenly in a vertical/depth fan
-  const layoutTier = (
-    nodes: Omit<AccountNodeData, 'position'>[],
-    baseX: number,
-    spreadY: number,
-    spreadZ: number,
-  ) => {
-    const count = nodes.length;
-    nodes.forEach((node, idx) => {
-      // Centered index around 0
-      const offset = idx - (count - 1) / 2;
-      const x = baseX + (Math.sin(idx) * 0.8);
-      const y = offset * spreadY;
-      const z = Math.sin(offset * 1.1) * spreadZ;
-      positionedNodes.push({ ...node, position: [x, y, z] });
+  // 2. Position nodes above their respective city
+  cityGroups.forEach((group, cityId) => {
+    const coord = resolveCityCoord(cityId);
+    const [baseX, , baseZ] = geoTo3D(coord.lon, coord.lat, 0);
+    const count = group.length;
+
+    group.forEach((node, i) => {
+      let x = baseX;
+      let z = baseZ;
+      let y = 1.8; // Baseline altitude hovering above map surface
+
+      if (count === 1) {
+        // Single account in this hub (e.g. Kolkata terminal sink or Dubai offshore)
+        y = node.role === 'cash_out' ? 2.15 : node.role === 'collector' ? 1.95 : 1.75;
+      } else {
+        // Multiple accounts in this city: radial orbital dispersal around city anchor
+        const radius = Math.min(1.5, 0.45 + (count - 1) * 0.08);
+        const angle = (i / count) * Math.PI * 2 + (i % 2 === 0 ? 0 : Math.PI / count);
+
+        x = baseX + Math.cos(angle) * radius;
+        z = baseZ + Math.sin(angle) * radius;
+
+        // Role-based vertical tiering
+        const roleElevation =
+          node.role === 'cash_out'
+            ? 0.45
+            : node.role === 'collector'
+              ? 0.3
+              : node.role === 'mule'
+                ? 0.15
+                : 0.0;
+        y = 1.6 + roleElevation + ((i % 3) - 1) * 0.2;
+      }
+
+      positionedNodes.push({
+        ...node,
+        position: [x, y, z],
+      });
     });
-  };
-
-  // 1. Victims: Left boundary (X: -10)
-  const victimSpreadY = Math.min(2.2, 12 / Math.max(byRole.victim.length, 1));
-  layoutTier(byRole.victim, -9.5, victimSpreadY, 4.5);
-
-  // 2. Collectors: Aggregation focal hub (X: -3)
-  const collectorSpreadY = Math.min(3.5, 8 / Math.max(byRole.collector.length, 1));
-  layoutTier(byRole.collector, -2.5, collectorSpreadY, 3.0);
-
-  // 3. Mules: Layering intermediaries (X: 3.5)
-  const muleSpreadY = Math.min(3.0, 10 / Math.max(byRole.mule.length, 1));
-  layoutTier(byRole.mule, 4.0, muleSpreadY, 3.8);
-
-  // 4. Cash-out sinks: Terminal right boundary (X: 10)
-  const cashOutSpreadY = Math.min(3.5, 8 / Math.max(byRole.cash_out.length, 1));
-  layoutTier(byRole.cash_out, 10.0, cashOutSpreadY, 3.0);
+  });
 
   return positionedNodes;
 }

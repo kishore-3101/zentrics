@@ -28,7 +28,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('TraceMesh ErrorBoundary caught an exception:', error, errorInfo);
+    console.error('MuleNet ErrorBoundary caught an exception:', error, errorInfo);
     this.setState({ errorInfo });
   }
 
@@ -53,7 +53,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           </h3>
 
           <p className="mt-1.5 max-w-md text-xs text-muted leading-relaxed">
-            TraceMesh detected a rendering fault in this module. The application shell and navigation remain fully operational.
+            MuleNet detected a rendering fault in this module. The application shell and navigation remain fully operational.
           </p>
 
           <div className="mt-3 max-w-lg rounded-xl border border-danger/25 bg-canvas/80 p-3 text-left font-mono text-xs text-danger/90 overflow-x-auto">
