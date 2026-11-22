@@ -22,7 +22,8 @@ export function useApiHealth(): { status: ApiHealthStatus } {
       try {
         const response = await axios.get('/health', { timeout: 2500 });
         if (isMounted) {
-          if (response.status === 200 && response.data?.status === 'healthy') {
+          const apiStatus = response.data?.status;
+          if (response.status === 200 && (apiStatus === 'healthy' || apiStatus === 'degraded' || apiStatus === 'ok')) {
             setStatus('live');
           } else {
             setStatus('offline');

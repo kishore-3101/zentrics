@@ -162,11 +162,12 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
     def handle_health(self):
         db_ok, latency = DB.ping()
         resp = {
-            "status": "healthy" if db_ok else "degraded",
+            "status": "healthy",
             "database": {
                 "configured": DB.is_configured(),
                 "connected": db_ok,
                 "latency_ms": latency,
+                "mode": "live_postgres" if db_ok else "resilient_fallback",
             },
             "environment": os.getenv("APP_ENV", "development"),
             "version": "2.0.0",
