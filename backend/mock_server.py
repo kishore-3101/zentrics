@@ -27,6 +27,12 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 from urllib.parse import parse_qs, unquote, urlparse
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from backend.detection_engine import DETECTION_ENGINE
+
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
 # -----------------------------------------------------------------------------
@@ -263,51 +269,108 @@ class MockDataStore:
 
     def inject_ring(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         with self.lock:
-            ring_type = payload.get("ring_type", "structural_cycle")
-            difficulty = payload.get("difficulty", "medium")
-            new_id = f"R-INJ-{self.next_event_id}"
-            self.next_event_id += 1
+            # Dynamically evaluate scenario through AutonomousDetectionEngine
+            eval_res = DETECTION_ENGINE.evaluate_scenario(payload)
+            ring_id = eval_res["ring_id"]
+            case_id = eval_res["case_id"]
+            typology = eval_res["typology"]
+            total_amount = eval_res["total_amount"]
+            entity_list = eval_res["entities"]
+            raw_edges = eval_res["transactions"]
+            blocked_info = eval_res["blocked_info"]
+            detection_results = eval_res["detection_results"]
+            block_enabled = bool(blocked_info and blocked_info.get("is_blocked"))
+            blocked_account_id = blocked_info.get("blocked_account") if blocked_info else None
             now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            self.next_event_id += 1
+
+            nodes = []
+            for ent in entity_list:
+                role_mapped = "victim" if ent["role"] == "victim" else ("cash_out" if ent["role"] == "cash_out" else ("collector" if ent["role"] == "hacker" else "mule"))
+                nodes.append({
+                    "account_id": ent["account_id"],
+                    "role": role_mapped,
+                    "actual_role": ent["role"],
+                    "holder_name": ent["name"],
+                    "risk_score": ent["risk_score"],
+                    "ml_prob": ent.get("ml_prob", 0.0),
+                    "rule_score": ent.get("rule_score", 0.0),
+                    "neighbor_risk": ent.get("neighbor_risk", 0.0),
+                    "reason_codes": ent.get("reason_codes", []),
+                    "city": ent["city"],
+                    "city_cluster": ent["city_cluster"],
+                    "latitude": ent["latitude"],
+                    "longitude": ent["longitude"],
+                    "device_id": ent["device_id"],
+                    "device_type": ent["device_type"],
+                    "ip_address": ent["ip_address"],
+                    "bank_id": ent["bank_id"],
+                    "is_frozen": ent.get("is_frozen", False),
+                    "is_blocked": ent.get("is_blocked", False),
+                    "blocked_reason": ent.get("blocked_reason"),
+                    "position": ent["position"],
+                    "total_incoming": ent.get("total_incoming", total_amount),
+                    "total_outgoing": ent.get("total_outgoing", total_amount),
+                    "transaction_count": ent.get("transaction_count", 2),
+                    "kyc_level": ent.get("kyc_level", "minimal"),
+                    "account_type": "savings" if ent["role"] == "victim" else ("sink" if ent["role"] == "cash_out" else "current"),
+                    "open_date": ent.get("open_date", "2024-06-15"),
+                })
+
+            max_risk = max((ent["risk_score"] for ent in entity_list if ent["role"] != "victim"), default=92.0)
+            ring_status = "frozen" if block_enabled else "under_review"
 
             new_alert = {
                 "run_id": 1,
-                "ring_id": new_id,
-                "fingerprint": f"inj_{new_id}_fp",
-                "ring_type": ring_type,
-                "score": 92.0,
-                "priority": 850000.0,
-                "amount_moved": 920000.00,
-                "amount_cashed": 200000.00,
-                "amount_at_risk": 720000.00,
-                "duration_min": 18.0,
-                "n_accounts": 5,
-                "n_victims": 2,
-                "pattern_tags": [ring_type, "live_injected", "stage_demo"],
-                "recommended": "Immediate freeze of injected simulation nodes.",
+                "ring_id": ring_id,
+                "fingerprint": f"inj_{ring_id.lower()}_fp",
+                "ring_type": typology,
+                "score": max_risk,
+                "priority": round(max_risk * (total_amount / 1000.0), 1),
+                "amount_moved": total_amount,
+                "amount_cashed": 0.0 if block_enabled else round(total_amount * 0.48, 2),
+                "amount_at_risk": 0.0 if block_enabled else total_amount,
+                "duration_min": 4.0,
+                "n_accounts": len(entity_list),
+                "n_victims": 1,
+                "pattern_tags": [typology, "live_simulation", "auto_freeze" if block_enabled else "active_threat"],
+                "recommended": f"Autonomous ML Containment executed: Account {blocked_account_id} quarantined under PMLA Sec 5." if block_enabled else "Immediate freeze recommended.",
                 "detected_at": now_iso,
-                "case_id": 900 + self.next_event_id,
-                "status": "new",
-                "assigned_to": None,
-                "case_notes": f"Live injected test ring ({ring_type}).",
-                "explanation": f"Live stream injection: {ring_type} topology synthesized on stage with ₹9,20,000 transaction volume.",
+                "case_id": case_id,
+                "status": ring_status,
+                "assigned_to": "TraceMesh AI Shield / Autonomous Detection Engine" if block_enabled else None,
+                "case_notes": f"Live simulation scenario detected dynamically by XGBoost & Graph Engine.",
+                "explanation": f"Live stream evaluated: {typology} topology synthesized with ₹{total_amount:,.0f} transaction volume. Autonomous containment active.",
                 "key_evidence": [
-                    "Synthesized real-time by Stage Demo Injector",
-                    "Immediate alert cross-correlated via delta-polling"
-                ]
+                    f"XGBoost Mule Probability: {detection_results.get('detected_ml_prob', 0.95)*100:.1f}%",
+                    f"Fused Risk Score: {detection_results.get('detected_fused_risk', 94.6):.1f}%",
+                    f"Triggered reason: {detection_results.get('detected_freeze_reason', 'Threshold exceeded')}",
+                ],
+                "blocked_info": blocked_info,
+                "is_simulation": True,
             }
 
             self.alerts.insert(0, new_alert)
-            self.rings[new_id] = copy.deepcopy(self.rings.get("R-104", {}))
-            self.rings[new_id]["ring_id"] = new_id
-            self.rings[new_id]["ring_type"] = ring_type
+            self.rings[ring_id] = {
+                **new_alert,
+                "nodes": nodes,
+                "edges": raw_edges,
+                "blocked_info": blocked_info,
+                "detection_results": detection_results,
+            }
 
             return {
                 "success": True,
-                "injected_ring_id": new_id,
-                "ring_id": new_id,
-                "scenario_name": payload.get("scenario_name", "Live Account Takeover"),
-                "total_amount": float(payload.get("amount") or payload.get("total_amount") or 500000.0),
-                "txns_injected": 6
+                "injected_ring_id": ring_id,
+                "ring_id": ring_id,
+                "case_id": case_id,
+                "scenario_name": eval_res.get("scenario_name", "Live Account Takeover"),
+                "total_amount": total_amount,
+                "blocked_info": blocked_info,
+                "detection_results": detection_results,
+                "nodes": nodes,
+                "edges": raw_edges,
+                "txns_injected": len(raw_edges),
             }
 
 

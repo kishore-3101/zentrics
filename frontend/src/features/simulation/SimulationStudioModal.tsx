@@ -5,6 +5,7 @@ import {
   Check,
   CheckCircle2,
   Sliders,
+  Sparkles,
   X,
 } from 'lucide-react';
 import { useSimulation } from './useSimulation';
@@ -35,7 +36,7 @@ export interface SimulationPreset {
   distributor: SimulationEntity;
   intermediator: SimulationEntity;
   cash_out: SimulationEntity;
-  blocked_target: 'intermediator' | 'cash_out';
+  blocked_target: 'auto' | 'intermediator' | 'cash_out';
   blocked_reason: string;
 }
 
@@ -246,8 +247,12 @@ export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModal
   const [distributor, setDistributor] = useState<SimulationEntity>(savedConfig?.distributor || PRESETS[0].distributor);
   const [intermediator, setIntermediator] = useState<SimulationEntity>(savedConfig?.intermediator || PRESETS[0].intermediator);
   const [cashOut, setCashOut] = useState<SimulationEntity>(savedConfig?.cash_out || PRESETS[0].cash_out);
-  const [blockedTarget, setBlockedTarget] = useState<'intermediator' | 'cash_out'>(
-    savedConfig?.block_policy?.blocked_account_id === savedConfig?.cash_out?.account_id ? 'cash_out' : 'intermediator'
+  const [blockedTarget, setBlockedTarget] = useState<'auto' | 'intermediator' | 'cash_out'>(
+    savedConfig?.block_policy?.blocked_account_id === savedConfig?.cash_out?.account_id
+      ? 'cash_out'
+      : savedConfig?.block_policy?.blocked_account_id === savedConfig?.intermediator?.account_id
+      ? 'intermediator'
+      : 'auto'
   );
   const [blockedReason, setBlockedReason] = useState<string>(savedConfig?.block_policy?.blocked_reason || PRESETS[0].blocked_reason);
   const [isSavedNotice, setIsSavedNotice] = useState(false);
@@ -285,7 +290,7 @@ export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModal
   };
 
   const handleSaveSettings = () => {
-    const blockedAccount = blockedTarget === 'intermediator' ? intermediator.account_id : cashOut.account_id;
+    const blockedAccount = blockedTarget === 'auto' ? undefined : (blockedTarget === 'intermediator' ? intermediator.account_id : cashOut.account_id);
 
     const payload = {
       scenario_name: preset.label,
@@ -299,10 +304,11 @@ export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModal
       cash_out: cashOut,
       block_policy: {
         enabled: blockEnabled,
+        blocked_target: blockedTarget,
         blocked_account_id: blockedAccount,
         blocked_reason: blockedReason,
-        blocked_by: 'TraceMesh AI Shield / Autonomous Freeze Engine',
-        blocked_step: blockedTarget === 'intermediator' ? 3 : 4,
+        blocked_by: 'TraceMesh AI Shield / Autonomous Detection Engine',
+        blocked_step: blockedTarget === 'intermediator' ? 3 : (blockedTarget === 'cash_out' ? 4 : undefined),
       },
     };
 
@@ -768,17 +774,28 @@ export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModal
 
               {blockEnabled && (
                 <div className="space-y-3 rounded-xl border border-gold/15 bg-canvas/40 p-4">
+                  <div className="rounded-lg border border-gold/15 bg-canvas/60 p-3 space-y-1.5 text-xs">
+                    <div className="flex items-center gap-1.5 font-bold text-gold-light">
+                      <Sparkles className="size-3.5 text-gold" />
+                      Dynamic Detection Engine & ML Inference Gateway
+                    </div>
+                    <p className="text-[11px] text-muted leading-relaxed">
+                      Extracts 63 behavioral features, evaluates the trained XGBoost model (models/mule_detection_xgboost.pkl), and calculates 1-hop neighborhood contagion. Whichever account breaches the 85.0% risk threshold is quarantined dynamically in real time.
+                    </p>
+                  </div>
+
                   <div>
                     <label className="block text-[11px] font-bold uppercase tracking-wider text-muted mb-1.5">
-                      Quarantine Target Account
+                      Quarantine Policy Mode
                     </label>
                     <select
                       value={blockedTarget}
                       onChange={(e) => setBlockedTarget(e.target.value as any)}
                       className="w-full rounded-xl border border-gold/25 bg-[#07110D] px-3.5 py-2 text-xs text-ink focus:border-gold focus:outline-none font-medium"
                     >
-                      <option value="intermediator">Intermediator Mule ({intermediator.account_id} - {intermediator.city})</option>
-                      <option value="cash_out">Cash-Out Sink ({cashOut.account_id} - {cashOut.city})</option>
+                      <option value="auto">⚡ Autonomous ML Engine (Evaluates All Accounts Dynamically)</option>
+                      <option value="intermediator">Focus Candidate: Intermediator Mule ({intermediator.account_id} - {intermediator.city})</option>
+                      <option value="cash_out">Focus Candidate: Cash-Out Sink ({cashOut.account_id} - {cashOut.city})</option>
                     </select>
                   </div>
 
@@ -795,7 +812,7 @@ export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModal
                   </div>
 
                   <div className="flex flex-wrap items-center justify-between text-xs text-muted pt-2 border-t border-gold/10">
-                    <span>Enforcing Actor: <strong className="text-gold-light">TraceMesh AI Shield / Autonomous Freeze Engine</strong></span>
+                    <span>Enforcing Actor: <strong className="text-gold-light">TraceMesh AI Shield / Autonomous Detection Engine</strong></span>
                     <span className="text-emerald font-semibold">Protected Funds: ~50% ({formatInrCompact(amount * 0.5)})</span>
                   </div>
                 </div>

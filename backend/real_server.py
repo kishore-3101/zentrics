@@ -32,6 +32,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from backend.db import DB
+from backend.detection_engine import DETECTION_ENGINE
 from backend.mock_server import MockDataStore
 from backend.simulation import SIMULATOR
 
@@ -685,268 +686,69 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
         """
         Executes a real-time Fraud Simulation scenario with granular attacker/victim profiles,
         multi-hop transactions, geographic routing, and automated AI Shield threat containment.
+        Driven dynamically by TraceMesh AutonomousDetectionEngine & calibrated XGBoost ML classifier.
         Persists all simulated entities into Supabase PostgreSQL and updates local caches.
         """
-        sim_id = int(time.time() * 1000) % 1000000
-        ring_id = payload.get("ring_id") or f"SIM-RING-{sim_id}"
-        case_id = int(payload.get("case_id") or (8000 + (sim_id % 1900)))
-        scenario_name = payload.get("scenario_name", "Live Account Takeover & Multi-Hop Syndicate")
-        total_amount = float(payload.get("amount") or payload.get("total_amount") or 500000.0)
+        eval_res = DETECTION_ENGINE.evaluate_scenario(payload)
+
+        ring_id = eval_res["ring_id"]
+        case_id = eval_res["case_id"]
+        scenario_name = eval_res["scenario_name"]
+        total_amount = eval_res["total_amount"]
         channel = payload.get("channel", "UPI")
-        typology = payload.get("typology", "circular_flow")
+        typology = eval_res["typology"]
+        entity_list = eval_res["entities"]
+        raw_edges = eval_res["transactions"]
+        blocked_info = eval_res["blocked_info"]
+        detection_results = eval_res["detection_results"]
+        amount_saved = eval_res["amount_saved"]
+        block_enabled = bool(blocked_info and blocked_info.get("is_blocked"))
+        blocked_account_id = blocked_info.get("blocked_account") if blocked_info else None
+        blocked_reason = blocked_info.get("blocked_reason") if blocked_info else None
+        blocked_city = blocked_info.get("blocked_city") if blocked_info else None
+        blocked_by = "TraceMesh AI Shield / Autonomous Detection Engine"
         now_dt = datetime.datetime.now(datetime.timezone.utc)
         now_iso = now_dt.isoformat()
 
-        # 1. Participating Entities
-        v_raw = payload.get("victim") or {}
-        h_raw = payload.get("hacker") or {}
-        d_raw = payload.get("distributor") or {}
-        m_raw = payload.get("intermediator") or {}
-        c_raw = payload.get("cash_out") or {}
+        # Build dynamic execution steps for live attack playback
+        execution_steps = []
+        for hop in raw_edges:
+            src_acct = hop["src_account"]
+            dst_acct = hop["dst_account"]
+            src_ent = next((e for e in entity_list if e["account_id"] == src_acct), {})
+            dst_ent = next((e for e in entity_list if e["account_id"] == dst_acct), {})
+            h_idx = hop["hop_index"]
+            is_blk = hop.get("is_blocked", False)
 
-        victim = {
-            "account_id": v_raw.get("account_id") or f"ACC_VIC_{sim_id % 1000}",
-            "name": v_raw.get("name", "Rohan Sharma (Victim)"),
-            "role": "victim",
-            "city": v_raw.get("city", "Mumbai"),
-            "city_cluster": "tier1_mumbai",
-            "latitude": float(v_raw.get("latitude") or 19.0760),
-            "longitude": float(v_raw.get("longitude") or 72.8777),
-            "device_id": v_raw.get("device_id") or "DEV_ANDR_VIC",
-            "device_type": v_raw.get("device_type") or "Samsung Galaxy S23 (Android 14)",
-            "ip_address": v_raw.get("ip_address") or "103.21.124.45",
-            "bank_id": "HDFC_BANK",
-            "risk_score": 15.0,
-            "position": [-9.0, 0.5, 0.0],
-        }
-
-        hacker = {
-            "account_id": h_raw.get("account_id") or f"ACC_HACK_{sim_id % 1000}",
-            "name": h_raw.get("name", "DarkNet Operator X"),
-            "role": "hacker",
-            "city": h_raw.get("city", "Delhi"),
-            "city_cluster": "tier1_delhi",
-            "latitude": float(h_raw.get("latitude") or 28.6139),
-            "longitude": float(h_raw.get("longitude") or 77.2090),
-            "device_id": h_raw.get("device_id") or "DEV_TOR_09",
-            "device_type": h_raw.get("device_type") or "Kali Linux / Tor Proxy Node",
-            "ip_address": h_raw.get("ip_address") or "185.220.101.5",
-            "bank_id": "SBI_CORE",
-            "risk_score": 96.5,
-            "position": [-4.5, 3.2, 1.8],
-        }
-
-        distributor = {
-            "account_id": d_raw.get("account_id") or f"ACC_DIST_{sim_id % 1000}",
-            "name": d_raw.get("name", "Karan Malhotra (Distributor)"),
-            "role": "distributor",
-            "city": d_raw.get("city", "Pune"),
-            "city_cluster": "tier1_pune",
-            "latitude": float(d_raw.get("latitude") or 18.5204),
-            "longitude": float(d_raw.get("longitude") or 73.8567),
-            "device_id": d_raw.get("device_id") or "DEV_WEB_DIST",
-            "device_type": d_raw.get("device_type") or "Chrome Windows 11 Desktop",
-            "ip_address": d_raw.get("ip_address") or "49.204.110.15",
-            "bank_id": "ICICI_CORP",
-            "risk_score": 93.0,
-            "position": [0.0, 0.0, -1.2],
-        }
-
-        intermediator = {
-            "account_id": m_raw.get("account_id") or f"ACC_MULE_{sim_id % 1000}",
-            "name": m_raw.get("name", "Pooja Verma (Mule Intermediator)"),
-            "role": "intermediator",
-            "city": m_raw.get("city", "Kanpur"),
-            "city_cluster": "tier2_kanpur",
-            "latitude": float(m_raw.get("latitude") or 26.4499),
-            "longitude": float(m_raw.get("longitude") or 80.3319),
-            "device_id": m_raw.get("device_id") or "DEV_MOB_MULE",
-            "device_type": m_raw.get("device_type") or "OnePlus 11 (Android 13)",
-            "ip_address": m_raw.get("ip_address") or "106.51.24.99",
-            "bank_id": "PNB_RETAIL",
-            "risk_score": 94.8,
-            "position": [4.8, 2.6, 1.5],
-        }
-
-        cash_out = {
-            "account_id": c_raw.get("account_id") or f"ACC_SINK_{sim_id % 1000}",
-            "name": c_raw.get("name", "NCR Terminal / P2P Exchange"),
-            "role": "cash_out",
-            "city": c_raw.get("city", "Bengaluru"),
-            "city_cluster": "tier1_bengaluru",
-            "latitude": float(c_raw.get("latitude") or 12.9716),
-            "longitude": float(c_raw.get("longitude") or 77.5946),
-            "device_id": c_raw.get("device_id") or "DEV_ATM_SINK",
-            "device_type": c_raw.get("device_type") or "NCR SelfServ ATM Terminal",
-            "ip_address": c_raw.get("ip_address") or "172.16.4.10",
-            "bank_id": "AXIS_SINK",
-            "risk_score": 98.2,
-            "position": [9.0, -1.8, 0.0],
-        }
-
-        entity_list = [victim, hacker, distributor, intermediator, cash_out]
-
-        # 2. Block Policy Configuration
-        bp_raw = payload.get("block_policy") or {}
-        block_enabled = bp_raw.get("enabled", True)
-        blocked_account_id = bp_raw.get("blocked_account_id") or intermediator["account_id"]
-        blocked_reason = bp_raw.get("blocked_reason") or (
-            f"Autonomous Freeze: Velocity spike of INR {total_amount:,.0f} across 4 states in 3m. "
-            f"Mule anomaly probability 96.8% exceeded defense threshold 85.0%."
-        )
-        blocked_by = bp_raw.get("blocked_by") or "TraceMesh AI Shield / Autonomous Freeze Engine"
-        blocked_at_hop = int(bp_raw.get("blocked_step") or 3)
-
-        # Mark blocked state on entities
-        for ent in entity_list:
-            if block_enabled and ent["account_id"] == blocked_account_id:
-                ent["is_blocked"] = True
-                ent["is_frozen"] = True
-                ent["blocked_reason"] = blocked_reason
-                ent["blocked_by"] = blocked_by
-                ent["blocked_at"] = now_iso
-            else:
-                ent["is_blocked"] = False
-                ent["is_frozen"] = False
-
-        # 3. Step-by-Step Transaction Pipeline
-        t1_ts = (now_dt - datetime.timedelta(minutes=4)).isoformat()
-        t2_ts = (now_dt - datetime.timedelta(minutes=3)).isoformat()
-        t3_ts = (now_dt - datetime.timedelta(minutes=2)).isoformat()
-        t4_ts = (now_dt - datetime.timedelta(minutes=1)).isoformat()
-        t5_ts = now_iso
-
-        h3_blocked = block_enabled and (blocked_account_id == intermediator["account_id"])
-        h4_blocked = block_enabled and (blocked_account_id == cash_out["account_id"])
-
-        hop1 = {
-            "txn_id": f"TXN_{sim_id}_1",
-            "src_account": victim["account_id"],
-            "dst_account": hacker["account_id"],
-            "amount": total_amount,
-            "channel": channel,
-            "ts": t1_ts,
-            "hop_index": 1,
-            "is_suspicious": True,
-            "is_blocked": False,
-            "device_id": victim["device_id"],
-            "device_type": victim["device_type"],
-            "ip_address": victim["ip_address"],
-            "latitude": victim["latitude"],
-            "longitude": victim["longitude"],
-        }
-
-        hop2 = {
-            "txn_id": f"TXN_{sim_id}_2",
-            "src_account": hacker["account_id"],
-            "dst_account": distributor["account_id"],
-            "amount": round(total_amount * 0.98, 2),
-            "channel": "IMPS" if channel == "UPI" else channel,
-            "ts": t2_ts,
-            "hop_index": 2,
-            "is_suspicious": True,
-            "is_blocked": False,
-            "device_id": hacker["device_id"],
-            "device_type": hacker["device_type"],
-            "ip_address": hacker["ip_address"],
-            "latitude": hacker["latitude"],
-            "longitude": hacker["longitude"],
-        }
-
-        hop3 = {
-            "txn_id": f"TXN_{sim_id}_3",
-            "src_account": distributor["account_id"],
-            "dst_account": intermediator["account_id"],
-            "amount": round(total_amount * 0.50, 2),
-            "channel": channel,
-            "ts": t3_ts,
-            "hop_index": 3,
-            "is_suspicious": True,
-            "is_blocked": h3_blocked,
-            "blocked_reason": blocked_reason if h3_blocked else None,
-            "device_id": distributor["device_id"],
-            "device_type": distributor["device_type"],
-            "ip_address": distributor["ip_address"],
-            "latitude": distributor["latitude"],
-            "longitude": distributor["longitude"],
-        }
-
-        hop4 = {
-            "txn_id": f"TXN_{sim_id}_4",
-            "src_account": distributor["account_id"],
-            "dst_account": cash_out["account_id"],
-            "amount": round(total_amount * 0.48, 2),
-            "channel": "ATM_WITHDRAWAL" if "ATM" in cash_out["name"] else "IMPS",
-            "ts": t4_ts,
-            "hop_index": 4,
-            "is_suspicious": True,
-            "is_blocked": h4_blocked,
-            "blocked_reason": blocked_reason if h4_blocked else None,
-            "device_id": distributor["device_id"],
-            "device_type": distributor["device_type"],
-            "ip_address": distributor["ip_address"],
-            "latitude": distributor["latitude"],
-            "longitude": distributor["longitude"],
-        }
-
-        raw_edges = [hop1, hop2, hop3, hop4]
-
-        # 4. Synthesize Execution Steps for Live Action Playback UI
-        amount_saved = round(total_amount * 0.50, 2) if h3_blocked else (round(total_amount * 0.48, 2) if h4_blocked else round(total_amount * 0.50, 2))
-        blocked_city = next((e["city"] for e in entity_list if e["account_id"] == blocked_account_id), "Kanpur")
-
-        execution_steps = [
-            {
-                "step": 1,
-                "title": "Account Compromise & Unauthorized Outflow",
-                "description": f"Victim {victim['name']} ({victim['city']}) drained ₹{total_amount:,.0f} via {channel} to Adversary account {hacker['account_id']} in {hacker['city']}.",
-                "from": f"{victim['account_id']} ({victim['city']})",
-                "to": f"{hacker['account_id']} ({hacker['city']})",
-                "amount": total_amount,
-                "channel": channel,
-                "device": f"{victim['device_type']} -> {hacker['device_type']}",
-                "status": "completed",
-            },
-            {
-                "step": 2,
-                "title": "Primary Aggregation & Laundering Layer",
-                "description": f"Adversary forwarded ₹{round(total_amount * 0.98, 2):,.0f} to Syndicate Distributor {distributor['account_id']} in {distributor['city']} via encrypted VPN gateway.",
-                "from": f"{hacker['account_id']} ({hacker['city']})",
-                "to": f"{distributor['account_id']} ({distributor['city']})",
-                "amount": round(total_amount * 0.98, 2),
-                "channel": "IMPS",
-                "device": f"{hacker['device_type']} -> {distributor['device_type']}",
-                "status": "completed",
-            },
-            {
-                "step": 3,
-                "title": "Rapid Smurfing Fan-Out to Mule Account",
-                "description": f"Distributor attempted split transfer of ₹{round(total_amount * 0.50, 2):,.0f} to Intermediator Mule {intermediator['account_id']} in {intermediator['city']}.",
-                "from": f"{distributor['account_id']} ({distributor['city']})",
-                "to": f"{intermediator['account_id']} ({intermediator['city']})",
-                "amount": round(total_amount * 0.50, 2),
-                "channel": channel,
-                "device": f"{distributor['device_type']} -> {intermediator['device_type']}",
-                "status": "blocked" if h3_blocked else "completed",
-            },
-            {
-                "step": 4,
-                "title": "Multi-Channel Extraction & Cash-Out Attempt",
-                "description": f"Attempted cash-out outflow of ₹{round(total_amount * 0.48, 2):,.0f} via {cash_out['name']} in {cash_out['city']}.",
-                "from": f"{distributor['account_id']} ({distributor['city']})",
-                "to": f"{cash_out['account_id']} ({cash_out['city']})",
-                "amount": round(total_amount * 0.48, 2),
-                "channel": "ATM_WITHDRAWAL",
-                "device": cash_out["device_type"],
-                "status": "blocked" if h4_blocked else "completed",
-            },
-        ]
+            step_title = (
+                "Account Compromise & Unauthorized Outflow" if h_idx == 1
+                else ("Primary Aggregation & Laundering Layer" if h_idx == 2
+                else ("Rapid Smurfing Fan-Out to Mule Account" if h_idx == 3
+                else "Multi-Channel Extraction & Cash-Out Attempt"))
+            )
+            step_desc = (
+                f"Transfer of ₹{hop['amount']:,.0f} via {hop['channel']} from {src_ent.get('name', src_acct)} ({hop['src_city']}) to {dst_ent.get('name', dst_acct)} ({hop['dst_city']})."
+            )
+            execution_steps.append({
+                "step": h_idx,
+                "title": step_title,
+                "description": step_desc,
+                "from": f"{src_acct} ({hop['src_city']})",
+                "to": f"{dst_acct} ({hop['dst_city']})",
+                "amount": hop["amount"],
+                "channel": hop["channel"],
+                "device": f"{src_ent.get('device_type', 'Terminal')} -> {dst_ent.get('device_type', 'Terminal')}",
+                "status": "blocked" if is_blk else "completed",
+            })
 
         if block_enabled:
             execution_steps.append({
-                "step": 5,
+                "step": len(execution_steps) + 1,
                 "title": "Autonomous Threat Containment & Account Freeze",
-                "description": f"MuleNet AI Shield detected velocity anomaly across 4 states in < 4m. Account {blocked_account_id} ({blocked_city}) was automatically quarantined and frozen.",
+                "description": (
+                    f"TraceMesh Autonomous Detection Engine triggered AI Shield freeze: "
+                    f"Account {blocked_account_id} ({blocked_city}) quarantined under PMLA Sec 5. {blocked_reason}"
+                ),
                 "target": f"{blocked_account_id} ({blocked_city})",
                 "action": "AUTO_FREEZE",
                 "reason": blocked_reason,
@@ -954,17 +756,7 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
                 "status": "frozen",
             })
 
-        blocked_info = {
-            "is_blocked": block_enabled,
-            "blocked_account": blocked_account_id if block_enabled else None,
-            "blocked_city": blocked_city if block_enabled else None,
-            "blocked_by": blocked_by if block_enabled else None,
-            "blocked_reason": blocked_reason if block_enabled else None,
-            "blocked_at": now_iso if block_enabled else None,
-            "amount_saved": amount_saved if block_enabled else 0.0,
-        }
-
-        # 5. Build Graph Nodes and Edges for Frontend Consumption
+        # Build Graph Nodes with Purely Engine-Computed Scores and Features
         nodes = []
         for ent in entity_list:
             role_mapped = "victim" if ent["role"] == "victim" else ("cash_out" if ent["role"] == "cash_out" else ("collector" if ent["role"] == "hacker" else "mule"))
@@ -974,6 +766,10 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
                 "actual_role": ent["role"],
                 "holder_name": ent["name"],
                 "risk_score": ent["risk_score"],
+                "ml_prob": ent.get("ml_prob", 0.0),
+                "rule_score": ent.get("rule_score", 0.0),
+                "neighbor_risk": ent.get("neighbor_risk", 0.0),
+                "reason_codes": ent.get("reason_codes", []),
                 "city": ent["city"],
                 "city_cluster": ent["city_cluster"],
                 "latitude": ent["latitude"],
@@ -986,18 +782,19 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
                 "is_blocked": ent.get("is_blocked", False),
                 "blocked_reason": ent.get("blocked_reason"),
                 "position": ent["position"],
-                "total_incoming": total_amount,
-                "total_outgoing": total_amount,
-                "transaction_count": 2,
-                "kyc_level": "full" if ent["role"] == "victim" else "minimal",
+                "total_incoming": ent.get("total_incoming", total_amount),
+                "total_outgoing": ent.get("total_outgoing", total_amount),
+                "transaction_count": ent.get("transaction_count", 2),
+                "kyc_level": ent.get("kyc_level", "minimal"),
                 "account_type": "savings" if ent["role"] == "victim" else ("sink" if ent["role"] == "cash_out" else "current"),
-                "open_date": "2024-06-15",
+                "open_date": ent.get("open_date", "2024-06-15"),
             })
 
         ring_status = "frozen" if block_enabled else "under_review"
+        max_risk = max((ent["risk_score"] for ent in entity_list if ent["role"] != "victim"), default=92.0)
         ring_explanation = (
-            f"Live Fraud Simulation '{scenario_name}': Stolen ₹{total_amount:,.0f} routed through {len(entity_list)} nodes across {victim['city']}, {hacker['city']}, {distributor['city']}, {intermediator['city']}, and {cash_out['city']}. "
-            + (f"Quarantined by AI Shield: {blocked_reason}" if block_enabled else "Detection active.")
+            f"Live Simulation '{scenario_name}': Stolen ₹{total_amount:,.0f} analyzed by TraceMesh XGBoost & Detection Engine across {len(entity_list)} nodes. "
+            + (f"Quarantined by AI Shield: {blocked_reason}" if block_enabled else "Autonomous detection active.")
         )
 
         new_alert = {
@@ -1005,8 +802,8 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
             "ring_id": ring_id,
             "fingerprint": f"fp_{ring_id.lower()}",
             "ring_type": typology,
-            "score": 96.5,
-            "priority": round(96.5 * (total_amount / 1000.0), 1),
+            "score": max_risk,
+            "priority": round(max_risk * (total_amount / 1000.0), 1),
             "amount_moved": total_amount,
             "amount_cashed": 0.0 if block_enabled else round(total_amount * 0.48, 2),
             "amount_at_risk": 0.0 if block_enabled else total_amount,
@@ -1018,9 +815,10 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
             "assignee": blocked_by if block_enabled else "Unassigned",
             "pattern_tags": [typology, "live_simulation", "auto_freeze" if block_enabled else "active_threat"],
             "explanation": ring_explanation,
-            "recommended": f"Containment active. Account {blocked_account_id} frozen under Section 102 CrPC." if block_enabled else "Immediate freeze recommended.",
+            "recommended": f"Autonomous ML Containment executed: Account {blocked_account_id} quarantined under Section 102 CrPC / PMLA Sec 5." if block_enabled else "Immediate freeze recommended.",
             "is_simulation": True,
             "blocked_info": blocked_info,
+            "detection_results": detection_results,
         }
 
         # 6. Update In-Memory Cache for Instant Zero-Delay Response

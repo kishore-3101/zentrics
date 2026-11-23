@@ -207,9 +207,9 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
           total_amount: totalAmt,
           blocked_info: payload.block_policy?.enabled ? {
             is_blocked: true,
-            blocked_account: payload.block_policy?.blocked_account_id || 'ACC_MULE_904',
+            blocked_account: payload.block_policy?.blocked_account_id || payload.intermediator?.account_id || 'ACC_MULE_904',
             blocked_city: payload.intermediator?.city || 'Kanpur',
-            blocked_reason: payload.block_policy?.blocked_reason || 'Autonomous Freeze: Velocity spike across state boundaries',
+            blocked_reason: payload.block_policy?.blocked_reason || 'Autonomous AI Shield Freeze: Fused Risk 94.6% (XGBoost ML Confidence 95.8%). Account quarantined under PMLA Sec 5 before cash-out sink.',
             amount_saved: Math.round(totalAmt * 0.5),
           } : undefined,
         };
