@@ -1,17 +1,11 @@
 import axios from 'axios';
-import { USE_MOCK } from '../config/env';
-import { MOCK_METRICS_DATA } from '../features/metrics/data/mockMetricsData';
 import type { MetricsDataset } from '../types/metrics';
 
 /**
- * Service to retrieve model evaluation benchmarks and curve artifacts.
+ * Service to retrieve model evaluation benchmarks and curve artifacts from live API.
  * Conforms strictly to GET /metrics.
  */
 export async function fetchMetrics(): Promise<MetricsDataset> {
-  if (USE_MOCK) {
-    return JSON.parse(JSON.stringify(MOCK_METRICS_DATA));
-  }
-
   const response = await axios.get<any>('/metrics');
   const raw = response.data;
 

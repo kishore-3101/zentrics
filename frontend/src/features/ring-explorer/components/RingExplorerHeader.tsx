@@ -1,12 +1,12 @@
 import { ArrowLeft, Box, ChevronDown, Compass, Network } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { RingStatusPill } from '../../../components/ui/RingStatusPill';
 import { RiskScoreMeter } from '../../../components/ui/RiskScoreMeter';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { TypologyBadge } from '../../../components/ui/TypologyBadge';
 import type { RingGraphData } from '../../../types/ring-graph';
-
-import { MOCK_RING_GRAPHS } from '../data/mockRingGraphData';
+import { fetchAlerts } from '../../../services/alerts.service';
 
 interface RingExplorerHeaderProps {
   graph: RingGraphData;
@@ -20,7 +20,18 @@ export function RingExplorerHeader({
   onViewModeChange,
 }: RingExplorerHeaderProps) {
   const navigate = useNavigate();
-  const availableRings = Object.keys(MOCK_RING_GRAPHS).filter((k) => k !== 'demo-ring');
+  const [availableRings, setAvailableRings] = useState<string[]>([graph.ring_id]);
+
+  useEffect(() => {
+    fetchAlerts()
+      .then((alerts) => {
+        const ids = Array.from(new Set([graph.ring_id, ...alerts.map((a) => a.ring_id)])).sort();
+        setAvailableRings(ids);
+      })
+      .catch(() => {
+        setAvailableRings([graph.ring_id]);
+      });
+  }, [graph.ring_id]);
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-gold/15 pb-4">

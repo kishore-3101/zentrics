@@ -5,14 +5,24 @@ import { EmptyState } from '../../../components/ui/EmptyState';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { cn } from '../../../lib/cn';
 import { formatRelativeTime } from '../../../lib/formatters';
-import type { ActivityEvent, ActivityKind } from '../types';
+import type { ActivityEvent } from '../types';
 
-const KIND_DISPLAY: Record<ActivityKind, { title: string; icon: LucideIcon; chip: string }> = {
+const DEFAULT_DISPLAY = {
+  title: 'Investigation action recorded',
+  icon: Activity,
+  chip: 'border-gold/30 bg-gold/10 text-gold-light',
+};
+
+const KIND_DISPLAY: Record<string, { title: string; icon: LucideIcon; chip: string }> = {
   detected: { title: 'New ring detected', icon: ShieldAlert, chip: 'border-gold/35 bg-gold/10 text-gold-light' },
   under_review: { title: 'Investigation opened', icon: Search, chip: 'border-warning/35 bg-warning/10 text-warning' },
   frozen: { title: 'Ring accounts frozen', icon: Snowflake, chip: 'border-emerald/30 bg-emerald/10 text-emerald' },
+  freeze: { title: 'Ring accounts frozen', icon: Snowflake, chip: 'border-emerald/30 bg-emerald/10 text-emerald' },
   escalated: { title: 'Escalated to Senior AML', icon: Flag, chip: 'border-danger/35 bg-danger/10 text-danger' },
+  escalate: { title: 'Escalated to Senior AML', icon: Flag, chip: 'border-danger/35 bg-danger/10 text-danger' },
   note: { title: 'Case note added', icon: MessageSquare, chip: 'border-white/15 bg-white/5 text-muted' },
+  status_change: { title: 'Case status updated', icon: Activity, chip: 'border-gold/30 bg-canvas/60 text-ink/80' },
+  false_positive: { title: 'Marked false positive', icon: Activity, chip: 'border-muted/40 bg-canvas/60 text-muted' },
 };
 
 interface RecentActivityFeedProps {
@@ -30,8 +40,8 @@ export function RecentActivityFeed({ events, delay = 0, className }: RecentActiv
       className={className}
       bodyClassName="max-h-[26rem] overflow-y-auto pb-3"
       action={
-        <StatusBadge tone="gold" size="sm" title="Illustrative events, not live data">
-          Mock data
+        <StatusBadge tone="emerald" size="sm" dot>
+          Live Activity
         </StatusBadge>
       }
     >
@@ -41,7 +51,7 @@ export function RecentActivityFeed({ events, delay = 0, className }: RecentActiv
         <ol className="relative space-y-4">
           <span aria-hidden className="absolute bottom-2 left-[17px] top-2 w-px bg-gold/12" />
           {events.map((event) => {
-            const display = KIND_DISPLAY[event.kind];
+            const display = KIND_DISPLAY[event.kind] || DEFAULT_DISPLAY;
             const Icon = display.icon;
             return (
               <li key={event.id} className="relative flex gap-3">

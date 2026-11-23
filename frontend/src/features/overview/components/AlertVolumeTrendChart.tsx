@@ -66,7 +66,7 @@ export function AlertVolumeTrendChart({ data, delay = 0, className }: AlertVolum
 
   const visible = TYPOLOGY_ORDER.filter((typology) => !hidden.has(typology));
   const totalAlerts = useMemo(
-    () => data.reduce((sum, point) => sum + TYPOLOGY_ORDER.reduce((inner, typology) => inner + point[typology], 0), 0),
+    () => (data || []).reduce((sum, point) => sum + TYPOLOGY_ORDER.reduce((inner, typology) => inner + (point?.[typology] || 0), 0), 0),
     [data],
   );
 

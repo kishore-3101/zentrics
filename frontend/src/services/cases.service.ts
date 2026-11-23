@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { fetchAlerts, fetchCaseActions, postCaseAction } from './alerts.service';
 import type { AuditLogEntry, CaseRecord } from '../types/cases';
 
@@ -8,6 +9,15 @@ import type { AuditLogEntry, CaseRecord } from '../types/cases';
  */
 
 export async function fetchAllCases(): Promise<CaseRecord[]> {
+  try {
+    const response = await axios.get<CaseRecord[]>('/cases');
+    if (response.data && Array.isArray(response.data)) {
+      return response.data;
+    }
+  } catch (err) {
+    console.warn('GET /cases endpoint error, using fallback:', err);
+  }
+
   const alerts = await fetchAlerts();
 
   // Map alerts to CaseRecords (v_alerts represents rings joined to cases)
@@ -30,7 +40,7 @@ export async function fetchAllCases(): Promise<CaseRecord[]> {
         assigned_to: alert.assigned_to,
         notes: alert.case_notes,
         created_at: alert.detected_at,
-        updated_at: actions.length > 0 ? actions[0].ts : alert.detected_at,
+        updated_at: actions.length > 0 ? actions[actions.length - 1].ts : alert.detected_at,
         actions_count: actions.length,
       };
     }),
@@ -43,20 +53,31 @@ export async function fetchAllCases(): Promise<CaseRecord[]> {
  * Aggregates all recorded case_actions across all cases into a unified chronological audit ledger.
  */
 export async function fetchAllAuditLogs(): Promise<AuditLogEntry[]> {
-  const alerts = await fetchAlerts();
-  const allLogs: AuditLogEntry[] = [];
+  try {
+    const response = await axios.get<AuditLogEntry[]>('/audit/logs');
+    if (response.data && Array.isArray(response.data)) {
+      return response.data;
+    }
+  } catch (err) {
+    console.warn('GET /audit/logs endpoint error, using fallback:', err);
+  }
 
-  for (const alert of alerts) {
-    if (!alert.case_id) continue;
-    const actions = await fetchCaseActions(alert.case_id);
-    for (const act of actions) {
-      allLogs.push({
+  const alerts = await fetchAlerts();
+
+  // Parallel fetch fallback
+  const results = await Promise.all(
+    alerts.map(async (alert) => {
+      if (!alert.case_id) return [];
+      const actions = await fetchCaseActions(alert.case_id);
+      return actions.map((act) => ({
         ...act,
         ring_id: alert.ring_id,
         ring_type: alert.ring_type,
-      });
-    }
-  }
+      }));
+    }),
+  );
+
+  const allLogs: AuditLogEntry[] = results.flat();
 
   // Sort strictly in reverse chronological order (newest actions first)
   allLogs.sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime());
@@ -66,10 +87,6 @@ export async function fetchAllAuditLogs(): Promise<AuditLogEntry[]> {
 
 /**
  * Reassign a case to an investigator.
- * Clarification Note: The schema `cases` supports `assigned_to`, while `case_actions` has
- * CHECK (action IN ('freeze', 'escalate', 'false_positive', 'note', 'status_change')).
- * To avoid inventing an unapproved action enum, we log the reassignment via 'note'
- * and update the case's assigned_to property.
  */
 export async function reassignCase(
   caseId: number,
