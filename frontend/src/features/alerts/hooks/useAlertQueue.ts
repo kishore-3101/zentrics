@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { fetchAlerts, postCaseAction, type CaseActionPayload } from '../../../services/alerts.service';
 import type {
@@ -53,6 +54,36 @@ export function useAlertQueue() {
   useEffect(() => {
     loadAlerts();
   }, [loadAlerts]);
+
+  // Delta polling hook for streaming simulation events (Module 12d)
+  useEffect(() => {
+    let latestEventId = 100;
+    const interval = setInterval(async () => {
+      try {
+        const resp = await axios.get<{ events?: any[]; latest_event_id?: number }>(
+          `/alerts?since_event_id=${latestEventId}`,
+        );
+        if (resp.data && resp.data.events && resp.data.events.length > 0) {
+          latestEventId = resp.data.latest_event_id || latestEventId;
+          const incoming = resp.data.events
+            .filter((ev) => ev.event_type === 'new_ring' && ev.payload)
+            .map((ev) => ev.payload as AlertRecord);
+
+          if (incoming.length > 0) {
+            setAlerts((prev) => {
+              const existing = new Set(prev.map((a) => a.ring_id));
+              const additions = incoming.filter((a) => !existing.has(a.ring_id));
+              return additions.length > 0 ? [...additions, ...prev] : prev;
+            });
+          }
+        }
+      } catch {
+        // Resilient fallback when backend is offline
+      }
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Handle column sort toggle
   const handleSortChange = useCallback((field: AlertSortField) => {

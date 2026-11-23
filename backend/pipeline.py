@@ -142,17 +142,19 @@ class PipelineRunner:
             with open(acc_file, "r", encoding="utf-8") as f:
                 reader = csv.DictReader(f)
                 for r in reader:
-                    acc_id = r["account_id"]
+                    acc_id = r.get("account_id")
+                    if not acc_id:
+                        continue
                     acc_type = r.get("account_type", "savings")
                     self.accounts[acc_id] = AccountNode(
                         account_id=acc_id,
                         account_type=acc_type,
-                        kyc_level=r.get("kyc_level", "minimal"),
-                        city_cluster=r.get("city_cluster", "c1"),
+                        kyc_level=r.get("kyc_level") or r.get("kyc_status", "minimal"),
+                        city_cluster=r.get("city_cluster") or r.get("city", "c1"),
                         declared_income_band=r.get("declared_income_band", "mid"),
                         bank_id=r.get("bank_id", "TRACE_BANK"),
                     )
-                    if acc_type == "sink":
+                    if acc_type.lower() in ("sink", "atm", "merchant"):
                         self.sink_accounts.add(acc_id)
 
         # Load transactions
@@ -161,13 +163,24 @@ class PipelineRunner:
             with open(tx_file, "r", encoding="utf-8") as f:
                 reader = csv.DictReader(f)
                 for r in reader:
+                    txn_id = r.get("txn_id") or r.get("transaction_id")
+                    src = r.get("src_account") or r.get("sender_account")
+                    dst = r.get("dst_account") or r.get("receiver_account")
+                    ts = r.get("ts") or r.get("timestamp")
+                    if not txn_id or not src or not dst or not ts:
+                        continue
+                    amt_str = r.get("amount", "0")
+                    try:
+                        amt = float(amt_str) if amt_str else 0.0
+                    except ValueError:
+                        amt = 0.0
                     self.transactions.append(
                         TransactionEdge(
-                            txn_id=r["txn_id"],
-                            src_account=r["src_account"],
-                            dst_account=r["dst_account"],
-                            amount=float(r["amount"]),
-                            ts=r["ts"],
+                            txn_id=txn_id,
+                            src_account=src,
+                            dst_account=dst,
+                            amount=amt,
+                            ts=ts,
                             channel=r.get("channel", "UPI"),
                             is_injected=str(r.get("is_injected", "")).lower() == "true",
                             injection_id=r.get("injection_id") or None,
@@ -348,17 +361,56 @@ class PipelineRunner:
                         score += 5.0
                 raw_rule_scores[acct_id] = min(score, 100.0) / 100.0
 
-        # Step 2: Simulated ML probabilities (0.0 to 1.0)
+        # Step 2: ML probabilities (0.0 to 1.0)
         ml_probs: Dict[str, float] = {}
-        for acct_id, acct in self.accounts.items():
-            base_p = 0.05
-            if raw_rule_scores[acct_id] > 0.5:
-                base_p = 0.85
-            elif raw_rule_scores[acct_id] > 0.2:
-                base_p = 0.60
-            if acct.kyc_level == "minimal" and base_p > 0.5:
-                base_p = min(base_p + 0.08, 0.98)
-            ml_probs[acct_id] = base_p
+        ml_model_loaded = False
+        try:
+            model_file = PROJECT_ROOT / "models" / "mule_detection_xgboost.pkl"
+            feat_file = PROJECT_ROOT / "models" / "feature_columns.json"
+            if model_file.exists() and feat_file.exists():
+                import joblib  # type: ignore
+                import pandas as pd  # type: ignore
+
+                model = joblib.load(model_file)
+                with open(feat_file, "r") as f:
+                    feature_cols = json.load(f)
+
+                rows = []
+                acct_order = list(self.accounts.keys())
+                for acct_id in acct_order:
+                    acct = self.accounts[acct_id]
+                    h_list = hits_by_acct.get(acct_id, [])
+                    row = {
+                        "account_id": acct_id,
+                        "kyc_level": 1.0 if acct.kyc_level == "full" else (0.5 if acct.kyc_level == "verified" else 0.0),
+                        "total_inflow": volume_in.get(acct_id, 0.0),
+                        "total_outflow": volume_out.get(acct_id, 0.0),
+                        "unique_counterparties": float(len(counterparts.get(acct_id, set()))),
+                        "detector_hits_count": float(len(h_list)),
+                        "rule_score_raw": raw_rule_scores.get(acct_id, 0.0),
+                    }
+                    rows.append(row)
+                df_feat = pd.DataFrame(rows)
+                for col in feature_cols:
+                    if col not in df_feat.columns:
+                        df_feat[col] = 0.0
+                probas = model.predict_proba(df_feat[feature_cols].fillna(0.0))[:, 1]
+                for idx, acct_id in enumerate(acct_order):
+                    ml_probs[acct_id] = float(probas[idx])
+                ml_model_loaded = True
+        except Exception:
+            ml_model_loaded = False
+
+        if not ml_model_loaded:
+            for acct_id, acct in self.accounts.items():
+                base_p = 0.05
+                if raw_rule_scores[acct_id] > 0.5:
+                    base_p = 0.85
+                elif raw_rule_scores[acct_id] > 0.2:
+                    base_p = 0.60
+                if acct.kyc_level == "minimal" and base_p > 0.5:
+                    base_p = min(base_p + 0.08, 0.98)
+                ml_probs[acct_id] = base_p
 
         # Step 3: Neighbor risk (1-hop contagion)
         neighbor_risks: Dict[str, float] = {}
@@ -682,11 +734,13 @@ class PipelineRunner:
         print(f"\n[*] Starting TraceMesh Pipeline Run #{run_id} on dataset '{dataset_name}'...")
 
         # 1. Load data
-        if self.dataset_path:
-            self.load_data_from_folder(self.dataset_path)
+        if self.dataset_path and Path(self.dataset_path).is_dir():
+            self.load_data_from_folder(Path(self.dataset_path))
         else:
             folder = Path.cwd() / "data" / dataset_name
-            if folder.exists():
+            if not folder.exists():
+                folder = Path.cwd() / dataset_name
+            if folder.exists() and folder.is_dir():
                 self.load_data_from_folder(folder)
             else:
                 raise FileNotFoundError(f"Dataset path '{dataset_name}' not found.")

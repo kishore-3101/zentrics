@@ -7,6 +7,7 @@ import { Breadcrumbs } from './Breadcrumbs';
 import { EnvironmentBadge } from './EnvironmentBadge';
 import { NotificationMenu } from './NotificationMenu';
 import { ProfileMenu } from './ProfileMenu';
+import { SimulationToolbar } from './SimulationToolbar';
 
 interface HeaderProps {
   onOpenNavigation: () => void;
@@ -38,6 +39,10 @@ export function Header({ onOpenNavigation }: HeaderProps) {
               {title}
             </h1>
           </div>
+        </div>
+
+        <div className="hidden lg:flex items-center">
+          <SimulationToolbar />
         </div>
 
         <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">

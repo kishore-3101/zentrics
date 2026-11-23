@@ -10,6 +10,7 @@ export interface SimulationContextValue {
   pause: () => void;
   reset: () => void;
   setSpeed: (speed: SimulationSpeed) => void;
+  injectRing: (typology?: string, difficulty?: string, amount?: number) => Promise<any>;
 }
 
 export const SimulationContext = createContext<SimulationContextValue | null>(null);

@@ -19,6 +19,7 @@ import logging
 import os
 import sys
 import threading
+import time
 from http import HTTPStatus
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
@@ -296,6 +297,87 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
             difficulty = payload.get("difficulty", "medium")
             amount = float(payload.get("amount", 250000.0))
             res = SIMULATOR.inject_ring(typology=typology, difficulty=difficulty, amount_base=amount)
+
+            # Mirror injected ring into STORE so /alerts, /rings/{id}, and /timeline find it immediately
+            ring_id = res["ring_id"]
+            txns = res.get("transactions", [])
+            accounts = list({t["src_account"] for t in txns} | {t["dst_account"] for t in txns})
+
+            nodes = []
+            for idx, acc in enumerate(accounts):
+                role = "collector" if "COLL" in acc else ("mule" if "HOP" in acc or "ACC" in acc else "victim")
+                nodes.append({
+                    "account_id": acc,
+                    "role": role,
+                    "risk_score": 92.0,
+                    "position": [-6.0 + (idx % 3) * 6.0, (idx // 3) * 3.0 - 2.0, 0.0],
+                    "total_incoming": res["amount_moved"],
+                    "total_outgoing": res["amount_moved"],
+                    "city_cluster": "tier1_delhi" if idx % 2 == 0 else "tier1_mumbai",
+                    "bank_id": "SBI_INJ",
+                    "kyc_level": "minimal",
+                    "account_type": "current",
+                    "open_date": "2026-01-01",
+                    "declared_income_band": "low",
+                    "is_injected": True,
+                })
+
+            edges = []
+            for hop, t in enumerate(txns, 1):
+                edges.append({
+                    "txn_id": t["txn_id"],
+                    "src_account": t["src_account"],
+                    "dst_account": t["dst_account"],
+                    "amount": t["amount"],
+                    "ts": t["ts"],
+                    "channel": t.get("channel", "UPI"),
+                    "hop_index": hop,
+                    "is_suspicious": True,
+                    "is_injected": True,
+                })
+
+            new_alert = {
+                "case_id": int(time.time()) % 10000,
+                "ring_id": ring_id,
+                "fingerprint": f"fp_{ring_id.lower()}",
+                "ring_type": typology,
+                "score": 92.5,
+                "priority": round(92.5 * (res["amount_moved"] / 1000.0), 1),
+                "amount_moved": res["amount_moved"],
+                "amount_cashed": 0.0,
+                "amount_at_risk": res["amount_moved"],
+                "duration_min": 25.0,
+                "n_accounts": len(accounts),
+                "n_victims": 1,
+                "status": "new",
+                "detected_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                "assignee": "Unassigned",
+                "pattern_tags": [typology, "live_injected", difficulty],
+                "explanation": f"Live injected {typology.replace('_', ' ')} syndicate comprising {len(accounts)} accounts.",
+                "is_injected": True,
+            }
+
+            STORE.alerts.insert(0, new_alert)
+            STORE.rings[ring_id] = {
+                **new_alert,
+                "nodes": nodes,
+                "edges": edges,
+            }
+            STORE.timelines[ring_id] = [
+                {
+                    "txn_id": e["txn_id"],
+                    "ts": e["ts"],
+                    "timestampMs": int(datetime.datetime.fromisoformat(e["ts"].replace("Z", "+00:00")).timestamp() * 1000),
+                    "src_account": e["src_account"],
+                    "dst_account": e["dst_account"],
+                    "amount": e["amount"],
+                    "channel": e["channel"],
+                    "hop_index": e["hop_index"],
+                    "is_suspicious": True,
+                    "progress": hop_idx / max(len(edges), 1),
+                }
+                for hop_idx, e in enumerate(edges, 1)
+            ]
         else:
             self._send_json_response(HTTPStatus.BAD_REQUEST, {"error": f"Unknown simulation action '{action}'"})
             return
