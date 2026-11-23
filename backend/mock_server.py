@@ -304,6 +304,9 @@ class MockDataStore:
             return {
                 "success": True,
                 "injected_ring_id": new_id,
+                "ring_id": new_id,
+                "scenario_name": payload.get("scenario_name", "Live Account Takeover"),
+                "total_amount": float(payload.get("amount") or payload.get("total_amount") or 500000.0),
                 "txns_injected": 6
             }
 
@@ -452,7 +455,7 @@ class MockRequestHandler(SimpleHTTPRequestHandler):
             self.send_json(200, STORE.set_simulation_speed(speed))
             return
 
-        if path == "/simulation/inject_ring":
+        if path in ("/simulation/inject_ring", "/simulation/run", "/simulation/custom", "/simulation/simulate"):
             result = STORE.inject_ring(payload)
             self.send_json(200, result)
             return
@@ -570,6 +573,14 @@ def create_fastapi_app():
 
         @app.post("/simulation/inject_ring")
         def post_simulation_inject(payload: Dict[str, Any]):
+            return STORE.inject_ring(payload)
+
+        @app.post("/simulation/run")
+        def post_simulation_run(payload: Dict[str, Any]):
+            return STORE.inject_ring(payload)
+
+        @app.post("/simulation/custom")
+        def post_simulation_custom(payload: Dict[str, Any]):
             return STORE.inject_ring(payload)
 
         return app

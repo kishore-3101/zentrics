@@ -24,8 +24,43 @@ import { createCurvedLineCoordinates } from '../../utils/geoData';
 import type { AccountNodeData } from '../../../../types/ring-graph';
 import { cn } from '../../../../lib/cn';
 
-// 1. Google Earth Hybrid: High-resolution satellite photography + labels, borders & transport networks
-export const GOOGLE_EARTH_HYBRID_STYLE: StyleSpecification = {
+// 1. Google Maps Default: Full-resolution official roadmap with streets, topology & city networks
+export const GOOGLE_MAPS_DEFAULT_STYLE: StyleSpecification = {
+  version: 8,
+  sources: {
+    'google-roadmap-base': {
+      type: 'raster',
+      tiles: [
+        'https://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}',
+        'https://mt1.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}',
+        'https://mt2.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}',
+        'https://mt3.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}',
+      ],
+      tileSize: 256,
+      attribution: '© Google Maps',
+      maxzoom: 20, // Prevents 404s; MapLibre automatically overzooms tiles smoothly up to zoom 22
+    },
+  },
+  layers: [
+    {
+      id: 'google-roadmap-bg',
+      type: 'background',
+      paint: {
+        'background-color': '#F4F3F0',
+      },
+    },
+    {
+      id: 'google-roadmap-layer',
+      type: 'raster',
+      source: 'google-roadmap-base',
+      minzoom: 0,
+      maxzoom: 22,
+    },
+  ],
+};
+
+// 2. Google Maps Satellite: High-resolution satellite aerial photography + labels, borders & transport networks
+export const GOOGLE_MAPS_SATELLITE_STYLE: StyleSpecification = {
   version: 8,
   sources: {
     'google-hybrid-base': {
@@ -38,10 +73,17 @@ export const GOOGLE_EARTH_HYBRID_STYLE: StyleSpecification = {
       ],
       tileSize: 256,
       attribution: '© Google Earth / Google Maps, Maxar Technologies',
-      maxzoom: 22,
+      maxzoom: 20, // Overzooms seamlessly up to zoom 22 without ever blacking out
     },
   },
   layers: [
+    {
+      id: 'google-satellite-bg',
+      type: 'background',
+      paint: {
+        'background-color': '#07110D',
+      },
+    },
     {
       id: 'google-hybrid-layer',
       type: 'raster',
@@ -52,82 +94,20 @@ export const GOOGLE_EARTH_HYBRID_STYLE: StyleSpecification = {
   ],
 };
 
-// 2. Google Earth Pure Satellite: Raw photorealistic satellite photography
-export const GOOGLE_EARTH_SATELLITE_STYLE: StyleSpecification = {
-  version: 8,
-  sources: {
-    'google-sat-base': {
-      type: 'raster',
-      tiles: [
-        'https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}',
-        'https://mt1.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}',
-        'https://mt2.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}',
-        'https://mt3.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}',
-      ],
-      tileSize: 256,
-      attribution: '© Google Earth / Google Maps, Maxar Technologies',
-      maxzoom: 22,
-    },
-  },
-  layers: [
-    {
-      id: 'google-sat-layer',
-      type: 'raster',
-      source: 'google-sat-base',
-      minzoom: 0,
-      maxzoom: 22,
-    },
-  ],
-};
+// Backwards-compatible aliases
+export const GOOGLE_EARTH_HYBRID_STYLE = GOOGLE_MAPS_SATELLITE_STYLE;
+export const GOOGLE_EARTH_SATELLITE_STYLE = GOOGLE_MAPS_SATELLITE_STYLE;
 
-// 3. Fallback Raster Style: Esri World Dark Gray Canvas
-export const ESRI_DARK_GRAY_FALLBACK_STYLE: StyleSpecification = {
-  version: 8,
-  sources: {
-    'esri-dark-base': {
-      type: 'raster',
-      tiles: [
-        'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
-      ],
-      tileSize: 256,
-      attribution: '© Esri, © OpenStreetMap contributors, OpenFreeMap',
-    },
-    'esri-dark-ref': {
-      type: 'raster',
-      tiles: [
-        'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
-      ],
-      tileSize: 256,
-    },
-  },
-  layers: [
-    {
-      id: 'esri-dark-base-layer',
-      type: 'raster',
-      source: 'esri-dark-base',
-      minzoom: 0,
-      maxzoom: 16,
-    },
-    {
-      id: 'esri-dark-ref-layer',
-      type: 'raster',
-      source: 'esri-dark-ref',
-      minzoom: 0,
-      maxzoom: 16,
-    },
-  ],
-};
+export type BasemapMode = 'default' | 'satellite';
 
-export type BasemapMode = 'google-hybrid' | 'tactical-dark';
-
-export const BASEMAP_CONFIGS: Record<BasemapMode, { style: StyleSpecification | string; label: string }> = {
-  'google-hybrid': {
-    style: GOOGLE_EARTH_HYBRID_STYLE,
-    label: '🛰️ Google Satellite',
+export const BASEMAP_CONFIGS: Record<BasemapMode, { style: StyleSpecification; label: string }> = {
+  default: {
+    style: GOOGLE_MAPS_DEFAULT_STYLE,
+    label: '🗺️ Default',
   },
-  'tactical-dark': {
-    style: ESRI_DARK_GRAY_FALLBACK_STYLE,
-    label: '🗺️ Esri Gray',
+  satellite: {
+    style: GOOGLE_MAPS_SATELLITE_STYLE,
+    label: '🛰️ Satellite',
   },
 };
 
@@ -169,7 +149,7 @@ export const GisWorldMap = memo(function GisWorldMap({
   const markersRef = useRef<MapLibreMarker[]>([]);
   const animFrameRef = useRef<number | null>(null);
 
-  const [basemap, setBasemap] = useState<BasemapMode>('google-hybrid');
+  const [basemap, setBasemap] = useState<BasemapMode>('default');
   const [is3dPitch, setIs3dPitch] = useState<boolean>(true);
 
   // ---------------------------------------------------------------------------
@@ -264,8 +244,10 @@ export const GisWorldMap = memo(function GisWorldMap({
 
       if (currentIsLive) {
         if (arc.hop_index < currentHopNum) {
+          // Previously completed hop: edge stays drawn after transfer
           curvePoints = fullCurve;
         } else if (arc.hop_index === currentHopNum || (currentHopNum === 3 && arc.hop_index === 4)) {
+          // Current hop: draws progressively as amount travels
           const sliceCount = Math.max(
             2,
             Math.floor(Math.max(0.06, currentLiveProgress) * fullCurve.length),
@@ -277,7 +259,8 @@ export const GisWorldMap = memo(function GisWorldMap({
             headPos = { x: projected.x, y: projected.y };
           }
         } else {
-          return; // Future hop not yet reached
+          // Future hop: DO NOT render until amount is transferred
+          return;
         }
       }
 
@@ -553,7 +536,7 @@ export const GisWorldMap = memo(function GisWorldMap({
           },
         });
       }
-      // Future hops are not rendered yet!
+      // Future hops are not shown until the amount is actually transferred
     });
 
     return { type: 'FeatureCollection' as const, features };
@@ -665,19 +648,19 @@ export const GisWorldMap = memo(function GisWorldMap({
     }
   }, []);
 
-  // 1. Initialize MapLibre GL Map with Google Earth Satellite Style & 3D oblique tilt
+  // 1. Initialize MapLibre GL Map with Google Maps Default Style & 3D oblique tilt
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
     const map = new Map({
       container: mapContainerRef.current,
-      style: GOOGLE_EARTH_HYBRID_STYLE,
+      style: BASEMAP_CONFIGS[basemap].style,
       center: [78.9629, 22.5937], // Centered on India
       zoom: 4.5,
-      pitch: 48, // Authentic Google Earth 3D oblique tilt
+      pitch: 48, // Authentic 3D oblique tilt
       bearing: -10,
       minZoom: 1.5,
-      maxZoom: 20,
+      maxZoom: 22, // Full zoom down to street level without blacking out
       attributionControl: false,
     });
 
@@ -737,13 +720,10 @@ export const GisWorldMap = memo(function GisWorldMap({
       });
     });
 
-    // Fallback handler if satellite style encounters network restrictions
+    // Handle non-fatal MapLibre events without switching basemap or blacking out
     map.on('error', (e) => {
-      if (!map.isStyleLoaded() && e.error) {
-        console.warn('Satellite style unreachable, falling back to Esri Dark Canvas');
-        try {
-          map.setStyle(ESRI_DARK_GRAY_FALLBACK_STYLE);
-        } catch {}
+      if (e?.error) {
+        console.debug('[GisWorldMap] MapLibre warning/error:', e.error);
       }
     });
 
@@ -1208,9 +1188,9 @@ export const GisWorldMap = memo(function GisWorldMap({
         })}
       </svg>
 
-      {/* 2. Floating Live Attack Video Playback HUD Overlay (Positioned at bottom center to never obscure map nodes & corridors) */}
-      {isLiveActive && livePhase !== 'idle' && (
-        <div className="absolute bottom-5 inset-x-4 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 z-30 max-w-xl w-[92%] sm:w-full animate-fadeIn">
+      {/* 2. Floating Live Attack Video Playback HUD Overlay (Positioned in top-right corner to never obscure map nodes & corridors) */}
+      {isLiveActive && livePhase !== 'idle' && livePhase !== 'completed' && (
+        <div className="absolute top-16 right-4 z-30 max-w-md w-[92%] sm:w-[380px] animate-fadeIn pointer-events-auto">
           <div className="rounded-xl border border-gold/40 bg-[#0B1812]/95 p-3 shadow-2xl backdrop-blur-md space-y-2">
             {/* Header row */}
             <div className="flex items-center justify-between gap-3">
@@ -1287,34 +1267,34 @@ export const GisWorldMap = memo(function GisWorldMap({
         </div>
       )}
 
-      {/* 4. Sleek Basemap Switcher: Satellite vs Dark (Bottom-Left) */}
-      <div className="absolute bottom-20 left-4 z-20 hidden sm:flex items-center rounded-xl border border-gold/30 bg-[#0B1812]/95 p-1 shadow-md backdrop-blur-md">
+      {/* 4. Sleek Basemap Switcher: Default vs Satellite (Bottom-Left) */}
+      <div className="absolute bottom-5 left-4 z-20 hidden sm:flex items-center rounded-xl border border-gold/30 bg-[#0B1812]/95 p-1 shadow-md backdrop-blur-md">
         <button
           type="button"
-          onClick={() => handleSelectBasemap('google-hybrid')}
+          onClick={() => handleSelectBasemap('default')}
           className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all cursor-pointer ${
-            basemap === 'google-hybrid'
+            basemap === 'default'
+              ? 'border border-gold/60 bg-gold/25 text-gold-light shadow-[0_0_8px_rgba(201,168,91,0.3)]'
+              : 'border border-transparent text-muted hover:text-ink'
+          }`}
+        >
+          🗺️ Default
+        </button>
+        <button
+          type="button"
+          onClick={() => handleSelectBasemap('satellite')}
+          className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all cursor-pointer ${
+            basemap === 'satellite'
               ? 'border border-gold/60 bg-gold/25 text-gold-light shadow-[0_0_8px_rgba(201,168,91,0.3)]'
               : 'border border-transparent text-muted hover:text-ink'
           }`}
         >
           🛰️ Satellite
         </button>
-        <button
-          type="button"
-          onClick={() => handleSelectBasemap('tactical-dark')}
-          className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all cursor-pointer ${
-            basemap === 'tactical-dark'
-              ? 'border border-gold/60 bg-gold/25 text-gold-light shadow-[0_0_8px_rgba(201,168,91,0.3)]'
-              : 'border border-transparent text-muted hover:text-ink'
-          }`}
-        >
-          🌑 Dark Canvas
-        </button>
       </div>
 
       {/* 5. Navigation Controls: 3D Tilt, Compass North, Zoom (Bottom-Right) */}
-      <div className="absolute bottom-20 right-4 z-20 flex flex-col gap-1.5">
+      <div className="absolute bottom-5 right-4 z-20 flex flex-col gap-1.5">
         <button
           type="button"
           onClick={toggle3dPitch}

@@ -8,7 +8,6 @@ import { RingExplorerHeader } from '../features/ring-explorer/components/RingExp
 import { RingExplorerSkeleton } from '../features/ring-explorer/components/RingExplorerSkeleton';
 import { RingSummaryBar } from '../features/ring-explorer/components/RingSummaryBar';
 import { SceneContainer } from '../features/ring-explorer/components/canvas/SceneContainer';
-import { TimelineReplayBar } from '../features/ring-explorer/components/TimelineReplayBar';
 import { TransactionInspector } from '../features/ring-explorer/components/TransactionInspector';
 import { useRingGraph } from '../features/ring-explorer/hooks/useRingGraph';
 import { useTimelineReplay } from '../features/ring-explorer/hooks/useTimelineReplay';
@@ -48,16 +47,7 @@ export default function RingExplorer() {
   } = useRingGraph(effectiveRingId);
 
   const {
-    isPlaying,
     speed,
-    setSpeed,
-    progress,
-    play,
-    pause,
-    restart,
-    scrubTo,
-    formattedTime,
-    runningTotals,
     activeTxnIds,
   } = useTimelineReplay({
     timeline,
@@ -388,23 +378,6 @@ export default function RingExplorer() {
           edge={selectedEdge}
           onClose={handleCloseInspectors}
         />
-
-        {/* Bottom Floating Cinematic Timeline Replay Bar */}
-        <div className="absolute bottom-4 left-4 right-4 z-20 pointer-events-auto">
-          <TimelineReplayBar
-            isPlaying={isPlaying}
-            speed={speed}
-            progress={progress}
-            formattedTime={formattedTime}
-            runningTotals={runningTotals}
-            totalTransactions={edges.length}
-            onPlay={play}
-            onPause={pause}
-            onRestart={restart}
-            onScrub={scrubTo}
-            onSpeedChange={setSpeed}
-          />
-        </div>
       </div>
     </div>
   );
