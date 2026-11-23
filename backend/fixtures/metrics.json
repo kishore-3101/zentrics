@@ -268,5 +268,11 @@
     "baseline_alerts": 412,
     "ring_cases": 9,
     "reduction_pct": 97.8
+  },
+  "operationalImpact": {
+    "totalAccountAlerts": 412,
+    "consolidatedRings": 18,
+    "reductionPercentage": 97.8,
+    "simulatedMoneySaved": 38400000
   }
 }

@@ -9,11 +9,12 @@ interface TypologyDifficultyMatrixProps {
   metrics: TypologyDifficultyMetric[];
 }
 
-export function TypologyDifficultyMatrix({ metrics }: TypologyDifficultyMatrixProps) {
+export function TypologyDifficultyMatrix({ metrics = [] }: TypologyDifficultyMatrixProps) {
   const [selectedTypology, setSelectedTypology] = useState<string>('all');
   const [selectedTier, setSelectedTier] = useState<string>('all');
 
-  const filteredMetrics = metrics.filter((m) => {
+  const safeMetrics = metrics || [];
+  const filteredMetrics = safeMetrics.filter((m) => {
     if (selectedTypology !== 'all') {
       const normTypology = m.typology.toLowerCase().replace(/[-\s]+/g, '_');
       const normSelected = selectedTypology.toLowerCase().replace(/[-\s]+/g, '_');

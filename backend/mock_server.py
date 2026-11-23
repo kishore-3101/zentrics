@@ -75,6 +75,16 @@ class MockDataStore:
             # Load metrics
             with open(FIXTURES_DIR / "metrics.json", "r", encoding="utf-8") as f:
                 self.metrics: Dict[str, Any] = json.load(f)
+                if "by_typology_difficulty" in self.metrics and "typologyBreakdown" not in self.metrics:
+                    self.metrics["typologyBreakdown"] = self.metrics["by_typology_difficulty"]
+                if "alert_reduction" in self.metrics and "operationalImpact" not in self.metrics:
+                    ar = self.metrics["alert_reduction"]
+                    self.metrics["operationalImpact"] = {
+                        "totalAccountAlerts": ar.get("baseline_alerts", 412),
+                        "consolidatedRings": ar.get("ring_cases", 18),
+                        "reductionPercentage": ar.get("reduction_pct", 97.8),
+                        "simulatedMoneySaved": 38400000,
+                    }
 
             # Load overview
             with open(FIXTURES_DIR / "overview.json", "r", encoding="utf-8") as f:

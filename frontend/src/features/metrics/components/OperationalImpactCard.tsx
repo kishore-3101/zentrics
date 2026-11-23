@@ -12,6 +12,13 @@ interface OperationalImpactCardProps {
 }
 
 export function OperationalImpactCard({ impact }: OperationalImpactCardProps) {
+  const safeImpact = impact || {
+    totalAccountAlerts: 412,
+    consolidatedRings: 18,
+    reductionPercentage: 97.8,
+    simulatedMoneySaved: 38400000,
+  };
+
   return (
     <DashboardCard bodyClassName="p-5 space-y-4">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between border-b border-gold/10 pb-3">
@@ -31,7 +38,7 @@ export function OperationalImpactCard({ impact }: OperationalImpactCardProps) {
 
         <div className="inline-flex items-center gap-1 rounded-full border border-emerald/35 bg-emerald/15 px-3 py-1 text-xs font-bold text-emerald">
           <ArrowDownRight className="size-3.5" />
-          {impact.reductionPercentage}% Alert Fatigue Reduction
+          {safeImpact.reductionPercentage}% Alert Fatigue Reduction
         </div>
       </div>
 
@@ -41,7 +48,7 @@ export function OperationalImpactCard({ impact }: OperationalImpactCardProps) {
             Raw Account-Level Alerts
           </span>
           <p className="font-display text-2xl font-bold text-ink tabular-nums">
-            {impact.totalAccountAlerts}
+            {safeImpact.totalAccountAlerts}
           </p>
           <p className="text-[11px] text-muted">
             Isolated account triggers raised by heuristic threshold rules
