@@ -18,7 +18,7 @@ export function TypologyDonutChart({ slices, delay = 0, className }: TypologyDon
   const reducedMotion = usePrefersReducedMotion();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
-  const totalRings = slices.reduce((sum, slice) => sum + slice.count, 0);
+  const totalRings = (slices || []).reduce((sum, slice) => sum + (slice.count || 0), 0);
   const active = activeIndex === null ? null : slices[activeIndex];
 
   return (

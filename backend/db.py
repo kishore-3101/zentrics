@@ -121,7 +121,8 @@ SELECT COALESCE(json_agg(to_jsonb(query_res)), '[]'::json) FROM query_res;
             raise ConnectionError("Database URL is not configured.")
 
         proc = subprocess.run(
-            ["psql", self.db_url, "-v", "ON_ERROR_STOP=1", "-c", sql],
+            ["psql", self.db_url, "-v", "ON_ERROR_STOP=1"],
+            input=sql,
             capture_output=True,
             text=True,
             timeout=timeout,
