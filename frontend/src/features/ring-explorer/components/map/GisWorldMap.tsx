@@ -1208,25 +1208,25 @@ export const GisWorldMap = memo(function GisWorldMap({
         })}
       </svg>
 
-      {/* 2. Floating Live Attack Video Playback HUD Overlay (Positioned safely below top command bar) */}
+      {/* 2. Floating Live Attack Video Playback HUD Overlay (Positioned at bottom center to never obscure map nodes & corridors) */}
       {isLiveActive && livePhase !== 'idle' && (
-        <div className="absolute top-16 inset-x-4 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 z-30 max-w-2xl w-[94%] sm:w-full animate-fadeIn">
-          <div className="rounded-2xl border border-gold/40 bg-[#0B1812]/95 p-3.5 sm:p-4 shadow-2xl backdrop-blur-md space-y-2.5">
+        <div className="absolute bottom-5 inset-x-4 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 z-30 max-w-xl w-[92%] sm:w-full animate-fadeIn">
+          <div className="rounded-xl border border-gold/40 bg-[#0B1812]/95 p-3 shadow-2xl backdrop-blur-md space-y-2">
             {/* Header row */}
             <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2.5 min-w-0">
                 {livePhase === 'blocked' ? (
-                  <span className="grid size-8 place-items-center rounded-xl bg-danger/25 text-danger border border-danger/40 animate-pulse">
-                    <ShieldAlert className="size-4" />
+                  <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-danger/25 text-danger border border-danger/40 animate-pulse">
+                    <ShieldAlert className="size-3.5" />
                   </span>
                 ) : (
-                  <span className="grid size-8 place-items-center rounded-xl bg-gold/20 text-gold-light border border-gold/40">
-                    <Zap className="size-4 fill-current" />
+                  <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-gold/20 text-gold-light border border-gold/40">
+                    <Zap className="size-3.5 fill-current" />
                   </span>
                 )}
-                <div>
+                <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-display text-xs font-bold text-ink">
+                    <span className="font-display text-xs font-bold text-ink truncate">
                       {livePhase === 'genesis' && '🔴 LIVE ATTACK STREAMING: Account Compromise'}
                       {livePhase === 'hop1' && '💸 LIVE ATTACK STREAMING: Hop 1 ➔ Adversary Transfer'}
                       {livePhase === 'hop2' && '💸 LIVE ATTACK STREAMING: Hop 2 ➔ Distributor Layering'}
@@ -1234,7 +1234,7 @@ export const GisWorldMap = memo(function GisWorldMap({
                       {livePhase === 'blocked' && '🛡️ AUTONOMOUS AI SHIELD ENGAGED: Account Quarantined!'}
                     </span>
                     <span className={cn(
-                      'rounded px-1.5 py-0.2 text-[9px] font-mono font-bold uppercase tracking-wider border',
+                      'shrink-0 rounded px-1.5 py-0.2 text-[9px] font-mono font-bold uppercase tracking-wider border',
                       livePhase === 'blocked' ? 'bg-danger/25 text-danger border-danger/40 animate-pulse' : 'bg-gold/15 text-gold-light border-gold/30'
                     )}>
                       {livePhase === 'blocked' ? 'CONTAINMENT ACTIVE' : 'LIVE STREAM'}
@@ -1262,7 +1262,7 @@ export const GisWorldMap = memo(function GisWorldMap({
             </div>
 
             {/* Live Progress Bar */}
-            <div className="w-full h-1.5 bg-canvas/80 rounded-full overflow-hidden border border-gold/15">
+            <div className="w-full h-1 bg-canvas/80 rounded-full overflow-hidden border border-gold/15">
               <div
                 className={cn(
                   'h-full transition-all duration-150',
@@ -1356,14 +1356,6 @@ export const GisWorldMap = memo(function GisWorldMap({
         >
           <ZoomOut className="size-4" />
         </button>
-      </div>
-
-      {/* 6. Bottom-Left Photorealistic Earth Engine Disclaimer */}
-      <div className="absolute bottom-4 left-4 z-20 pointer-events-none hidden md:block max-w-lg">
-        <div className="rounded-lg border border-gold/20 bg-[#0B1812]/90 px-3 py-1 text-[10px] text-muted backdrop-blur-md">
-          <span className="text-gold-light font-semibold">GOOGLE EARTH SATELLITE ENGINE: </span>
-          High-resolution satellite terrain imagery synchronized with active mule ring corridors ({geoGraph.locations.length} regional hubs).
-        </div>
       </div>
     </div>
   );

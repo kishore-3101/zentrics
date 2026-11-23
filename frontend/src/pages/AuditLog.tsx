@@ -6,7 +6,6 @@ import {
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Skeleton } from '../components/ui/Skeleton';
-import { StatusBadge } from '../components/ui/StatusBadge';
 import { ExportAuditButton } from '../features/audit/components/ExportAuditButton';
 import { AuditDetailModal } from '../features/audit/components/AuditDetailModal';
 import { AuditFiltersBar } from '../features/audit/components/AuditFiltersBar';
@@ -84,9 +83,6 @@ export default function AuditLog() {
             <h1 className="font-display text-2xl font-bold tracking-tight text-ink sm:text-3xl">
               Case Management &amp; Compliance Audit
             </h1>
-            <StatusBadge tone="gold" size="sm" dot>
-              Module 16 &bull; Active
-            </StatusBadge>
           </div>
           <p className="mt-1 text-sm text-muted">
             Operational case triage tracker and immutable regulatory audit trail conforming to PMLA statutory retention.

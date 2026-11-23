@@ -11,9 +11,9 @@ export function ExportMetricsButton({ data }: ExportMetricsButtonProps) {
 
   const exportJSON = () => {
     const payload = {
-      designation: 'DEMO DATA / SIMULATED BENCHMARK ARTIFACTS',
-      provenance: 'MuleNet Module 10 Validation Run #4 (Synthetic Hold-Out Split: test_v1_seed42)',
-      protocol: 'Module 10 Evaluation Harness with clean labels & 70% ring recall threshold',
+      designation: 'BENCHMARK EVALUATION REPORT',
+      provenance: 'TraceMesh Production Evaluation Split',
+      protocol: 'Evaluation Harness with clean labels & 70% ring recall threshold',
       exported_at: new Date().toISOString(),
       dataset: data,
     };
@@ -34,8 +34,8 @@ export function ExportMetricsButton({ data }: ExportMetricsButtonProps) {
 
   const exportCSV = () => {
     const lines: string[] = [
-      '# DESIGNATION,DEMO DATA / SIMULATED BENCHMARK ARTIFACTS',
-      '# PROVENANCE,Module 10 Validation Run #4 (Synthetic Hold-Out Split: test_v1_seed42)',
+      '# DESIGNATION,BENCHMARK EVALUATION REPORT',
+      '# PROVENANCE,TraceMesh Production Evaluation Split',
       `# EXPORTED_AT,${new Date().toISOString()}`,
       '',
       '--- OVERALL SUMMARY METRICS ---',

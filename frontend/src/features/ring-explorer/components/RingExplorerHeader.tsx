@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { RingStatusPill } from '../../../components/ui/RingStatusPill';
 import { RiskScoreMeter } from '../../../components/ui/RiskScoreMeter';
-import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { TypologyBadge } from '../../../components/ui/TypologyBadge';
 import type { RingGraphData } from '../../../types/ring-graph';
 import { fetchAlerts } from '../../../services/alerts.service';
@@ -72,9 +71,6 @@ export function RingExplorerHeader({
 
             <TypologyBadge typology={graph.ring_type} />
             <RingStatusPill status={graph.status} />
-            <StatusBadge tone="gold" size="sm" dot>
-              Demo data
-            </StatusBadge>
           </div>
 
           <p className="mt-1 text-xs text-muted flex items-center gap-2">

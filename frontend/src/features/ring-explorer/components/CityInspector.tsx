@@ -50,11 +50,6 @@ export function CityInspector({ location, onClose, onSelectAccount }: CityInspec
           </button>
         </div>
 
-        {/* Demo data provenance notice */}
-        <div className="mt-2.5 rounded-lg border border-gold/15 bg-gold/5 px-2.5 py-1.5 text-[10px] text-gold-light/90 leading-tight">
-          <strong>DEMO DATA:</strong> Synthetic geospatial projection based on account cluster metadata ({location.id}).
-        </div>
-
         {/* Key Metrics Grid */}
         <div className="mt-3.5 grid grid-cols-2 gap-2 text-xs">
           <div className="rounded-xl border border-gold/10 bg-canvas/60 p-2.5">
