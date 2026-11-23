@@ -1,6 +1,6 @@
-import { AlertTriangle, Compass, RotateCw, Search, Tag } from 'lucide-react';
+import { AlertTriangle, Compass, RotateCcw, RotateCw, Search, Tag } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { AccountInspector } from '../features/ring-explorer/components/AccountInspector';
 import { CityInspector } from '../features/ring-explorer/components/CityInspector';
 import { GisWorldMap } from '../features/ring-explorer/components/map/GisWorldMap';
@@ -18,10 +18,16 @@ import type { AccountNodeData } from '../types/ring-graph';
 
 export default function RingExplorer() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   // Resolve effective ring ID (defaults to R-104 for demo-ring or root entry)
   const effectiveRingId = !id || id === 'demo-ring' ? 'R-104' : id;
+  const isLiveSimulation =
+    searchParams.get('live') === '1' ||
+    searchParams.get('play') === 'true' ||
+    effectiveRingId.startsWith('SIM-');
 
   const [viewMode, setViewMode] = useState<'map' | 'canvas'>('map');
+  const [replayTrigger, setReplayTrigger] = useState(0);
 
   const {
     graph,
@@ -260,22 +266,36 @@ export default function RingExplorer() {
             </div>
           </div>
 
-          {/* Right: Sleek Single-Line Legend */}
-          <div className="flex items-center gap-3 rounded-xl border border-gold/20 bg-[#0B1812]/90 px-3 py-1.5 backdrop-blur-md shadow-md text-xs">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
-              Legend:
-            </span>
-            <div className="flex items-center gap-1.5 text-[11px]">
-              <span className="size-2 rounded-full bg-[#00C878] shadow-[0_0_6px_#00C878]" />
-              <span className="text-ink/90 font-medium">Inflow (Victim)</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-[11px]">
-              <span className="size-2 rounded-full bg-[#C9A85B] shadow-[0_0_6px_#C9A85B]" />
-              <span className="text-ink/90 font-medium">Mule Conduit</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-[11px]">
-              <span className="size-2 rounded-full bg-[#EF4444] shadow-[0_0_6px_#EF4444]" />
-              <span className="text-ink/90 font-medium">Cash-out Sink</span>
+          {/* Right: Replay Video Action + Sleek Single-Line Legend */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {viewMode === 'map' && isLiveSimulation && (
+              <button
+                type="button"
+                onClick={() => setReplayTrigger((prev) => prev + 1)}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-gold/45 bg-gold/15 px-3 py-1.5 text-xs font-bold text-gold-light hover:border-gold hover:bg-gold/25 transition-all shadow-md cursor-pointer"
+                title="Replay animated step-by-step video of this simulated attack"
+              >
+                <RotateCcw className="size-3.5 text-gold-light" />
+                <span>Replay Attack Video</span>
+              </button>
+            )}
+
+            <div className="flex items-center gap-3 rounded-xl border border-gold/20 bg-[#0B1812]/90 px-3 py-1.5 backdrop-blur-md shadow-md text-xs">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
+                Legend:
+              </span>
+              <div className="flex items-center gap-1.5 text-[11px]">
+                <span className="size-2 rounded-full bg-[#00C878] shadow-[0_0_6px_#00C878]" />
+                <span className="text-ink/90 font-medium">Inflow (Victim)</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-[11px]">
+                <span className="size-2 rounded-full bg-[#C9A85B] shadow-[0_0_6px_#C9A85B]" />
+                <span className="text-ink/90 font-medium">Mule Conduit</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-[11px]">
+                <span className="size-2 rounded-full bg-[#EF4444] shadow-[0_0_6px_#EF4444]" />
+                <span className="text-ink/90 font-medium">Cash-out Sink</span>
+              </div>
             </div>
           </div>
         </div>
@@ -291,6 +311,8 @@ export default function RingExplorer() {
               cameraPreset={cameraPreset}
               searchQuery={searchQuery}
               filterRole={filterRole}
+              autoPlaySimulation={isLiveSimulation}
+              replayTrigger={replayTrigger}
               onSelectCity={(loc) => {
                 setSelectedNode(null);
                 setSelectedEdge(null);

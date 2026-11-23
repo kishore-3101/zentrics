@@ -1,6 +1,8 @@
-import { Check, ChevronDown, Pause, Play, RotateCcw, Zap } from 'lucide-react';
+import { Check, ChevronDown, Pause, Play, RotateCcw, Sliders, Zap } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SIMULATION_SPEEDS, type SimulationStatus } from '../../features/simulation/constants';
+import { SimulationStudioModal } from '../../features/simulation/SimulationStudioModal';
 import { useSimulation } from '../../features/simulation/useSimulation';
 import { cn } from '../../lib/cn';
 import { formatVirtualTime } from '../../lib/formatters';
@@ -18,109 +20,37 @@ function Divider() {
   return <span className="h-5 w-px shrink-0 bg-gold/15" aria-hidden />;
 }
 
-function InjectRingForm({
-  onClose,
-  onInject,
-}: {
-  onClose: () => void;
-  onInject?: (typology?: string, difficulty?: string, amount?: number) => Promise<any>;
-}) {
-  const [typology, setTypology] = useState('circular_flow');
-  const [difficulty, setDifficulty] = useState('medium');
-  const [loading, setLoading] = useState(false);
-  const [injectedId, setInjectedId] = useState<string | null>(null);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!onInject) return;
-    setLoading(true);
-    try {
-      const res = await onInject(typology, difficulty);
-      if (res && res.ring_id) {
-        setInjectedId(res.ring_id);
-        setTimeout(() => {
-          onClose();
-        }, 1200);
-      } else {
-        onClose();
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <div className="flex items-center justify-between border-b border-gold/15 pb-2">
-        <span className="font-mono text-xs font-bold text-gold-light flex items-center gap-1.5">
-          <Zap className="size-3.5 text-danger fill-current" /> Live Ring Injector
-        </span>
-        <button
-          type="button"
-          onClick={onClose}
-          className="text-xs text-muted hover:text-ink cursor-pointer"
-        >
-          ✕
-        </button>
-      </div>
-
-      {injectedId ? (
-        <div className="rounded-lg bg-emerald/10 border border-emerald/30 p-2 text-center text-xs font-semibold text-emerald">
-          ✓ Injected {injectedId}! Alert published.
-        </div>
-      ) : (
-        <>
-          <div>
-            <label className="text-[10px] font-semibold uppercase text-muted block mb-1">
-              Ring Typology
-            </label>
-            <select
-              value={typology}
-              onChange={(e) => setTypology(e.target.value)}
-              className="w-full rounded-lg border border-gold/25 bg-[#07110D] px-2 py-1 text-xs text-ink focus:border-gold focus:outline-none"
-            >
-              <option value="circular_flow">Circular Flow (Cycles)</option>
-              <option value="fan_in_burst">Fan-In Burst (Aggregator)</option>
-              <option value="layering_chain">Layering Chain (Multi-hop)</option>
-              <option value="pass_through_hub">Rapid Pass-Through</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="text-[10px] font-semibold uppercase text-muted block mb-1">
-              Detection Difficulty
-            </label>
-            <select
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value)}
-              className="w-full rounded-lg border border-gold/25 bg-[#07110D] px-2 py-1 text-xs text-ink focus:border-gold focus:outline-none"
-            >
-              <option value="easy">Easy (Rapid Burst)</option>
-              <option value="medium">Medium (Realistic Spacing)</option>
-              <option value="hard">Hard (Delayed Smurfing)</option>
-            </select>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg border border-danger/50 bg-danger/20 py-1.5 text-xs font-bold text-danger hover:bg-danger/30 transition-colors cursor-pointer"
-          >
-            {loading ? 'Injecting...' : 'Inject Live Syndicate'}
-          </button>
-        </>
-      )}
-    </form>
-  );
-}
-
 /** Production simulation controls wired to backend streaming endpoints (Module 12d) */
 export function SimulationToolbar() {
-  const { status, speed, elapsedSeconds, play, pause, reset, setSpeed, injectRing } =
-    useSimulation();
+  const navigate = useNavigate();
+  const {
+    status,
+    speed,
+    elapsedSeconds,
+    play,
+    pause,
+    reset,
+    setSpeed,
+    hasSavedConfig,
+    isSimulating,
+    runSimulation,
+  } = useSimulation();
+
+  const [isStudioOpen, setIsStudioOpen] = useState(false);
   const isRunning = status === 'running';
   const isPristine = status === 'stopped' && elapsedSeconds === 0;
   const display = STATUS_DISPLAY[status];
+
+  const handleExecuteSimulation = async () => {
+    try {
+      const res = await runSimulation();
+      if (res && res.ring_id) {
+        navigate(`/rings/${res.ring_id}?live=1`);
+      }
+    } catch (err) {
+      console.error('Failed to run attack simulation:', err);
+    }
+  };
 
   return (
     <div
@@ -222,25 +152,57 @@ export function SimulationToolbar() {
       </Popover>
       <Divider />
 
-      {/* Live Ring Injector Modal (Module 12d) */}
-      <Popover
-        align="end"
-        panelLabel="Live Ring Injector"
-        panelClassName="w-64 p-3 bg-[#0B1812] border border-gold/30 shadow-2xl rounded-xl backdrop-blur-md"
-        trigger={({ toggle }) => (
+      {/* Live Fraud Simulation Flow: Step 1 (Configure & Save) vs Step 2 (Simulate) */}
+      {!hasSavedConfig ? (
+        <button
+          type="button"
+          onClick={() => setIsStudioOpen(true)}
+          className="flex h-8 items-center gap-1.5 rounded-lg border border-gold/40 bg-gold/15 px-3 text-xs font-semibold text-gold-light hover:border-gold hover:bg-gold/25 transition-all cursor-pointer shadow-xs"
+          title="Configure Attack Scenario & Save Settings"
+        >
+          <Sliders className="size-3.5 text-gold-light" />
+          <span className="hidden sm:inline">Simulate Attack</span>
+        </button>
+      ) : (
+        <div className="flex items-center gap-1.5">
+          {/* Main Trigger: Simulate Button */}
           <button
             type="button"
-            onClick={toggle}
-            className="flex h-8 items-center gap-1.5 rounded-lg border border-danger/40 bg-danger/10 px-2.5 text-xs font-semibold text-danger hover:bg-danger/20 transition-colors cursor-pointer"
-            title="Inject simulated mule ring for live demonstration"
+            disabled={isSimulating}
+            onClick={handleExecuteSimulation}
+            className="flex h-8 items-center gap-1.5 rounded-lg border border-emerald/50 bg-emerald/20 px-3 text-xs font-bold text-emerald hover:border-emerald hover:bg-emerald/30 transition-all cursor-pointer shadow-md disabled:opacity-50"
+            title="Execute Live Simulated Attack & Watch in Ring Explorer"
           >
-            <Zap className="size-3.5 fill-current" />
-            <span className="hidden sm:inline">Inject Ring</span>
+            {isSimulating ? (
+              <>
+                <span className="size-3 border-2 border-emerald border-t-transparent rounded-full animate-spin" />
+                <span className="hidden sm:inline">Simulating...</span>
+              </>
+            ) : (
+              <>
+                <Zap className="size-3.5 fill-current text-emerald" />
+                <span className="hidden sm:inline">Simulate</span>
+              </>
+            )}
           </button>
-        )}
-      >
-        {({ close }) => <InjectRingForm onClose={close} onInject={injectRing} />}
-      </Popover>
+
+          {/* Edit Settings Button */}
+          <button
+            type="button"
+            onClick={() => setIsStudioOpen(true)}
+            className="flex h-8 items-center justify-center rounded-lg border border-gold/30 bg-canvas/60 px-2 text-xs font-medium text-muted hover:border-gold/50 hover:text-ink transition-colors cursor-pointer"
+            title="Edit Attack Settings"
+          >
+            <Sliders className="size-3.5 text-gold-light" />
+          </button>
+        </div>
+      )}
+
+      <SimulationStudioModal
+        isOpen={isStudioOpen}
+        onClose={() => setIsStudioOpen(false)}
+      />
+
       <Divider />
 
       {/* Virtual Time Indicator */}

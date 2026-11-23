@@ -51,8 +51,8 @@ export function RecentActivityFeed({ events, delay = 0, className }: RecentActiv
         <ol className="relative space-y-4">
           <span aria-hidden className="absolute bottom-2 left-[17px] top-2 w-px bg-gold/12" />
           {events.map((event) => {
-            const display = KIND_DISPLAY[event.kind] || DEFAULT_DISPLAY;
-            const Icon = display.icon;
+            const display = (event?.kind && KIND_DISPLAY[event.kind]) ? KIND_DISPLAY[event.kind] : DEFAULT_DISPLAY;
+            const Icon = display?.icon || Activity;
             return (
               <li key={event.id} className="relative flex gap-3">
                 <span className={cn('relative z-10 grid size-9 shrink-0 place-items-center rounded-full border', display.chip)}>

@@ -10,12 +10,12 @@ export function selectActiveRings(rings: readonly OverviewRing[]): OverviewRing[
 export function selectKpiSummary(data: OverviewData): KpiSummary {
   const rings = data?.rings || [];
   const active = selectActiveRings(rings);
-  const investigated = active.filter((ring) => ring.status !== 'new');
+  const investigated = (active || []).filter((ring) => ring?.status !== 'new');
 
   return {
-    activeRings: active.length,
-    amountAtRisk: active.reduce((sum, ring) => sum + (ring.amountAtRisk || 0), 0),
-    accountsUnderInvestigation: investigated.reduce((sum, ring) => sum + (ring.accountCount || 0), 0),
+    activeRings: active?.length || 0,
+    amountAtRisk: (active || []).reduce((sum, ring) => sum + (ring?.amountAtRisk || 0), 0),
+    accountsUnderInvestigation: (investigated || []).reduce((sum, ring) => sum + (ring?.accountCount || 0), 0),
     detectionRate: data?.detectionRate ?? 92.5,
   };
 }

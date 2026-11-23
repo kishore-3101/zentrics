@@ -26,6 +26,12 @@ export interface AccountNodeData {
   kyc_level?: 'minimal' | 'full';
   account_type?: 'savings' | 'current' | 'wallet' | 'sink';
   city_cluster?: string;
+  city?: string;
+  latitude?: number;
+  longitude?: number;
+  device_id?: string;
+  device_type?: string;
+  ip_address?: string;
   declared_income_band?: 'low' | 'lower_mid' | 'mid' | 'upper_mid' | 'high';
   bank_id?: string;
   total_incoming: number;
@@ -33,6 +39,9 @@ export interface AccountNodeData {
   transaction_count: number;
   reason_codes: ShapReasonCode[];
   is_frozen?: boolean;
+  is_blocked?: boolean;
+  blocked_reason?: string;
+  blocked_by?: string;
   position: [number, number, number]; // 3D spatial coordinate [x, y, z]
 }
 
@@ -49,6 +58,11 @@ export interface TransactionEdgeData {
   ts: string; // ISO 8601 UTC
   hop_index: number;
   is_suspicious: boolean;
+  is_blocked?: boolean;
+  blocked_reason?: string;
+  device_id?: string;
+  device_type?: string;
+  ip_address?: string;
   delay_seconds?: number;
 }
 
@@ -70,8 +84,18 @@ export interface RingGraphData {
   detected_at: string;
   pattern_tags: string[];
   explanation: string;
+  recommended?: string;
   nodes: AccountNodeData[];
   edges: TransactionEdgeData[];
+  blocked_info?: {
+    is_blocked: boolean;
+    blocked_account?: string;
+    blocked_city?: string;
+    blocked_by?: string;
+    blocked_reason?: string;
+    blocked_at?: string;
+    amount_saved?: number;
+  };
 }
 
 /**

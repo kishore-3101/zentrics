@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { Building2, Calendar, CheckCircle2, ShieldAlert, User, X } from 'lucide-react';
+import { Building2, Calendar, CheckCircle2, Laptop, Lock, MapPin, ShieldAlert, Smartphone, User, X } from 'lucide-react';
 import { RiskScoreMeter } from '../../../components/ui/RiskScoreMeter';
 import { formatInrCompact } from '../../../lib/formatters';
 import type { AccountNodeData } from '../../../types/ring-graph';
@@ -11,7 +11,7 @@ interface AccountInspectorProps {
 
 const ROLE_LABELS: Record<AccountNodeData['role'], { label: string; badge: string }> = {
   victim: { label: 'Legitimate Victim', badge: 'bg-emerald/20 text-emerald border-emerald/30' },
-  collector: { label: 'Aggregation Collector', badge: 'bg-gold/20 text-gold-light border-gold/30' },
+  collector: { label: 'Aggregation Collector / Hacker', badge: 'bg-gold/20 text-gold-light border-gold/30' },
   mule: { label: 'Layering Mule Conduit', badge: 'bg-warning/20 text-warning border-warning/30' },
   cash_out: { label: 'Terminal Cash-Out Sink', badge: 'bg-danger/20 text-danger border-danger/30' },
 };
@@ -56,6 +56,28 @@ export function AccountInspector({ account, onClose }: AccountInspectorProps) {
           </button>
         </div>
 
+        {/* Autonomous Freeze Alert Banner */}
+        {(account.is_blocked || account.is_frozen) && (
+          <div className="mt-4 rounded-xl border border-danger/40 bg-danger/15 p-3">
+            <div className="flex items-start gap-2.5">
+              <span className="grid size-6 shrink-0 place-items-center rounded bg-danger/25 text-danger border border-danger/40 mt-0.5">
+                <Lock className="size-3.5" />
+              </span>
+              <div>
+                <span className="rounded bg-danger/30 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-danger border border-danger/40">
+                  Autonomous Freeze Enforced
+                </span>
+                <p className="mt-1 text-xs text-ink/90 leading-relaxed font-medium">
+                  {account.blocked_reason || 'Quarantined under Section 102 CrPC by TraceMesh AI Shield.'}
+                </p>
+                <p className="mt-1 text-[10px] text-muted">
+                  Enforced by: <strong className="text-gold-light">{account.blocked_by || 'TraceMesh AI Shield'}</strong>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Fused Risk Score Gauge */}
         <div className="mt-4 rounded-xl border border-gold/15 bg-canvas/60 p-3">
           <div className="flex items-center justify-between text-xs font-semibold text-muted">
@@ -92,7 +114,7 @@ export function AccountInspector({ account, onClose }: AccountInspectorProps) {
         {/* Account Profile & KYC Attributes */}
         <div className="mt-4 space-y-2 text-xs">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
-            Account Profile
+            Account Profile & Device Telemetry
           </span>
 
           <div className="divide-y divide-gold/10 rounded-xl border border-gold/15 bg-canvas/40 px-3 py-1">
@@ -104,6 +126,37 @@ export function AccountInspector({ account, onClose }: AccountInspectorProps) {
                 {account.account_type || 'Savings'}
               </span>
             </div>
+
+            <div className="flex items-center justify-between py-1.5">
+              <span className="text-muted flex items-center gap-1.5">
+                <MapPin className="size-3" /> City / Location
+              </span>
+              <span className="font-mono font-medium text-gold-light">
+                {account.city || account.city_cluster || 'Regional Terminal'}
+              </span>
+            </div>
+
+            {account.device_type && (
+              <div className="flex items-center justify-between py-1.5">
+                <span className="text-muted flex items-center gap-1.5">
+                  <Smartphone className="size-3" /> Device
+                </span>
+                <span className="font-mono text-[11px] text-ink truncate max-w-[140px]" title={account.device_type}>
+                  {account.device_type}
+                </span>
+              </div>
+            )}
+
+            {account.ip_address && (
+              <div className="flex items-center justify-between py-1.5">
+                <span className="text-muted flex items-center gap-1.5">
+                  <Laptop className="size-3" /> IP Address
+                </span>
+                <span className="font-mono text-[11px] text-muted">
+                  {account.ip_address}
+                </span>
+              </div>
+            )}
 
             <div className="flex items-center justify-between py-1.5">
               <span className="text-muted flex items-center gap-1.5">

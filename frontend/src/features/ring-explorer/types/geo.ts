@@ -37,6 +37,8 @@ export interface GeoLocationNode {
   isCollectorHub: boolean;
   isMuleHub: boolean;
   isCashoutHub: boolean;
+  isBlocked?: boolean;
+  blockedReason?: string;
   synthetic: boolean;
 }
 
@@ -56,6 +58,8 @@ export interface GeoTransactionArc {
   ts: string;
   hop_index: number;
   is_suspicious: boolean;
+  is_blocked?: boolean;
+  blocked_reason?: string;
   arcType: 'victim' | 'mule' | 'cash_out';
   color: string;
   srcPos: THREE.Vector3;

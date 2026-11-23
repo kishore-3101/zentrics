@@ -56,7 +56,23 @@ export function buildGeoGraph(graph: RingGraphData, globeRadius: number = 4.8): 
 
   // 1. Group Accounts by City Location
   graph.nodes.forEach((node) => {
-    const coord = resolveCityCoord(node.city_cluster, node.account_id);
+    const hasRealCoords =
+      typeof node.latitude === 'number' &&
+      typeof node.longitude === 'number' &&
+      !isNaN(node.latitude) &&
+      !isNaN(node.longitude);
+
+    const coord: GeoCityCoordinate = hasRealCoords
+      ? {
+          id: `loc_${(node.city || node.account_id).toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+          city: node.city || 'Regional Center',
+          state: node.city || 'State',
+          country: 'India',
+          lat: node.latitude!,
+          lon: node.longitude!,
+        }
+      : resolveCityCoord(node.city_cluster, node.account_id);
+
     accountCityMap.set(node.account_id, coord.id);
 
     let loc = cityMap.get(coord.id);
@@ -82,7 +98,9 @@ export function buildGeoGraph(graph: RingGraphData, globeRadius: number = 4.8): 
         isCollectorHub: false,
         isMuleHub: false,
         isCashoutHub: false,
-        synthetic: true,
+        isBlocked: false,
+        blockedReason: undefined,
+        synthetic: !hasRealCoords,
       };
       cityMap.set(coord.id, loc);
     }
@@ -92,6 +110,11 @@ export function buildGeoGraph(graph: RingGraphData, globeRadius: number = 4.8): 
     loc.totalIncoming += node.total_incoming || 0;
     loc.totalOutgoing += node.total_outgoing || 0;
     loc.totalAmount += (node.total_incoming || 0) + (node.total_outgoing || 0);
+
+    if (node.is_blocked || node.is_frozen) {
+      loc.isBlocked = true;
+      loc.blockedReason = node.blocked_reason || 'Quarantined by AI Shield';
+    }
 
     if (node.role === 'victim') loc.isVictimHub = true;
     if (node.role === 'collector') loc.isCollectorHub = true;
@@ -153,6 +176,11 @@ export function buildGeoGraph(graph: RingGraphData, globeRadius: number = 4.8): 
       color = '#EF4444'; // Red for cash-out terminal
     }
 
+    const isEdgeBlocked = Boolean(edge.is_blocked || dstLoc.isBlocked || dstNode?.is_blocked);
+    if (isEdgeBlocked) {
+      color = '#EF4444'; // Crimson alert for blocked transaction
+    }
+
     arcs.push({
       txn_id: edge.txn_id,
       src_city_id: srcCityId,
@@ -166,6 +194,8 @@ export function buildGeoGraph(graph: RingGraphData, globeRadius: number = 4.8): 
       ts: edge.ts,
       hop_index: edge.hop_index,
       is_suspicious: edge.is_suspicious,
+      is_blocked: isEdgeBlocked,
+      blocked_reason: edge.blocked_reason || dstLoc.blockedReason,
       arcType,
       color,
       srcPos: p1,
