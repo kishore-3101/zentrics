@@ -21,7 +21,7 @@ import sys
 import threading
 import time
 from http import HTTPStatus
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http.server import HTTPServer, SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from urllib.parse import parse_qs, unquote, urlparse
@@ -51,12 +51,27 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
 
     def _send_json_response(self, status: int, data: Any):
         body = json.dumps(data, indent=2, default=str).encode("utf-8")
-        self.send_response(status)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(body)))
-        self._send_cors_headers()
-        self.end_headers()
-        self.wfile.write(body)
+        try:
+            self.send_response(status)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self._send_cors_headers()
+            self.end_headers()
+            self.wfile.write(body)
+        except (BrokenPipeError, ConnectionResetError):
+            pass
+
+    def handle(self):
+        try:
+            super().handle()
+        except (BrokenPipeError, ConnectionResetError):
+            pass
+
+    def finish(self):
+        try:
+            super().finish()
+        except (BrokenPipeError, ConnectionResetError):
+            pass
 
     def do_OPTIONS(self):
         self.send_response(HTTPStatus.NO_CONTENT)
@@ -238,12 +253,16 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
         self._send_json_response(HTTPStatus.OK, account)
 
     def handle_case_actions(self, case_id: str):
+        if not case_id or case_id in ("undefined", "null"):
+            self._send_json_response(HTTPStatus.OK, [])
+            return
+
         try:
             cid = int(case_id)
             actions = STORE.get_case_actions(cid)
             self._send_json_response(HTTPStatus.OK, actions)
-        except ValueError:
-            self._send_json_response(HTTPStatus.BAD_REQUEST, {"error": "Invalid case_id"})
+        except (ValueError, TypeError):
+            self._send_json_response(HTTPStatus.OK, [])
 
     def handle_ring_action(self, ring_id: str, payload: Dict[str, Any]):
         action = payload.get("action")
@@ -386,7 +405,8 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
 
 
 def run_server(port: int = 8000, host: str = "0.0.0.0"):
-    server = HTTPServer((host, port), TraceMeshAPIHandler)
+    server = ThreadingHTTPServer((host, port), TraceMeshAPIHandler)
+    server.daemon_threads = True
     print("=" * 70)
     print(f" TRACEMESH PRODUCTION API SERVER (Module 11)")
     print(f" Listening at : http://{host}:{port}")

@@ -34,12 +34,21 @@ export async function fetchAlerts(): Promise<AlertRecord[]> {
  * Fetch append-only audit trail for a case from `case_actions` endpoint.
  */
 export async function fetchCaseActions(caseId: number): Promise<CaseAction[]> {
+  if (!caseId || isNaN(Number(caseId))) {
+    return [];
+  }
+
   if (USE_MOCK) {
     return inMemoryCaseActions[caseId] ? [...inMemoryCaseActions[caseId]] : [];
   }
 
-  const response = await axios.get<CaseAction[]>(`/cases/${caseId}/actions`);
-  return response.data;
+  try {
+    const response = await axios.get<CaseAction[]>(`/cases/${caseId}/actions`);
+    return response.data || [];
+  } catch (err) {
+    console.warn(`Failed to fetch actions for case ${caseId}:`, err);
+    return [];
+  }
 }
 
 /**

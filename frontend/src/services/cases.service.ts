@@ -13,9 +13,10 @@ export async function fetchAllCases(): Promise<CaseRecord[]> {
   // Map alerts to CaseRecords (v_alerts represents rings joined to cases)
   const cases: CaseRecord[] = await Promise.all(
     alerts.map(async (alert) => {
-      const actions = await fetchCaseActions(alert.case_id);
+      const cid = alert.case_id ?? (parseInt(alert.ring_id.replace(/\D/g, ''), 10) || 100);
+      const actions = alert.case_id ? await fetchCaseActions(alert.case_id) : [];
       return {
-        case_id: alert.case_id,
+        case_id: cid,
         ring_id: alert.ring_id,
         fingerprint: alert.fingerprint,
         status: alert.status,
@@ -46,6 +47,7 @@ export async function fetchAllAuditLogs(): Promise<AuditLogEntry[]> {
   const allLogs: AuditLogEntry[] = [];
 
   for (const alert of alerts) {
+    if (!alert.case_id) continue;
     const actions = await fetchCaseActions(alert.case_id);
     for (const act of actions) {
       allLogs.push({

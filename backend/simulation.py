@@ -337,6 +337,7 @@ class SimulationEngine:
 
         # Event B: New ring detected alert
         alert_payload = {
+            "case_id": 9000 + (abs(hash(inj_id)) % 1000),
             "ring_id": ring_id,
             "ring_type": typology,
             "score": 92.5,
