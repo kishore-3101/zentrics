@@ -110,6 +110,38 @@ class MockDataStore:
 
             # Load metrics
             self.metrics = load_json_file("metrics.json", {})
+            if not self.metrics.get("curves"):
+                self.metrics["curves"] = {
+                    "pr_curve": [
+                        {"threshold": 0.1, "recall": 99.2, "precision": 52.1, "fpr": 18.5, "tpr": 99.2},
+                        {"threshold": 0.3, "recall": 96.5, "precision": 74.3, "fpr": 8.2, "tpr": 96.5},
+                        {"threshold": 0.5, "recall": 92.5, "precision": 88.6, "fpr": 3.1, "tpr": 92.5},
+                        {"threshold": 0.7, "recall": 88.7, "precision": 91.4, "fpr": 1.8, "tpr": 88.7},
+                        {"threshold": 0.85, "recall": 76.4, "precision": 96.2, "fpr": 0.6, "tpr": 76.4},
+                        {"threshold": 0.95, "recall": 54.1, "precision": 98.9, "fpr": 0.1, "tpr": 54.1},
+                    ],
+                    "roc_curve": [
+                        {"fpr": 0.0, "tpr": 0.0, "threshold": 1.0},
+                        {"fpr": 0.1, "tpr": 54.1, "threshold": 0.95},
+                        {"fpr": 0.6, "tpr": 76.4, "threshold": 0.85},
+                        {"fpr": 1.8, "tpr": 88.7, "threshold": 0.7},
+                        {"fpr": 3.1, "tpr": 92.5, "threshold": 0.5},
+                        {"fpr": 8.2, "tpr": 96.5, "threshold": 0.3},
+                        {"fpr": 18.5, "tpr": 99.2, "threshold": 0.1},
+                        {"fpr": 100.0, "tpr": 100.0, "threshold": 0.0},
+                    ]
+                }
+            if not self.metrics.get("overall"):
+                self.metrics["overall"] = {
+                    "precision": 91.4, "recall": 88.7, "f1": 90.0, "pr_auc": 0.942, "ring_recall": 92.5, "fpr": 1.8
+                }
+            if not self.metrics.get("comparison"):
+                self.metrics["comparison"] = [
+                    {"metric": "PR-AUC", "baseline_rules": 0.612, "graph_rules": 0.785, "ml_only": 0.834, "full_fusion": 0.942},
+                    {"metric": "F1-Score", "baseline_rules": 58.4, "graph_rules": 74.2, "ml_only": 81.1, "full_fusion": 90.0},
+                    {"metric": "Ring Recall @ 70%", "baseline_rules": 42.1, "graph_rules": 71.5, "ml_only": 68.4, "full_fusion": 92.5},
+                    {"metric": "False Positive Rate", "baseline_rules": 14.8, "graph_rules": 6.9, "ml_only": 5.2, "full_fusion": 1.8},
+                ]
             if "by_typology_difficulty" in self.metrics and "typologyBreakdown" not in self.metrics:
                 self.metrics["typologyBreakdown"] = self.metrics["by_typology_difficulty"]
             if "alert_reduction" in self.metrics and "operationalImpact" not in self.metrics:
@@ -120,6 +152,47 @@ class MockDataStore:
                     "reductionPercentage": ar.get("reduction_pct", 97.8),
                     "simulatedMoneySaved": 38400000,
                 }
+
+            # Ensure R-104 and demo-ring are in self.rings
+            if not self.rings.get("R-104"):
+                demo_r = {
+                    "ring_id": "R-104",
+                    "fingerprint": "fp_r104",
+                    "ring_type": "circular",
+                    "score": 94.2,
+                    "priority": 96.5,
+                    "amount_moved": 750000.0,
+                    "amount_cashed": 0.0,
+                    "amount_at_risk": 750000.0,
+                    "duration_min": 34.0,
+                    "status": "active",
+                    "detected_at": "2026-03-10T10:49:00Z",
+                    "pattern_tags": ["circular_routing", "rapid_cycling", "layering"],
+                    "explanation": {
+                        "rule_score": 92.0,
+                        "ml_probability": 0.95,
+                        "graph_risk": 0.94,
+                        "primary_typology": "Circular Flow / Churning",
+                        "detection_summary": "Circular routing between multiple accounts to obscure source of funds.",
+                        "top_risk_factors": [
+                            {"factor": "Closed Cycle Flow", "weight": 45.0, "description": "Funds return to initiator within 34 minutes."},
+                            {"factor": "Rapid Pass-Through", "weight": 35.0, "description": "Average retention time < 6 minutes."}
+                        ]
+                    },
+                    "nodes": [
+                        {"account_id": "ACC_VICTIM_401", "role": "victim", "risk_score": 12.0, "ml_prob": 0.08, "rule_score": 0.1, "neighbor_risk": 0.15, "open_date": "2019-04-12", "kyc_level": "full", "account_type": "savings", "city_cluster": "MUMBAI", "declared_income_band": "mid", "bank_id": "TRACE_BANK", "total_incoming": 800000.0, "total_outgoing": 750000.0, "transaction_count": 3, "reason_codes": [], "is_frozen": False, "position": [-8.0, 0.5, 0.0]},
+                        {"account_id": "ACC_MULE_401", "role": "collector", "risk_score": 88.0, "ml_prob": 0.91, "rule_score": 0.85, "neighbor_risk": 0.89, "open_date": "2026-01-15", "kyc_level": "minimal", "account_type": "current", "city_cluster": "DELHI", "declared_income_band": "low", "bank_id": "TRACE_BANK", "total_incoming": 750000.0, "total_outgoing": 745000.0, "transaction_count": 8, "reason_codes": [], "is_frozen": False, "position": [-4.0, 2.5, 1.2]},
+                        {"account_id": "ACC_MULE_402", "role": "mule", "risk_score": 92.0, "ml_prob": 0.94, "rule_score": 0.89, "neighbor_risk": 0.92, "open_date": "2026-02-01", "kyc_level": "minimal", "account_type": "current", "city_cluster": "BANGALORE", "declared_income_band": "low", "bank_id": "FAST_BANK", "total_incoming": 745000.0, "total_outgoing": 740000.0, "transaction_count": 12, "reason_codes": [], "is_frozen": False, "position": [0.0, 0.0, -1.0]},
+                        {"account_id": "ACC_MULE_403", "role": "cash_out", "risk_score": 95.0, "ml_prob": 0.97, "rule_score": 0.94, "neighbor_risk": 0.95, "open_date": "2026-02-10", "kyc_level": "minimal", "account_type": "savings", "city_cluster": "KOLKATA", "declared_income_band": "low", "bank_id": "SAFE_BANK", "total_incoming": 740000.0, "total_outgoing": 735000.0, "transaction_count": 15, "reason_codes": [], "is_frozen": False, "position": [8.0, -1.5, 0.0]}
+                    ],
+                    "edges": [
+                        {"txn_id": "TXN_401_01", "src_account": "ACC_VICTIM_401", "dst_account": "ACC_MULE_401", "amount": 750000.0, "channel": "UPI", "ts": "2026-03-10T10:15:00Z", "hop_index": 1, "is_suspicious": True},
+                        {"txn_id": "TXN_401_02", "src_account": "ACC_MULE_401", "dst_account": "ACC_MULE_402", "amount": 745000.0, "channel": "IMPS", "ts": "2026-03-10T10:22:00Z", "hop_index": 2, "is_suspicious": True},
+                        {"txn_id": "TXN_401_03", "src_account": "ACC_MULE_402", "dst_account": "ACC_MULE_403", "amount": 740000.0, "channel": "RTGS", "ts": "2026-03-10T10:35:00Z", "hop_index": 3, "is_suspicious": True}
+                    ]
+                }
+                self.rings["R-104"] = demo_r
+                self.rings["demo-ring"] = demo_r
 
             # Load overview
             self.overview = load_json_file("overview.json", {
@@ -183,8 +256,14 @@ class MockDataStore:
         with self.lock:
             ring = self.rings.get(normalized)
             if not ring:
+                for k, v in self.rings.items():
+                    if k.lower() == normalized.lower():
+                        return copy.deepcopy(v)
+            if not ring:
                 # Fallback alias for convenience
-                ring = self.rings.get("R-104")
+                ring = self.rings.get("R-104") or self.rings.get("demo-ring")
+            if not ring and self.rings:
+                ring = next(iter(self.rings.values()))
             return copy.deepcopy(ring) if ring else None
 
     def get_timeline(self, ring_id: str) -> List[Dict[str, Any]]:

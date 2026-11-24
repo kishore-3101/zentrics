@@ -1,0 +1,1058 @@
+{
+  "ACC_VICTIM_401": {
+    "account_id": "ACC_VICTIM_401",
+    "open_date": "2019-04-12",
+    "kyc_level": "full",
+    "account_type": "savings",
+    "city_cluster": "MUMBAI",
+    "declared_income_band": "mid",
+    "bank_id": "TRACE_BANK",
+    "risk_score": 12.0,
+    "ml_prob": 0.08,
+    "rule_score": 0.1,
+    "neighbor_risk": 0.15,
+    "total_incoming": 800000.0,
+    "total_outgoing": 750000.0,
+    "transaction_count": 3,
+    "is_frozen": false,
+    "reason_codes": [
+      {
+        "code": "NORMAL_PROFILE",
+        "label": "Established account profile (5+ years)",
+        "weight": -15.0,
+        "direction": "decreases_risk"
+      }
+    ],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "normal_flow",
+        "severity": "low",
+        "detail": "Account ACC_VICTIM_401 evaluated in active window with 3 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-104",
+        "role": "victim",
+        "score": 96.0
+      }
+    ]
+  },
+  "ACC_MULE_401": {
+    "account_id": "ACC_MULE_401",
+    "open_date": "2026-02-14",
+    "kyc_level": "minimal",
+    "account_type": "savings",
+    "city_cluster": "MUMBAI",
+    "declared_income_band": "low",
+    "bank_id": "TRACE_BANK",
+    "risk_score": 94.0,
+    "ml_prob": 0.95,
+    "rule_score": 0.92,
+    "neighbor_risk": 0.88,
+    "total_incoming": 1420000.0,
+    "total_outgoing": 1390000.0,
+    "transaction_count": 12,
+    "is_frozen": false,
+    "reason_codes": [
+      {
+        "code": "CYCLE_PARTICIPATION",
+        "label": "Key anchor in length-4 circular fund loop",
+        "weight": 34.0,
+        "direction": "increases_risk"
+      },
+      {
+        "code": "RAPID_FORWARDING",
+        "label": "Funds forwarded in < 5 mins (98% pass-through)",
+        "weight": 28.0,
+        "direction": "increases_risk"
+      }
+    ],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "critical",
+        "detail": "Account ACC_MULE_401 evaluated in active window with 12 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-104",
+        "role": "collector",
+        "score": 96.0
+      }
+    ]
+  },
+  "ACC_MULE_402": {
+    "account_id": "ACC_MULE_402",
+    "open_date": "2026-01-20",
+    "kyc_level": "minimal",
+    "account_type": "wallet",
+    "city_cluster": "THANE",
+    "declared_income_band": "low",
+    "bank_id": "TRACE_BANK",
+    "risk_score": 91.0,
+    "ml_prob": 0.89,
+    "rule_score": 0.9,
+    "neighbor_risk": 0.86,
+    "total_incoming": 1380000.0,
+    "total_outgoing": 1350000.0,
+    "transaction_count": 9,
+    "is_frozen": false,
+    "reason_codes": [
+      {
+        "code": "CYCLE_PARTICIPATION",
+        "label": "Participated in 3 cycle laps",
+        "weight": 31.0,
+        "direction": "increases_risk"
+      }
+    ],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "critical",
+        "detail": "Account ACC_MULE_402 evaluated in active window with 9 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-104",
+        "role": "mule",
+        "score": 96.0
+      }
+    ]
+  },
+  "ACC_MULE_403": {
+    "account_id": "ACC_MULE_403",
+    "open_date": "2026-02-01",
+    "kyc_level": "minimal",
+    "account_type": "savings",
+    "city_cluster": "NAVI_MUMBAI",
+    "declared_income_band": "lower_mid",
+    "bank_id": "TRACE_BANK",
+    "risk_score": 89.0,
+    "ml_prob": 0.88,
+    "rule_score": 0.87,
+    "neighbor_risk": 0.84,
+    "total_incoming": 1350000.0,
+    "total_outgoing": 1320000.0,
+    "transaction_count": 8,
+    "is_frozen": false,
+    "reason_codes": [
+      {
+        "code": "CYCLE_PARTICIPATION",
+        "label": "Cycle conduit node",
+        "weight": 29.0,
+        "direction": "increases_risk"
+      }
+    ],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "critical",
+        "detail": "Account ACC_MULE_403 evaluated in active window with 8 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-104",
+        "role": "mule",
+        "score": 96.0
+      }
+    ]
+  },
+  "ACC_MULE_404": {
+    "account_id": "ACC_MULE_404",
+    "open_date": "2026-02-10",
+    "kyc_level": "minimal",
+    "account_type": "wallet",
+    "city_cluster": "MUMBAI",
+    "declared_income_band": "low",
+    "bank_id": "TRACE_BANK",
+    "risk_score": 93.0,
+    "ml_prob": 0.92,
+    "rule_score": 0.91,
+    "neighbor_risk": 0.89,
+    "total_incoming": 1320000.0,
+    "total_outgoing": 1290000.0,
+    "transaction_count": 10,
+    "is_frozen": false,
+    "reason_codes": [
+      {
+        "code": "SINK_EXTRACTION",
+        "label": "Direct transfer to ATM sink",
+        "weight": 32.0,
+        "direction": "increases_risk"
+      }
+    ],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "critical",
+        "detail": "Account ACC_MULE_404 evaluated in active window with 10 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-104",
+        "role": "mule",
+        "score": 96.0
+      }
+    ]
+  },
+  "ATM_SINK_MUMBAI": {
+    "account_id": "ATM_SINK_MUMBAI",
+    "open_date": "2015-01-01",
+    "kyc_level": "full",
+    "account_type": "sink",
+    "city_cluster": "MUMBAI",
+    "declared_income_band": "high",
+    "bank_id": "CASH_OUT_NETWORK",
+    "risk_score": 5.0,
+    "ml_prob": 0.01,
+    "rule_score": 0.05,
+    "neighbor_risk": 0.1,
+    "total_incoming": 435000.0,
+    "total_outgoing": 0.0,
+    "transaction_count": 5,
+    "is_frozen": false,
+    "reason_codes": [
+      {
+        "code": "TERMINAL_SINK",
+        "label": "Designated cash withdrawal point",
+        "weight": 0.0,
+        "direction": "decreases_risk"
+      }
+    ],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "low",
+        "detail": "Account ATM_SINK_MUMBAI evaluated in active window with 5 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-104",
+        "role": "cash_out",
+        "score": 96.0
+      }
+    ]
+  },
+  "ACC_COLL_101": {
+    "account_id": "ACC_COLL_101",
+    "open_date": "2026-02-18",
+    "kyc_level": "minimal",
+    "account_type": "savings",
+    "city_cluster": "DELHI",
+    "declared_income_band": "low",
+    "bank_id": "TRACE_BANK",
+    "risk_score": 96.0,
+    "ml_prob": 0.98,
+    "rule_score": 0.94,
+    "neighbor_risk": 0.85,
+    "total_incoming": 1850000.0,
+    "total_outgoing": 1750000.0,
+    "transaction_count": 14,
+    "is_frozen": false,
+    "reason_codes": [
+      {
+        "code": "BURST_INFLOW",
+        "label": "8 senders in 28 mins",
+        "weight": 35.0,
+        "direction": "increases_risk"
+      }
+    ],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "critical",
+        "detail": "Account ACC_COLL_101 evaluated in active window with 14 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-101",
+        "role": "collector",
+        "score": 94.0
+      }
+    ]
+  },
+  "ACC_MULE_101": {
+    "account_id": "ACC_MULE_101",
+    "open_date": "2026-02-20",
+    "kyc_level": "minimal",
+    "account_type": "wallet",
+    "city_cluster": "DELHI",
+    "declared_income_band": "low",
+    "bank_id": "TRACE_BANK",
+    "risk_score": 88.0,
+    "ml_prob": 0.86,
+    "rule_score": 0.89,
+    "neighbor_risk": 0.82,
+    "total_incoming": 450000.0,
+    "total_outgoing": 450000.0,
+    "transaction_count": 4,
+    "is_frozen": false,
+    "reason_codes": [
+      {
+        "code": "RAPID_SPLIT",
+        "label": "Fast split receiver",
+        "weight": 25.0,
+        "direction": "increases_risk"
+      }
+    ],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "critical",
+        "detail": "Account ACC_MULE_101 evaluated in active window with 4 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-101",
+        "role": "mule",
+        "score": 94.0
+      }
+    ]
+  },
+  "ATM_SINK_DELHI": {
+    "account_id": "ATM_SINK_DELHI",
+    "open_date": "2018-01-01",
+    "kyc_level": "full",
+    "account_type": "sink",
+    "city_cluster": "DELHI",
+    "declared_income_band": "high",
+    "bank_id": "CASH_OUT_NETWORK",
+    "risk_score": 5.0,
+    "ml_prob": 0.01,
+    "rule_score": 0.05,
+    "neighbor_risk": 0.05,
+    "total_incoming": 650000.0,
+    "total_outgoing": 0.0,
+    "transaction_count": 6,
+    "is_frozen": false,
+    "reason_codes": [],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "low",
+        "detail": "Account ATM_SINK_DELHI evaluated in active window with 6 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-101",
+        "role": "cash_out",
+        "score": 94.0
+      }
+    ]
+  },
+  "ACC_HUB_201": {
+    "account_id": "ACC_HUB_201",
+    "open_date": "2026-02-25",
+    "kyc_level": "minimal",
+    "account_type": "savings",
+    "city_cluster": "HYDERABAD",
+    "declared_income_band": "low",
+    "bank_id": "TRACE_BANK",
+    "risk_score": 93.0,
+    "ml_prob": 0.94,
+    "rule_score": 0.91,
+    "neighbor_risk": 0.82,
+    "total_incoming": 820000.0,
+    "total_outgoing": 810000.0,
+    "transaction_count": 4,
+    "is_frozen": false,
+    "reason_codes": [
+      {
+        "code": "PASS_THROUGH_SPEED",
+        "label": "Forwarded in 4.2 mins",
+        "weight": 38.0,
+        "direction": "increases_risk"
+      }
+    ],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "critical",
+        "detail": "Account ACC_HUB_201 evaluated in active window with 4 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-102",
+        "role": "collector",
+        "score": 91.0
+      }
+    ]
+  },
+  "ACC_MULE_201": {
+    "account_id": "ACC_MULE_201",
+    "open_date": "2026-02-15",
+    "kyc_level": "minimal",
+    "account_type": "wallet",
+    "city_cluster": "HYDERABAD",
+    "declared_income_band": "low",
+    "bank_id": "TRACE_BANK",
+    "risk_score": 87.0,
+    "ml_prob": 0.85,
+    "rule_score": 0.86,
+    "neighbor_risk": 0.8,
+    "total_incoming": 410000.0,
+    "total_outgoing": 0.0,
+    "transaction_count": 1,
+    "is_frozen": false,
+    "reason_codes": [],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "critical",
+        "detail": "Account ACC_MULE_201 evaluated in active window with 1 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-102",
+        "role": "mule",
+        "score": 91.0
+      }
+    ]
+  },
+  "ACC_MULE_202": {
+    "account_id": "ACC_MULE_202",
+    "open_date": "2026-02-16",
+    "kyc_level": "minimal",
+    "account_type": "savings",
+    "city_cluster": "HYDERABAD",
+    "declared_income_band": "low",
+    "bank_id": "TRACE_BANK",
+    "risk_score": 86.0,
+    "ml_prob": 0.84,
+    "rule_score": 0.85,
+    "neighbor_risk": 0.79,
+    "total_incoming": 400000.0,
+    "total_outgoing": 0.0,
+    "transaction_count": 1,
+    "is_frozen": false,
+    "reason_codes": [],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "critical",
+        "detail": "Account ACC_MULE_202 evaluated in active window with 1 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-102",
+        "role": "mule",
+        "score": 91.0
+      }
+    ]
+  },
+  "ACC_DORM_301": {
+    "account_id": "ACC_DORM_301",
+    "open_date": "2025-08-10",
+    "kyc_level": "minimal",
+    "account_type": "savings",
+    "city_cluster": "KOLKATA",
+    "declared_income_band": "low",
+    "bank_id": "TRACE_BANK",
+    "risk_score": 90.0,
+    "ml_prob": 0.91,
+    "rule_score": 0.88,
+    "neighbor_risk": 0.75,
+    "total_incoming": 640000.0,
+    "total_outgoing": 640000.0,
+    "transaction_count": 3,
+    "is_frozen": false,
+    "reason_codes": [
+      {
+        "code": "DORMANCY_BREAK",
+        "label": "142 days inactive before surge",
+        "weight": 36.0,
+        "direction": "increases_risk"
+      }
+    ],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "critical",
+        "detail": "Account ACC_DORM_301 evaluated in active window with 3 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-103",
+        "role": "mule",
+        "score": 88.0
+      }
+    ]
+  },
+  "EXT_BANK_ICICI": {
+    "account_id": "EXT_BANK_ICICI",
+    "open_date": "2015-01-01",
+    "kyc_level": "full",
+    "account_type": "sink",
+    "city_cluster": "KOLKATA",
+    "declared_income_band": "high",
+    "bank_id": "EXT_BANK",
+    "risk_score": 5.0,
+    "ml_prob": 0.01,
+    "rule_score": 0.05,
+    "neighbor_risk": 0.05,
+    "total_incoming": 180000.0,
+    "total_outgoing": 0.0,
+    "transaction_count": 1,
+    "is_frozen": false,
+    "reason_codes": [],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "low",
+        "detail": "Account EXT_BANK_ICICI evaluated in active window with 1 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-103",
+        "role": "cash_out",
+        "score": 88.0
+      }
+    ]
+  },
+  "ACC_CHAIN_01": {
+    "account_id": "ACC_CHAIN_01",
+    "open_date": "2026-02-12",
+    "kyc_level": "minimal",
+    "account_type": "savings",
+    "city_cluster": "PUNE",
+    "declared_income_band": "low",
+    "bank_id": "TRACE_BANK",
+    "risk_score": 92.0,
+    "ml_prob": 0.9,
+    "rule_score": 0.91,
+    "neighbor_risk": 0.85,
+    "total_incoming": 950000.0,
+    "total_outgoing": 920000.0,
+    "transaction_count": 2,
+    "is_frozen": false,
+    "reason_codes": [],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "critical",
+        "detail": "Account ACC_CHAIN_01 evaluated in active window with 2 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-105",
+        "role": "collector",
+        "score": 93.0
+      }
+    ]
+  },
+  "ACC_CHAIN_02": {
+    "account_id": "ACC_CHAIN_02",
+    "open_date": "2026-02-14",
+    "kyc_level": "minimal",
+    "account_type": "savings",
+    "city_cluster": "PUNE",
+    "declared_income_band": "low",
+    "bank_id": "TRACE_BANK",
+    "risk_score": 91.0,
+    "ml_prob": 0.89,
+    "rule_score": 0.9,
+    "neighbor_risk": 0.86,
+    "total_incoming": 920000.0,
+    "total_outgoing": 890000.0,
+    "transaction_count": 2,
+    "is_frozen": false,
+    "reason_codes": [],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "critical",
+        "detail": "Account ACC_CHAIN_02 evaluated in active window with 2 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-105",
+        "role": "mule",
+        "score": 93.0
+      }
+    ]
+  },
+  "ACC_CHAIN_03": {
+    "account_id": "ACC_CHAIN_03",
+    "open_date": "2026-02-16",
+    "kyc_level": "minimal",
+    "account_type": "savings",
+    "city_cluster": "PUNE",
+    "declared_income_band": "low",
+    "bank_id": "TRACE_BANK",
+    "risk_score": 91.0,
+    "ml_prob": 0.89,
+    "rule_score": 0.9,
+    "neighbor_risk": 0.86,
+    "total_incoming": 890000.0,
+    "total_outgoing": 860000.0,
+    "transaction_count": 2,
+    "is_frozen": false,
+    "reason_codes": [],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "critical",
+        "detail": "Account ACC_CHAIN_03 evaluated in active window with 2 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-105",
+        "role": "mule",
+        "score": 93.0
+      }
+    ]
+  },
+  "ACC_CHAIN_04": {
+    "account_id": "ACC_CHAIN_04",
+    "open_date": "2026-02-18",
+    "kyc_level": "minimal",
+    "account_type": "wallet",
+    "city_cluster": "PUNE",
+    "declared_income_band": "low",
+    "bank_id": "TRACE_BANK",
+    "risk_score": 92.0,
+    "ml_prob": 0.9,
+    "rule_score": 0.91,
+    "neighbor_risk": 0.87,
+    "total_incoming": 860000.0,
+    "total_outgoing": 830000.0,
+    "transaction_count": 2,
+    "is_frozen": false,
+    "reason_codes": [],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "critical",
+        "detail": "Account ACC_CHAIN_04 evaluated in active window with 2 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-105",
+        "role": "mule",
+        "score": 93.0
+      }
+    ]
+  },
+  "ACC_CHAIN_05": {
+    "account_id": "ACC_CHAIN_05",
+    "open_date": "2026-02-20",
+    "kyc_level": "minimal",
+    "account_type": "wallet",
+    "city_cluster": "PUNE",
+    "declared_income_band": "low",
+    "bank_id": "TRACE_BANK",
+    "risk_score": 94.0,
+    "ml_prob": 0.93,
+    "rule_score": 0.92,
+    "neighbor_risk": 0.88,
+    "total_incoming": 830000.0,
+    "total_outgoing": 0.0,
+    "transaction_count": 1,
+    "is_frozen": false,
+    "reason_codes": [
+      {
+        "code": "CHAIN_DESTINATION",
+        "label": "5-hop terminal holding node",
+        "weight": 33.0,
+        "direction": "increases_risk"
+      }
+    ],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "critical",
+        "detail": "Account ACC_CHAIN_05 evaluated in active window with 1 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-105",
+        "role": "mule",
+        "score": 93.0
+      }
+    ]
+  },
+  "ACC_SYN_AGG_1": {
+    "account_id": "ACC_SYN_AGG_1",
+    "open_date": "2026-01-15",
+    "kyc_level": "minimal",
+    "account_type": "current",
+    "city_cluster": "BENGALURU",
+    "declared_income_band": "low",
+    "bank_id": "TRACE_BANK",
+    "risk_score": 97.0,
+    "ml_prob": 0.98,
+    "rule_score": 0.95,
+    "neighbor_risk": 0.9,
+    "total_incoming": 1100000.0,
+    "total_outgoing": 1050000.0,
+    "transaction_count": 6,
+    "is_frozen": true,
+    "reason_codes": [],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "critical",
+        "detail": "Account ACC_SYN_AGG_1 evaluated in active window with 6 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-106",
+        "role": "collector",
+        "score": 95.0
+      }
+    ]
+  },
+  "ACC_SYN_AGG_2": {
+    "account_id": "ACC_SYN_AGG_2",
+    "open_date": "2026-01-18",
+    "kyc_level": "minimal",
+    "account_type": "savings",
+    "city_cluster": "CHENNAI",
+    "declared_income_band": "low",
+    "bank_id": "TRACE_BANK",
+    "risk_score": 96.0,
+    "ml_prob": 0.97,
+    "rule_score": 0.94,
+    "neighbor_risk": 0.89,
+    "total_incoming": 1000000.0,
+    "total_outgoing": 950000.0,
+    "transaction_count": 5,
+    "is_frozen": true,
+    "reason_codes": [],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "critical",
+        "detail": "Account ACC_SYN_AGG_2 evaluated in active window with 5 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-106",
+        "role": "collector",
+        "score": 95.0
+      }
+    ]
+  },
+  "ATM_SINK_BLR": {
+    "account_id": "ATM_SINK_BLR",
+    "open_date": "2016-01-01",
+    "kyc_level": "full",
+    "account_type": "sink",
+    "city_cluster": "BENGALURU",
+    "declared_income_band": "high",
+    "bank_id": "CASH_OUT_NETWORK",
+    "risk_score": 5.0,
+    "ml_prob": 0.01,
+    "rule_score": 0.05,
+    "neighbor_risk": 0.05,
+    "total_incoming": 350000.0,
+    "total_outgoing": 0.0,
+    "transaction_count": 4,
+    "is_frozen": false,
+    "reason_codes": [],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "low",
+        "detail": "Account ATM_SINK_BLR evaluated in active window with 4 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-106",
+        "role": "cash_out",
+        "score": 95.0
+      }
+    ]
+  },
+  "ACC_SHOP_KIRANA_01": {
+    "account_id": "ACC_SHOP_KIRANA_01",
+    "open_date": "2021-06-10",
+    "kyc_level": "full",
+    "account_type": "current",
+    "city_cluster": "AHMEDABAD",
+    "declared_income_band": "upper_mid",
+    "bank_id": "TRACE_BANK",
+    "risk_score": 22.0,
+    "ml_prob": 0.15,
+    "rule_score": 0.25,
+    "neighbor_risk": 0.18,
+    "total_incoming": 450000.0,
+    "total_outgoing": 30000.0,
+    "transaction_count": 36,
+    "is_frozen": false,
+    "reason_codes": [
+      {
+        "code": "HIGH_RETENTION",
+        "label": "Retains 93.3% of funds (legitimate merchant balance)",
+        "weight": -28.0,
+        "direction": "decreases_risk"
+      }
+    ],
+    "features": {
+      "pass_through_ratio": 0.96,
+      "median_forward_time_min": 4.5,
+      "unique_senders": 3,
+      "unique_receivers": 2,
+      "cash_out_share": 0.35,
+      "night_transaction_share": 0.28
+    },
+    "detector_hits": [
+      {
+        "code": "rapid_pass_through",
+        "severity": "low",
+        "detail": "Account ACC_SHOP_KIRANA_01 evaluated in active window with 36 txns.",
+        "window_start": "2026-03-10T10:00:00Z",
+        "window_end": "2026-03-10T11:00:00Z"
+      }
+    ],
+    "rings": [
+      {
+        "ring_id": "R-107",
+        "role": "collector",
+        "score": 24.0
+      }
+    ]
+  }
+}

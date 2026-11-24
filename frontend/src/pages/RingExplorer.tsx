@@ -81,14 +81,16 @@ export default function RingExplorer() {
 
   // Filtered nodes and edges for 3D Cyber Canvas view (from first commit)
   const canvasNodes = useMemo(() => {
-    if (filterRole === 'all') return nodes;
-    return nodes.filter((n) => n.role === filterRole);
+    const list = Array.isArray(nodes) ? nodes : [];
+    if (filterRole === 'all') return list;
+    return list.filter((n) => n && n.role === filterRole);
   }, [nodes, filterRole]);
 
   const canvasEdges = useMemo(() => {
-    if (filterRole === 'all') return edges;
+    const edgeList = Array.isArray(edges) ? edges : [];
+    if (filterRole === 'all') return edgeList;
     const nodeIds = new Set(canvasNodes.map((n) => n.account_id));
-    return edges.filter((e) => nodeIds.has(e.src_account) && nodeIds.has(e.dst_account));
+    return edgeList.filter((e) => e && nodeIds.has(e.src_account) && nodeIds.has(e.dst_account));
   }, [edges, canvasNodes, filterRole]);
 
   const handleSelectCameraPreset = useCallback((preset: string) => {

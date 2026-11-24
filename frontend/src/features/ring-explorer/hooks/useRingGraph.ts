@@ -92,12 +92,13 @@ export function useRingGraph(ringId: string) {
 
   // Filtered nodes based on role selections and search
   const visibleNodes = useMemo(() => {
-    if (!graph) return [];
+    if (!graph || !Array.isArray(graph.nodes)) return [];
     return graph.nodes.filter((node) => {
+      if (!node) return false;
       if (!selectedRoles.has(node.role)) return false;
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
-        return node.account_id.toLowerCase().includes(q);
+        return (node.account_id || '').toLowerCase().includes(q);
       }
       return true;
     });
@@ -105,10 +106,10 @@ export function useRingGraph(ringId: string) {
 
   // Edges connecting visible nodes
   const visibleEdges = useMemo(() => {
-    if (!graph) return [];
+    if (!graph || !Array.isArray(graph.edges)) return [];
     const visibleAccountIds = new Set(visibleNodes.map((n) => n.account_id));
     return graph.edges.filter(
-      (e) => visibleAccountIds.has(e.src_account) && visibleAccountIds.has(e.dst_account),
+      (e) => e && visibleAccountIds.has(e.src_account) && visibleAccountIds.has(e.dst_account),
     );
   }, [graph, visibleNodes]);
 

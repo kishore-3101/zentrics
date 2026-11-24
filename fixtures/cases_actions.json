@@ -1,0 +1,60 @@
+{
+  "101": [
+    {
+      "action_id": 1001,
+      "case_id": 101,
+      "actor": "system_detector",
+      "action": "status_change",
+      "from_status": null,
+      "to_status": "new",
+      "note": "Auto-flagged with priority score 1128000.0",
+      "ts": "2026-03-10T11:15:00Z"
+    },
+    {
+      "action_id": 1002,
+      "case_id": 101,
+      "actor": "Ananya Sharma",
+      "action": "status_change",
+      "from_status": "new",
+      "to_status": "under_review",
+      "note": "Assigned to junior analyst for victim verification.",
+      "ts": "2026-03-10T11:25:00Z"
+    }
+  ],
+  "104": [
+    {
+      "action_id": 1003,
+      "case_id": 104,
+      "actor": "system_detector",
+      "action": "status_change",
+      "from_status": null,
+      "to_status": "new",
+      "note": "High-confidence cycle detected (96 score).",
+      "ts": "2026-03-10T10:45:00Z"
+    }
+  ],
+  "106": [
+    {
+      "action_id": 1004,
+      "case_id": 106,
+      "actor": "Kishore Kumar",
+      "action": "freeze",
+      "from_status": "under_review",
+      "to_status": "frozen",
+      "note": "Hot debit-freeze applied across all aggregator and mule accounts.",
+      "ts": "2026-03-10T15:15:00Z"
+    }
+  ],
+  "107": [
+    {
+      "action_id": 1005,
+      "case_id": 107,
+      "actor": "Ananya Sharma",
+      "action": "false_positive",
+      "from_status": "new",
+      "to_status": "false_positive",
+      "note": "GST verified retail supermarket. Whitelisted.",
+      "ts": "2026-03-10T16:10:00Z"
+    }
+  ]
+}

@@ -86,7 +86,7 @@ export default function Metrics() {
           {/* Section 2: Interactive Decision Threshold Calibration */}
           <ErrorBoundary fallbackTitle="Threshold Calibration Unavailable">
             <InteractiveThresholdExplorer
-              prCurve={data.curves.pr_curve}
+              prCurve={data.curves?.pr_curve || []}
               selectedThreshold={selectedThreshold}
               onThresholdChange={setSelectedThreshold}
             />
@@ -95,12 +95,12 @@ export default function Metrics() {
           {/* Section 3: Four-Way Comparison & PR/ROC Curves */}
           <div className="grid gap-6 lg:grid-cols-2">
             <ErrorBoundary fallbackTitle="Model Comparison Chart Unavailable">
-              <FourWayComparisonChart comparison={data.comparison} />
+              <FourWayComparisonChart comparison={data.comparison || []} />
             </ErrorBoundary>
             <ErrorBoundary fallbackTitle="PR/ROC Curves Unavailable">
               <PrRocCurvesChart
-                prCurve={data.curves.pr_curve}
-                rocCurve={data.curves.roc_curve}
+                prCurve={data.curves?.pr_curve || []}
+                rocCurve={data.curves?.roc_curve || []}
                 selectedThreshold={selectedThreshold}
                 onSelectThreshold={setSelectedThreshold}
               />
@@ -115,10 +115,10 @@ export default function Metrics() {
           {/* Section 5: Typology Breakdown Matrix & Fairness Auditing */}
           <div className="grid gap-6 lg:grid-cols-2">
             <ErrorBoundary fallbackTitle="Typology Matrix Unavailable">
-              <TypologyDifficultyMatrix metrics={data.typologyBreakdown} />
+              <TypologyDifficultyMatrix metrics={data.typologyBreakdown || []} />
             </ErrorBoundary>
             <ErrorBoundary fallbackTitle="Fairness Auditing Table Unavailable">
-              <FairnessBiasTable records={data.fairness} />
+              <FairnessBiasTable records={data.fairness || []} />
             </ErrorBoundary>
           </div>
         </>
