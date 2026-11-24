@@ -847,9 +847,21 @@ async def asgi_handler(scope, receive, send):
     raw_path = scope.get("path", "/") or "/"
     query_string = scope.get("query_string", b"").decode("utf-8")
 
+    # Extract original path from Vercel rewrite headers if present
+    for h_name, h_val in scope.get("headers", []):
+        if h_name.lower() in (b"x-matched-path", b"x-forwarded-uri", b"x-original-uri"):
+            val = h_val.decode("utf-8")
+            if val and not val.endswith(".py"):
+                if "?" in val:
+                    val, qs = val.split("?", 1)
+                    if not query_string:
+                        query_string = qs
+                raw_path = val
+                break
+
     # Normalize path (strip trailing slashes and normalize /api/ prefix if present)
     path = raw_path.rstrip("/")
-    if not path:
+    if not path or path.endswith(".py"):
         path = "/"
     norm_path = path[4:] if path.startswith("/api/") else path
     if not norm_path:
@@ -859,7 +871,7 @@ async def asgi_handler(scope, receive, send):
         (b"content-type", b"application/json; charset=utf-8"),
         (b"access-control-allow-origin", b"*"),
         (b"access-control-allow-methods", b"GET, POST, PUT, DELETE, OPTIONS, PATCH"),
-        (b"access-control-allow-headers", b"Content-Type, Authorization, X-API-Key, Accept"),
+        (b"access-control-allow-headers", b"Content-Type, Authorization, X-API-Key, Accept, X-Requested-With"),
     ]
 
     if method == "OPTIONS":
@@ -887,13 +899,24 @@ async def asgi_handler(scope, receive, send):
     response_data = None
 
     if norm_path in ("/", "/health", "/api/health"):
-        response_data = {
-            "status": "healthy",
-            "service": "TraceMesh MuleNet API",
-            "version": "1.0.0",
-            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-            "database": "mock_fixtures_loaded"
-        }
+        if method == "POST":
+            # Resilient fallback: If proxy forwarded POST without path
+            if payload.get("scenario") or payload.get("transactions") or payload.get("entities"):
+                response_data = STORE.inject_ring(payload)
+            elif payload.get("speed") is not None:
+                response_data = STORE.set_simulation_speed(float(payload.get("speed", 1.0)))
+            elif payload.get("action"):
+                response_data = STORE.execute_action(payload.get("ring_id", "R-104"), payload)
+            else:
+                response_data = {"status": "ok", "message": "Simulation action received"}
+        else:
+            response_data = {
+                "status": "healthy",
+                "service": "TraceMesh MuleNet API",
+                "version": "1.0.0",
+                "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                "database": "mock_fixtures_loaded"
+            }
     elif norm_path == "/alerts":
         query_params = parse_qs(query_string)
         filters = {
@@ -1000,13 +1023,8 @@ async def asgi_handler(scope, receive, send):
 async def app(scope, receive, send):
     """
     Primary Entrypoint for Vercel Serverless.
-    Delegates to FastAPI if initialized, otherwise transparently executes pure ASGI handler.
+    Directly dispatches to pure-Python ASGI handler with Vercel rewrite header support.
     """
-    if fastapi_app is not None:
-        try:
-            return await fastapi_app(scope, receive, send)
-        except Exception:
-            pass
     return await asgi_handler(scope, receive, send)
 
 

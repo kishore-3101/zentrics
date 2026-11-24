@@ -14,8 +14,22 @@ export interface CaseActionPayload {
  * Fetch alerts from `v_alerts` database endpoint.
  */
 export async function fetchAlerts(): Promise<AlertRecord[]> {
-  const response = await axios.get<AlertRecord[]>('/alerts');
-  return response.data;
+  try {
+    const response = await axios.get<any>('/alerts');
+    const data = response.data;
+    if (Array.isArray(data)) {
+      return data;
+    }
+    if (data && Array.isArray(data.events)) {
+      return data.events.filter((e: any) => e.payload).map((e: any) => e.payload);
+    }
+    if (data && Array.isArray(data.alerts)) {
+      return data.alerts;
+    }
+  } catch (err) {
+    console.warn('Failed to fetch alerts from API:', err);
+  }
+  return [];
 }
 
 /**

@@ -42,7 +42,7 @@ export function useAlertQueue() {
       setLoading(true);
       setError(null);
       const data = await fetchAlerts();
-      setAlerts(data);
+      setAlerts(Array.isArray(data) ? data : []);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to load alert queue data.';
       setError(message);
@@ -118,7 +118,8 @@ export function useAlertQueue() {
 
   // Filter and sort alerts
   const filteredAndSortedAlerts = useMemo(() => {
-    let result = [...alerts];
+    const list = Array.isArray(alerts) ? alerts : [];
+    let result = [...list];
 
     // 1. Text Search Query
     if (filters.searchQuery.trim()) {
