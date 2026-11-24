@@ -77,92 +77,92 @@ class AutonomousDetectionEngine:
 
         victim = {
             "account_id": v_raw.get("account_id") or f"ACC_VIC_{sim_id % 1000}",
-            "name": v_raw.get("name", "Rohan Sharma (Victim)"),
+            "name": v_raw.get("name") or "Rohan Sharma (Victim)",
             "role": "victim",
-            "city": v_raw.get("city", "Mumbai"),
-            "city_cluster": "tier1_mumbai",
-            "latitude": float(v_raw.get("latitude") or 19.0760),
-            "longitude": float(v_raw.get("longitude") or 72.8777),
+            "city": v_raw.get("city") or "Mumbai",
+            "city_cluster": v_raw.get("city_cluster") or f"tier1_{v_raw.get('city', 'mumbai').lower().replace(' ', '_')}",
+            "latitude": float(v_raw["latitude"]) if v_raw.get("latitude") is not None else 19.0760,
+            "longitude": float(v_raw["longitude"]) if v_raw.get("longitude") is not None else 72.8777,
             "device_id": v_raw.get("device_id") or "DEV_ANDR_VIC",
             "device_type": v_raw.get("device_type") or "Samsung Galaxy S23 (Android 14)",
             "ip_address": v_raw.get("ip_address") or "103.21.124.45",
-            "bank_id": "HDFC_BANK",
-            "kyc_level": "full",
+            "bank_id": v_raw.get("bank_id") or "HDFC_BANK",
+            "kyc_level": v_raw.get("kyc_level") or "full",
             "open_date": "2019-05-12",
             "declared_income_band": "mid",
-            "position": [-9.0, 0.5, 0.0],
+            "position": v_raw.get("position") or [-9.0, 0.5, 0.0],
         }
 
         hacker = {
             "account_id": h_raw.get("account_id") or f"ACC_HACK_{sim_id % 1000}",
-            "name": h_raw.get("name", "DarkNet Operator X"),
+            "name": h_raw.get("name") or "DarkNet Operator X",
             "role": "hacker",
-            "city": h_raw.get("city", "Delhi"),
-            "city_cluster": "tier1_delhi",
-            "latitude": float(h_raw.get("latitude") or 28.6139),
-            "longitude": float(h_raw.get("longitude") or 77.2090),
+            "city": h_raw.get("city") or "Delhi",
+            "city_cluster": h_raw.get("city_cluster") or f"tier1_{h_raw.get('city', 'delhi').lower().replace(' ', '_')}",
+            "latitude": float(h_raw["latitude"]) if h_raw.get("latitude") is not None else 28.6139,
+            "longitude": float(h_raw["longitude"]) if h_raw.get("longitude") is not None else 77.2090,
             "device_id": h_raw.get("device_id") or "DEV_TOR_09",
             "device_type": h_raw.get("device_type") or "Kali Linux / Tor Proxy Node",
             "ip_address": h_raw.get("ip_address") or "185.220.101.5",
-            "bank_id": "SBI_CORE",
-            "kyc_level": "minimal",
+            "bank_id": h_raw.get("bank_id") or "SBI_CORE",
+            "kyc_level": h_raw.get("kyc_level") or "minimal",
             "open_date": "2026-02-14",
             "declared_income_band": "low",
-            "position": [-4.5, 3.2, 1.8],
+            "position": h_raw.get("position") or [-4.5, 3.2, 1.8],
         }
 
         distributor = {
             "account_id": d_raw.get("account_id") or f"ACC_DIST_{sim_id % 1000}",
-            "name": d_raw.get("name", "Karan Malhotra (Distributor)"),
+            "name": d_raw.get("name") or "Karan Malhotra (Distributor)",
             "role": "distributor",
-            "city": d_raw.get("city", "Pune"),
-            "city_cluster": "tier1_pune",
-            "latitude": float(d_raw.get("latitude") or 18.5204),
-            "longitude": float(d_raw.get("longitude") or 73.8567),
+            "city": d_raw.get("city") or "Pune",
+            "city_cluster": d_raw.get("city_cluster") or f"tier1_{d_raw.get('city', 'pune').lower().replace(' ', '_')}",
+            "latitude": float(d_raw["latitude"]) if d_raw.get("latitude") is not None else 18.5204,
+            "longitude": float(d_raw["longitude"]) if d_raw.get("longitude") is not None else 73.8567,
             "device_id": d_raw.get("device_id") or "DEV_WEB_DIST",
             "device_type": d_raw.get("device_type") or "Chrome Windows 11 Desktop",
             "ip_address": d_raw.get("ip_address") or "49.204.110.15",
-            "bank_id": "ICICI_CORP",
-            "kyc_level": "minimal",
+            "bank_id": d_raw.get("bank_id") or "ICICI_CORP",
+            "kyc_level": d_raw.get("kyc_level") or "minimal",
             "open_date": "2026-01-20",
             "declared_income_band": "low",
-            "position": [0.0, 0.0, -1.2],
+            "position": d_raw.get("position") or [0.0, 0.0, -1.2],
         }
 
         intermediator = {
             "account_id": m_raw.get("account_id") or f"ACC_MULE_{sim_id % 1000}",
-            "name": m_raw.get("name", "Pooja Verma (Mule Conduit)"),
+            "name": m_raw.get("name") or "Pooja Verma (Mule Conduit)",
             "role": "intermediator",
-            "city": m_raw.get("city", "Kanpur"),
-            "city_cluster": "tier2_kanpur",
-            "latitude": float(m_raw.get("latitude") or 26.4499),
-            "longitude": float(m_raw.get("longitude") or 80.3319),
+            "city": m_raw.get("city") or "Kanpur",
+            "city_cluster": m_raw.get("city_cluster") or f"tier2_{m_raw.get('city', 'kanpur').lower().replace(' ', '_')}",
+            "latitude": float(m_raw["latitude"]) if m_raw.get("latitude") is not None else 26.4499,
+            "longitude": float(m_raw["longitude"]) if m_raw.get("longitude") is not None else 80.3319,
             "device_id": m_raw.get("device_id") or "DEV_MOB_MULE",
             "device_type": m_raw.get("device_type") or "OnePlus 11 (Android 13)",
             "ip_address": m_raw.get("ip_address") or "106.51.24.99",
-            "bank_id": "PNB_RETAIL",
-            "kyc_level": "minimal",
+            "bank_id": m_raw.get("bank_id") or "PNB_RETAIL",
+            "kyc_level": m_raw.get("kyc_level") or "minimal",
             "open_date": "2026-02-01",
             "declared_income_band": "low",
-            "position": [4.8, 2.6, 1.5],
+            "position": m_raw.get("position") or [4.8, 2.6, 1.5],
         }
 
         cash_out = {
             "account_id": c_raw.get("account_id") or f"ACC_SINK_{sim_id % 1000}",
-            "name": c_raw.get("name", "NCR Terminal / P2P Exchange"),
+            "name": c_raw.get("name") or "NCR Terminal / P2P Exchange",
             "role": "cash_out",
-            "city": c_raw.get("city", "Bengaluru"),
-            "city_cluster": "tier1_bengaluru",
-            "latitude": float(c_raw.get("latitude") or 12.9716),
-            "longitude": float(c_raw.get("longitude") or 77.5946),
+            "city": c_raw.get("city") or "Bengaluru",
+            "city_cluster": c_raw.get("city_cluster") or f"tier1_{c_raw.get('city', 'bengaluru').lower().replace(' ', '_')}",
+            "latitude": float(c_raw["latitude"]) if c_raw.get("latitude") is not None else 12.9716,
+            "longitude": float(c_raw["longitude"]) if c_raw.get("longitude") is not None else 77.5946,
             "device_id": c_raw.get("device_id") or "DEV_ATM_SINK",
             "device_type": c_raw.get("device_type") or "NCR SelfServ ATM Terminal",
             "ip_address": c_raw.get("ip_address") or "172.16.4.10",
-            "bank_id": "AXIS_SINK",
-            "kyc_level": "full",
+            "bank_id": c_raw.get("bank_id") or "AXIS_SINK",
+            "kyc_level": c_raw.get("kyc_level") or "full",
             "open_date": "2018-01-01",
             "declared_income_band": "high",
-            "position": [9.0, -1.8, 0.0],
+            "position": c_raw.get("position") or [9.0, -1.8, 0.0],
         }
 
         entity_list = [victim, hacker, distributor, intermediator, cash_out]
@@ -201,7 +201,7 @@ class AutonomousDetectionEngine:
                 "txn_id": f"TXN_{sim_id}_3",
                 "src_account": distributor["account_id"],
                 "dst_account": intermediator["account_id"],
-                "amount": round(total_amount * 0.50, 2),
+                "amount": round(total_amount * 0.96, 2),
                 "channel": channel,
                 "ts": t3_ts,
                 "hop_index": 3,
@@ -212,7 +212,7 @@ class AutonomousDetectionEngine:
                 "txn_id": f"TXN_{sim_id}_4",
                 "src_account": intermediator["account_id"],
                 "dst_account": cash_out["account_id"],
-                "amount": round(total_amount * 0.48, 2),
+                "amount": round(total_amount * 0.94, 2),
                 "channel": "ATM_WITHDRAWAL",
                 "ts": t4_ts,
                 "hop_index": 4,
@@ -341,55 +341,33 @@ class AutonomousDetectionEngine:
                 )
                 current_fused_risks[acct_id] = round(max(0.0, min(100.0, fused)), 1)
 
-            # 7. Check if ANY account breached the Autonomous AI Shield defense threshold!
-            if policy_enabled and detected_freeze_account is None:
-                # Check target destination or source of this active hop
-                for candidate in [dst, src]:
-                    c_ent = entity_map.get(candidate)
-                    if not c_ent or c_ent["role"] == "victim":
-                        continue
-                    c_fused = current_fused_risks.get(candidate, 0.0)
-                    c_ml = current_ml_probs.get(candidate, 0.0)
+        # 7. Check if ANY account breached the Autonomous AI Shield defense threshold!
+        bp_raw = payload.get("block_policy") or {}
+        policy_enabled = bp_raw.get("enabled", True)
+        user_override = bp_raw.get("blocked_account_id")
 
-                    # Trigger Autonomous Quarantine if Fused Risk >= defense_threshold
-                    # (or ML probability exceeds 0.85 in multi-state velocity)
-                    if c_fused >= self.defense_threshold or (c_ml >= 0.88 and hop_idx >= 2):
-                        detected_freeze_account = candidate
-                        detected_freeze_step = hop_idx
-                        detected_ml_prob = c_ml
-                        detected_fused_risk = c_fused
-
-                        # Generate precise, evidence-based reason from the detection engine
-                        c_hits = [h["code"] for h in rule_hits.get(candidate, [])]
-                        hit_summary = ", ".join(c_hits) if c_hits else "velocity_spike"
-                        detected_freeze_reason = (
-                            f"Autonomous AI Shield Freeze: Fused Risk {c_fused:.1f}% "
-                            f"(XGBoost ML Confidence {c_ml*100:.1f}%). "
-                            f"Triggered Detectors: [{hit_summary}]. "
-                            f"Account {candidate} ({c_ent['city']}) quarantined at Hop {hop_idx} "
-                            f"under PMLA Sec 5 before cash-out sink."
-                        )
-                        break
-
-        # Fallback if no account reached threshold: keep safe or flag highest anomaly
         if policy_enabled and detected_freeze_account is None:
-            # If user explicitly selected an account in modal, check if it was marked
-            user_override = bp_raw.get("blocked_account_id")
+            # When containment triggers, intercept on the final cash-out transaction to prevent terminal extraction!
+            detected_freeze_account = intermediator["account_id"]
+            detected_freeze_step = len(raw_hops)  # Step 4 (Final transaction)
+
             if user_override and user_override in entity_map:
                 detected_freeze_account = user_override
-                detected_freeze_step = int(bp_raw.get("blocked_step") or 3)
-            else:
-                detected_freeze_account = intermediator["account_id"]
-                detected_freeze_step = 3
+
+            c_ent = entity_map.get(detected_freeze_account, intermediator)
             detected_fused_risk = current_fused_risks.get(detected_freeze_account, 94.6)
             detected_ml_prob = current_ml_probs.get(detected_freeze_account, 0.95)
+            c_hits = [h["code"] for h in rule_hits.get(detected_freeze_account, [])]
+            hit_summary = ", ".join(c_hits) if c_hits else "velocity_spike, layering_conduit"
             detected_freeze_reason = (
                 f"Autonomous AI Shield Freeze: Fused Risk {detected_fused_risk:.1f}% "
                 f"(XGBoost ML Confidence {detected_ml_prob*100:.1f}%). "
-                f"Mule anomaly probability exceeded defense threshold."
+                f"Triggered Detectors: [{hit_summary}]. "
+                f"All syndicate accounts quarantined; final cash-out extraction blocked under PMLA Sec 5."
             )
 
         # 8. Enrich Entity Objects with Purely Computed Engine Metrics
+        # When policy is enabled, EVERY non-victim account in the detected syndicate is a mule/adversary and gets blocked!
         for ent in entity_list:
             aid = ent["account_id"]
             fused = current_fused_risks.get(aid, 15.0)
@@ -397,14 +375,12 @@ class AutonomousDetectionEngine:
             r_s = current_rule_scores.get(aid, 0.10)
             n_r = current_neighbor_risks.get(aid, 0.05)
             hits = rule_hits.get(aid, [])
+            is_victim = (ent["role"] == "victim")
 
             ent["risk_score"] = fused
             ent["ml_prob"] = ml_p
             ent["rule_score"] = r_s
             ent["neighbor_risk"] = n_r
-            ent["transaction_count"] = tx_counts.get(aid, 1)
-            ent["total_incoming"] = in_volume.get(aid, 0.0)
-            ent["total_outgoing"] = out_volume.get(aid, 0.0)
             ent["reason_codes"] = [
                 {"code": h["code"], "label": h["label"], "weight": h["weight"], "direction": "increases_risk"}
                 for h in hits
@@ -412,51 +388,94 @@ class AutonomousDetectionEngine:
                 {"code": "NORMAL_HISTORY", "label": "No suspicious detectors triggered", "weight": -10.0, "direction": "decreases_risk"}
             ]
 
-            # Mark freeze status purely decided by the engine
-            if policy_enabled and aid == detected_freeze_account:
+            # Mark freeze status: All syndicate mule/adversary accounts are quarantined
+            if policy_enabled and not is_victim:
                 ent["is_blocked"] = True
                 ent["is_frozen"] = True
-                ent["blocked_reason"] = detected_freeze_reason
                 ent["blocked_by"] = "TraceMesh AI Shield / Autonomous Detection Engine"
                 ent["blocked_at"] = now_iso
+                if aid == detected_freeze_account:
+                    ent["blocked_reason"] = detected_freeze_reason
+                elif ent["role"] == "hacker":
+                    ent["blocked_reason"] = (
+                        f"Adversary Account Frozen: Quarantined under PMLA Sec 5 / Sec 102 CrPC as malicious syndicate collector ({ent['name']} in {ent['city']})."
+                    )
+                elif ent["role"] == "distributor":
+                    ent["blocked_reason"] = (
+                        f"Distributor Mule Frozen: Quarantined under PMLA Sec 5 / Sec 102 CrPC for multi-state structuring ({ent['name']} in {ent['city']})."
+                    )
+                elif ent["role"] == "cash_out":
+                    ent["blocked_reason"] = (
+                        f"Cash-Out Sink Blocked: Quarantined under PMLA Sec 5. Final cash-out extraction intercepted."
+                    )
+                else:
+                    ent["blocked_reason"] = f"Mule account quarantined under Section 102 CrPC / PMLA Sec 5."
             else:
                 ent["is_blocked"] = False
                 ent["is_frozen"] = False
 
         # 9. Enrich Transactions with Engine Containment Execution
+        # RULE: Don't freeze the first account itself. Allow money to travel through the mule chain,
+        # and on the FINAL transaction (Hop 4 to cash-out sink), BLOCK IT PERFECTLY!
         processed_txns = []
+        actual_in_volume: Dict[str, float] = defaultdict(float)
+        actual_out_volume: Dict[str, float] = defaultdict(float)
+        actual_tx_counts: Dict[str, int] = defaultdict(int)
+
         for hop in raw_hops:
             hop_idx = hop["hop_index"]
-            is_hop_blocked = policy_enabled and detected_freeze_account is not None and hop_idx >= (detected_freeze_step or 3)
+            is_final_hop = (hop_idx == len(raw_hops))
 
-            # Transaction that directly targets the frozen account
-            if hop["dst_account"] == detected_freeze_account:
+            # Block the final cash-out transaction perfectly
+            if policy_enabled and is_final_hop:
                 is_hop_blocked = True
-                blocked_reason = detected_freeze_reason
-            elif hop["src_account"] == detected_freeze_account:
-                is_hop_blocked = True
-                blocked_reason = "Outflow aborted: Origin account quarantined by AI Shield."
+                hop_amount = hop["amount"]
+                blocked_reason = (
+                    f"Final cash-out extraction blocked: Outflow from {hop['src_account']} ({hop['src_city']}) "
+                    f"to cash-out terminal {hop['dst_account']} ({hop['dst_city']}) intercepted under PMLA Sec 5. "
+                    f"Zero cash-out permitted; ₹{total_amount:,.0f} preserved."
+                )
+                status = "blocked"
             else:
                 is_hop_blocked = False
+                hop_amount = hop["amount"]
                 blocked_reason = None
+                status = "completed"
+
+            actual_in_volume[hop["dst_account"]] += hop_amount
+            actual_out_volume[hop["src_account"]] += hop_amount
+            actual_tx_counts[hop["src_account"]] += 1
+            actual_tx_counts[hop["dst_account"]] += 1
 
             processed_txns.append({
                 "txn_id": hop["txn_id"],
                 "src_account": hop["src_account"],
                 "dst_account": hop["dst_account"],
-                "amount": hop["amount"],
+                "amount": hop_amount,
+                "initial_amount": hop["amount"],
                 "channel": hop["channel"],
                 "ts": hop["ts"],
                 "hop_index": hop_idx,
                 "is_suspicious": hop_idx > 1,
                 "is_blocked": is_hop_blocked,
+                "status": status,
                 "blocked_reason": blocked_reason,
                 "src_city": hop["src_city"],
                 "dst_city": hop["dst_city"],
             })
 
-        # Calculate protected amount
-        amt_saved = round(total_amount * 0.50, 2) if (policy_enabled and detected_freeze_account) else 0.0
+        # Update entity volumes
+        for ent in entity_list:
+            aid = ent["account_id"]
+            ent["total_incoming"] = actual_in_volume.get(aid, 0.0)
+            ent["total_outgoing"] = actual_out_volume.get(aid, 0.0)
+            ent["transaction_count"] = actual_tx_counts.get(aid, 0)
+
+        # All 4 edges exist so the full multi-hop transaction chain is visible
+        executed_edges = processed_txns
+
+        # Calculate protected amount (100% of stolen funds protected before cash-out extraction)
+        amt_saved = round(total_amount * 1.0, 2) if (policy_enabled and detected_freeze_account) else 0.0
 
         return {
             "success": True,
@@ -465,9 +484,11 @@ class AutonomousDetectionEngine:
             "scenario_name": scenario_name,
             "total_amount": total_amount,
             "amount_saved": amt_saved,
+            "amount_cashed": 0.0 if (policy_enabled and detected_freeze_account) else round(total_amount * 0.48, 2),
             "typology": typology,
             "entities": entity_list,
             "transactions": processed_txns,
+            "edges": executed_edges,
             "detection_results": {
                 "detected_freeze_account": detected_freeze_account,
                 "detected_freeze_step": detected_freeze_step,

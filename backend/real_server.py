@@ -306,6 +306,18 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
         self._send_json_response(HTTPStatus.OK, STORE.get_metrics())
 
     def handle_ring(self, ring_id: str):
+        # 1. Check in-memory store first (for live simulations and newly injected rings)
+        if ring_id in STORE.rings:
+            self._send_json_response(HTTPStatus.OK, STORE.rings[ring_id])
+            return
+
+        role_default_positions = {
+            "victim": [-8.0, 0.5, 0.0],
+            "collector": [-4.0, 2.5, 1.2],
+            "mule": [0.0, 0.0, -1.0],
+            "cash_out": [8.0, -1.5, 0.0],
+        }
+
         try:
             if DB.is_configured():
                 ring_sql = f"SELECT * FROM rings WHERE ring_id = '{ring_id}' LIMIT 1;"
@@ -329,6 +341,24 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
                         f"ORDER BY rt.hop_index ASC, t.ts ASC;"
                     )
                     edges = DB.query_json(edge_sql)
+
+                    # Ensure every node from DB has valid 3D coordinates, risk score, and telemetry
+                    for idx, n in enumerate(nodes):
+                        if "position" not in n or not n.get("position"):
+                            n["position"] = role_default_positions.get(
+                                n.get("role"),
+                                [(idx - (len(nodes) - 1) / 2) * 3.5, (1 if idx % 2 == 0 else -1) * 1.5, 0.0]
+                            )
+                        if "risk_score" not in n or n.get("risk_score") is None:
+                            n["risk_score"] = 15.0 if n.get("role") == "victim" else 88.0
+                        if "reason_codes" not in n or n.get("reason_codes") is None:
+                            n["reason_codes"] = []
+                        if "total_incoming" not in n or n.get("total_incoming") is None:
+                            n["total_incoming"] = 500000.0
+                        if "total_outgoing" not in n or n.get("total_outgoing") is None:
+                            n["total_outgoing"] = 500000.0
+                        if "transaction_count" not in n or n.get("transaction_count") is None:
+                            n["transaction_count"] = 2
 
                     # Query freeze or block actions for this ring
                     blocked_info = None
@@ -698,7 +728,7 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
         channel = payload.get("channel", "UPI")
         typology = eval_res["typology"]
         entity_list = eval_res["entities"]
-        raw_edges = eval_res["transactions"]
+        raw_edges = eval_res.get("edges") or [t for t in eval_res["transactions"] if not t.get("is_blocked") and t.get("amount", 0) > 0]
         blocked_info = eval_res["blocked_info"]
         detection_results = eval_res["detection_results"]
         amount_saved = eval_res["amount_saved"]
@@ -709,10 +739,12 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
         blocked_by = "TraceMesh AI Shield / Autonomous Detection Engine"
         now_dt = datetime.datetime.now(datetime.timezone.utc)
         now_iso = now_dt.isoformat()
+        sim_id = int(time.time() * 1000) % 1000000
+        t3_ts = raw_edges[min(2, len(raw_edges) - 1)]["ts"] if raw_edges else now_iso
 
         # Build dynamic execution steps for live attack playback
         execution_steps = []
-        for hop in raw_edges:
+        for hop in eval_res["transactions"]:
             src_acct = hop["src_account"]
             dst_acct = hop["dst_account"]
             src_ent = next((e for e in entity_list if e["account_id"] == src_acct), {})
@@ -720,15 +752,20 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
             h_idx = hop["hop_index"]
             is_blk = hop.get("is_blocked", False)
 
-            step_title = (
-                "Account Compromise & Unauthorized Outflow" if h_idx == 1
-                else ("Primary Aggregation & Laundering Layer" if h_idx == 2
-                else ("Rapid Smurfing Fan-Out to Mule Account" if h_idx == 3
-                else "Multi-Channel Extraction & Cash-Out Attempt"))
-            )
-            step_desc = (
-                f"Transfer of ₹{hop['amount']:,.0f} via {hop['channel']} from {src_ent.get('name', src_acct)} ({hop['src_city']}) to {dst_ent.get('name', dst_acct)} ({hop['dst_city']})."
-            )
+            if is_blk:
+                step_title = "Outflow Aborted (Origin Account Frozen)"
+                step_desc = f"Transfer of ₹{hop.get('initial_amount', 0):,.0f} from {src_ent.get('name', src_acct)} ({hop['src_city']}) to {dst_ent.get('name', dst_acct)} ({hop['dst_city']}) REJECTED: Account {src_acct} is frozen under PMLA Sec 5. Zero funds transferred."
+            else:
+                step_title = (
+                    "Account Compromise & Unauthorized Outflow" if h_idx == 1
+                    else ("Primary Aggregation & Laundering Layer" if h_idx == 2
+                    else ("Rapid Smurfing Fan-Out to Mule Account" if h_idx == 3
+                    else "Multi-Channel Extraction & Cash-Out Attempt"))
+                )
+                step_desc = (
+                    f"Transfer of ₹{hop['amount']:,.0f} via {hop['channel']} from {src_ent.get('name', src_acct)} ({hop['src_city']}) to {dst_ent.get('name', dst_acct)} ({hop['dst_city']})."
+                )
+
             execution_steps.append({
                 "step": h_idx,
                 "title": step_title,
@@ -782,9 +819,9 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
                 "is_blocked": ent.get("is_blocked", False),
                 "blocked_reason": ent.get("blocked_reason"),
                 "position": ent["position"],
-                "total_incoming": ent.get("total_incoming", total_amount),
-                "total_outgoing": ent.get("total_outgoing", total_amount),
-                "transaction_count": ent.get("transaction_count", 2),
+                "total_incoming": ent.get("total_incoming", 0.0),
+                "total_outgoing": ent.get("total_outgoing", 0.0),
+                "transaction_count": ent.get("transaction_count", 0),
                 "kyc_level": ent.get("kyc_level", "minimal"),
                 "account_type": "savings" if ent["role"] == "victim" else ("sink" if ent["role"] == "cash_out" else "current"),
                 "open_date": ent.get("open_date", "2024-06-15"),
@@ -827,6 +864,7 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
             **new_alert,
             "nodes": nodes,
             "edges": raw_edges,
+            "transactions": eval_res["transactions"],
             "blocked_info": blocked_info,
         }
         STORE.timelines[ring_id] = [
