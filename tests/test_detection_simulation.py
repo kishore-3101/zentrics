@@ -83,6 +83,75 @@ class TestDetectionSimulation(unittest.TestCase):
         self.assertIn("detection_results", mock_res)
         self.assertIn("detected_ml_prob", mock_res["detection_results"])
 
+    def test_custom_simulation_settings_and_cities(self):
+        # Scenario with customized cities: Chennai -> Mumbai -> Dubai -> Singapore -> Ahmedabad
+        custom_payload = {
+            "scenario_name": "Offshore Trade Smurfing Loop",
+            "total_amount": 1850000.0,
+            "channel": "NEFT",
+            "typology": "circular_flow",
+            "victim": {
+                "account_id": "ACC_VIC_CHENNAI",
+                "name": "Sundararajan Corp",
+                "city": "Chennai",
+                "latitude": 13.0827,
+                "longitude": 80.2707,
+            },
+            "hacker": {
+                "account_id": "ACC_HACK_MUMBAI",
+                "name": "Operator Alpha",
+                "city": "Mumbai",
+                "latitude": 19.0760,
+                "longitude": 72.8777,
+            },
+            "distributor": {
+                "account_id": "ACC_DIST_DUBAI",
+                "name": "Dubai Offshore Trading Co",
+                "city": "Dubai",
+                "latitude": 25.2048,
+                "longitude": 55.2708,
+            },
+            "intermediator": {
+                "account_id": "ACC_MULE_SINGAPORE",
+                "name": "Lion City Conduit Pte",
+                "city": "Singapore",
+                "latitude": 1.3521,
+                "longitude": 103.8198,
+            },
+            "cash_out": {
+                "account_id": "ACC_SINK_AHMEDABAD",
+                "name": "Bullion Exchange Terminal",
+                "city": "Ahmedabad",
+                "latitude": 23.0225,
+                "longitude": 72.5714,
+            },
+            "block_policy": {
+                "enabled": True,
+                "blocked_target": "auto",
+            },
+        }
+
+        eval_res = DETECTION_ENGINE.evaluate_scenario(custom_payload)
+        self.assertTrue(eval_res["success"])
+        self.assertEqual(eval_res["total_amount"], 1850000.0)
+
+        # Confirm all 5 custom cities are preserved accurately
+        cities = [e["city"] for e in eval_res["entities"]]
+        self.assertEqual(cities, ["Chennai", "Mumbai", "Dubai", "Singapore", "Ahmedabad"])
+
+        # Check that 3D positions exist for all nodes
+        for ent in eval_res["entities"]:
+            self.assertIn("position", ent)
+            self.assertEqual(len(ent["position"]), 3)
+
+        # Check transactions link the custom cities
+        txns = eval_res["transactions"]
+        self.assertEqual(len(txns), 4)
+        self.assertEqual(txns[0]["src_city"], "Chennai")
+        self.assertEqual(txns[0]["dst_city"], "Mumbai")
+        self.assertEqual(txns[1]["src_city"], "Mumbai")
+        self.assertEqual(txns[1]["dst_city"], "Dubai")
+
 
 if __name__ == "__main__":
     unittest.main()

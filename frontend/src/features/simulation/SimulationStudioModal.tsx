@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
   Check,
@@ -7,10 +8,26 @@ import {
   Sliders,
   Sparkles,
   X,
+  Zap,
 } from 'lucide-react';
 import { useSimulation } from './useSimulation';
 import { cn } from '../../lib/cn';
 import { formatInrCompact } from '../../lib/formatters';
+
+export const CITY_GEO_LOOKUP: Record<string, { lat: number; lon: number }> = {
+  Mumbai: { lat: 19.0760, lon: 72.8777 },
+  Delhi: { lat: 28.6139, lon: 77.2090 },
+  Kolkata: { lat: 22.5726, lon: 88.3639 },
+  Bengaluru: { lat: 12.9716, lon: 77.5946 },
+  Hyderabad: { lat: 17.3850, lon: 78.4867 },
+  Chennai: { lat: 13.0827, lon: 80.2707 },
+  Pune: { lat: 18.5204, lon: 73.8567 },
+  Kanpur: { lat: 26.4499, lon: 80.3319 },
+  Jaipur: { lat: 26.9124, lon: 75.7873 },
+  Ahmedabad: { lat: 23.0225, lon: 72.5714 },
+  Dubai: { lat: 25.2048, lon: 55.2708 },
+  Singapore: { lat: 1.3521, lon: 103.8198 },
+};
 
 export interface SimulationEntity {
   account_id: string;
@@ -232,7 +249,8 @@ interface SimulationStudioModalProps {
 }
 
 export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModalProps) {
-  const { saveConfig, savedConfig } = useSimulation();
+  const navigate = useNavigate();
+  const { saveConfig, savedConfig, runSimulation } = useSimulation();
 
   const [preset, setPreset] = useState<SimulationPreset>(PRESETS[0]);
   const [amount, setAmount] = useState<number>(savedConfig?.total_amount || PRESETS[0].amount);
@@ -256,6 +274,7 @@ export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModal
   );
   const [blockedReason, setBlockedReason] = useState<string>(savedConfig?.block_policy?.blocked_reason || PRESETS[0].blocked_reason);
   const [isSavedNotice, setIsSavedNotice] = useState(false);
+  const [isExecutingNow, setIsExecutingNow] = useState(false);
 
   // Lock body scroll and listen for Escape key while modal is open
   useEffect(() => {
@@ -289,10 +308,15 @@ export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModal
     setBlockedReason(p.blocked_reason);
   };
 
-  const handleSaveSettings = () => {
-    const blockedAccount = blockedTarget === 'auto' ? undefined : (blockedTarget === 'intermediator' ? intermediator.account_id : cashOut.account_id);
+  const buildPayload = () => {
+    const blockedAccount =
+      blockedTarget === 'auto'
+        ? undefined
+        : blockedTarget === 'intermediator'
+        ? intermediator.account_id
+        : cashOut.account_id;
 
-    const payload = {
+    return {
       scenario_name: preset.label,
       total_amount: amount,
       channel,
@@ -308,16 +332,36 @@ export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModal
         blocked_account_id: blockedAccount,
         blocked_reason: blockedReason,
         blocked_by: 'TraceMesh AI Shield / Autonomous Detection Engine',
-        blocked_step: blockedTarget === 'intermediator' ? 3 : (blockedTarget === 'cash_out' ? 4 : undefined),
+        blocked_step: blockedTarget === 'intermediator' ? 3 : blockedTarget === 'cash_out' ? 4 : undefined,
       },
     };
+  };
 
+  const handleSaveSettings = () => {
+    const payload = buildPayload();
     saveConfig(payload);
     setIsSavedNotice(true);
     setTimeout(() => {
       setIsSavedNotice(false);
       onClose();
     }, 450);
+  };
+
+  const handleExecuteNow = async () => {
+    setIsExecutingNow(true);
+    try {
+      const payload = buildPayload();
+      saveConfig(payload);
+      const res = await runSimulation(payload);
+      onClose();
+      if (res && res.ring_id) {
+        navigate(`/rings/${res.ring_id}?live=1`);
+      }
+    } catch (err) {
+      console.error('Failed to execute simulation:', err);
+    } finally {
+      setIsExecutingNow(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -571,7 +615,22 @@ export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModal
                       <span className="grid size-4 place-items-center rounded-full bg-emerald text-[#0B1812] text-[10px] font-mono font-bold">1</span>
                       Victim Account (Compromised)
                     </span>
-                    <span className="font-mono text-[11px] text-muted">{victim.city}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] uppercase text-muted font-bold">City:</span>
+                      <select
+                        value={victim.city}
+                        onChange={(e) => {
+                          const c = e.target.value;
+                          const geo = CITY_GEO_LOOKUP[c] || { lat: 19.0760, lon: 72.8777 };
+                          setVictim({ ...victim, city: c, latitude: geo.lat, longitude: geo.lon });
+                        }}
+                        className="rounded-md border border-gold/25 bg-[#07110D] px-2 py-0.5 text-xs text-gold-light font-mono focus:border-gold focus:outline-none"
+                      >
+                        {Object.keys(CITY_GEO_LOOKUP).map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
@@ -603,7 +662,22 @@ export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModal
                       <span className="grid size-4 place-items-center rounded-full bg-danger text-ink text-[10px] font-mono font-bold">2</span>
                       Adversary / Hacker Account
                     </span>
-                    <span className="font-mono text-[11px] text-muted">{hacker.city}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] uppercase text-muted font-bold">City:</span>
+                      <select
+                        value={hacker.city}
+                        onChange={(e) => {
+                          const c = e.target.value;
+                          const geo = CITY_GEO_LOOKUP[c] || { lat: 28.6139, lon: 77.2090 };
+                          setHacker({ ...hacker, city: c, latitude: geo.lat, longitude: geo.lon });
+                        }}
+                        className="rounded-md border border-gold/25 bg-[#07110D] px-2 py-0.5 text-xs text-gold-light font-mono focus:border-gold focus:outline-none"
+                      >
+                        {Object.keys(CITY_GEO_LOOKUP).map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
@@ -635,7 +709,22 @@ export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModal
                       <span className="grid size-4 place-items-center rounded-full bg-gold-light text-[#0B1812] text-[10px] font-mono font-bold">3</span>
                       Distributor Account (Layering Hub)
                     </span>
-                    <span className="font-mono text-[11px] text-muted">{distributor.city}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] uppercase text-muted font-bold">City:</span>
+                      <select
+                        value={distributor.city}
+                        onChange={(e) => {
+                          const c = e.target.value;
+                          const geo = CITY_GEO_LOOKUP[c] || { lat: 18.5204, lon: 73.8567 };
+                          setDistributor({ ...distributor, city: c, latitude: geo.lat, longitude: geo.lon });
+                        }}
+                        className="rounded-md border border-gold/25 bg-[#07110D] px-2 py-0.5 text-xs text-gold-light font-mono focus:border-gold focus:outline-none"
+                      >
+                        {Object.keys(CITY_GEO_LOOKUP).map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
@@ -679,7 +768,22 @@ export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModal
                         </span>
                       )}
                     </div>
-                    <span className="font-mono text-[11px] text-muted">{intermediator.city}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] uppercase text-muted font-bold">City:</span>
+                      <select
+                        value={intermediator.city}
+                        onChange={(e) => {
+                          const c = e.target.value;
+                          const geo = CITY_GEO_LOOKUP[c] || { lat: 26.4499, lon: 80.3319 };
+                          setIntermediator({ ...intermediator, city: c, latitude: geo.lat, longitude: geo.lon });
+                        }}
+                        className="rounded-md border border-gold/25 bg-[#07110D] px-2 py-0.5 text-xs text-gold-light font-mono focus:border-gold focus:outline-none"
+                      >
+                        {Object.keys(CITY_GEO_LOOKUP).map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
@@ -723,7 +827,22 @@ export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModal
                         </span>
                       )}
                     </div>
-                    <span className="font-mono text-[11px] text-muted">{cashOut.city}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] uppercase text-muted font-bold">City:</span>
+                      <select
+                        value={cashOut.city}
+                        onChange={(e) => {
+                          const c = e.target.value;
+                          const geo = CITY_GEO_LOOKUP[c] || { lat: 12.9716, lon: 77.5946 };
+                          setCashOut({ ...cashOut, city: c, latitude: geo.lat, longitude: geo.lon });
+                        }}
+                        className="rounded-md border border-gold/25 bg-[#07110D] px-2 py-0.5 text-xs text-gold-light font-mono focus:border-gold focus:outline-none"
+                      >
+                        {Object.keys(CITY_GEO_LOOKUP).map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                     <div>
@@ -822,25 +941,25 @@ export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModal
         </div>
 
         {/* ================================================================= */}
-        {/* FIXED FOOTER: ONLY "CANCEL" AND "SAVE SETTINGS" BUTTONS          */}
+        {/* FIXED FOOTER: ACTIONS                                           */}
         {/* ================================================================= */}
         <div className="shrink-0 flex items-center justify-between border-t border-gold/15 px-5 py-3.5 bg-sidebar/95">
           <div className="flex items-center gap-2 text-xs">
             <span className="size-2 rounded-full bg-emerald animate-pulse" />
             <span className="text-muted font-medium">Attack Scenario Parameters</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-white/10 px-4 py-2 text-xs font-semibold text-muted hover:text-ink hover:bg-white/5 transition-colors cursor-pointer"
+              className="rounded-lg border border-white/10 px-3.5 py-2 text-xs font-semibold text-muted hover:text-ink hover:bg-white/5 transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleSaveSettings}
-              className="inline-flex items-center gap-2 rounded-lg border border-gold/50 bg-gold/20 px-5 py-2 text-xs font-bold text-gold-light hover:bg-gold/30 transition-all cursor-pointer shadow-md"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-gold/40 bg-gold/15 px-4 py-2 text-xs font-bold text-gold-light hover:bg-gold/25 transition-all cursor-pointer shadow-sm"
             >
               {isSavedNotice ? (
                 <>
@@ -851,6 +970,24 @@ export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModal
                 <>
                   <Check className="size-4 text-emerald" />
                   Save Settings
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              disabled={isExecutingNow}
+              onClick={handleExecuteNow}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald/50 bg-emerald/20 px-4 py-2 text-xs font-bold text-emerald hover:border-emerald hover:bg-emerald/30 transition-all cursor-pointer shadow-md disabled:opacity-50"
+            >
+              {isExecutingNow ? (
+                <>
+                  <span className="size-3.5 border-2 border-emerald border-t-transparent rounded-full animate-spin" />
+                  <span>Starting...</span>
+                </>
+              ) : (
+                <>
+                  <Zap className="size-3.5 fill-current text-emerald" />
+                  Save & Simulate Now
                 </>
               )}
             </button>

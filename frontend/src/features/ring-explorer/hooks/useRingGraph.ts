@@ -30,6 +30,38 @@ export function useRingGraph(ringId: string) {
         fetchRingGraph(id),
         fetchRingTimeline(id),
       ]);
+
+      // Ensure every node has valid 3D coordinates, risk score, and required attributes
+      if (graphData && Array.isArray(graphData.nodes)) {
+        const roleDefaultPositions: Record<string, [number, number, number]> = {
+          victim: [-8.0, 0.5, 0.0],
+          collector: [-4.0, 2.5, 1.2],
+          mule: [0.0, 0.0, -1.0],
+          cash_out: [8.0, -1.5, 0.0],
+        };
+
+        graphData.nodes.forEach((node, idx) => {
+          if (
+            !Array.isArray(node.position) ||
+            node.position.length !== 3 ||
+            node.position.some((coord) => typeof coord !== 'number' || isNaN(coord))
+          ) {
+            const fallbackPos = roleDefaultPositions[node.role] || [
+              (idx - (graphData.nodes.length - 1) / 2) * 3.5,
+              (idx % 2 === 0 ? 1 : -1) * 1.5,
+              0,
+            ];
+            node.position = fallbackPos;
+          }
+          if (typeof node.risk_score !== 'number' || isNaN(node.risk_score)) {
+            node.risk_score = node.role === 'victim' ? 15 : 88;
+          }
+          if (!Array.isArray(node.reason_codes)) {
+            node.reason_codes = [];
+          }
+        });
+      }
+
       setGraph(graphData);
       setTimeline(timelineData);
       setSelectedNode(null);

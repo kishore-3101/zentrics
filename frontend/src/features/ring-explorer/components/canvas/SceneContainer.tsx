@@ -33,10 +33,22 @@ export function SceneContainer({
 }: SceneContainerProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
 
-  // Map of account_id -> 3D position
+  // Map of account_id -> 3D position (with safe fallback coordinate resolution)
   const nodePositionMap = useMemo(() => {
     const map = new Map<string, [number, number, number]>();
-    nodes.forEach((n) => map.set(n.account_id, n.position));
+    const roleDefaultPositions: Record<string, [number, number, number]> = {
+      victim: [-8.0, 0.5, 0.0],
+      collector: [-4.0, 2.5, 1.2],
+      mule: [0.0, 0.0, -1.0],
+      cash_out: [8.0, -1.5, 0.0],
+    };
+    nodes.forEach((n, idx) => {
+      const pos: [number, number, number] =
+        Array.isArray(n.position) && n.position.length === 3 && !n.position.some(isNaN)
+          ? n.position
+          : roleDefaultPositions[n.role] || [(idx - (nodes.length - 1) / 2) * 3.5, 0, 0];
+      map.set(n.account_id, pos);
+    });
     return map;
   }, [nodes]);
 
@@ -118,11 +130,15 @@ export function SceneContainer({
         {nodes.map((node) => {
           const isSelected = selectedNode?.account_id === node.account_id;
           const isHighlighted = connectedAccountIds.has(node.account_id);
+          const safeNode = {
+            ...node,
+            position: nodePositionMap.get(node.account_id) || [0, 0, 0],
+          };
 
           return (
             <AccountNode3D
               key={node.account_id}
-              node={node}
+              node={safeNode}
               isSelected={isSelected}
               isHighlighted={isHighlighted}
               showLabels={showLabels}

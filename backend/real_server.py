@@ -306,6 +306,18 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
         self._send_json_response(HTTPStatus.OK, STORE.get_metrics())
 
     def handle_ring(self, ring_id: str):
+        # 1. Check in-memory store first (for live simulations and newly injected rings)
+        if ring_id in STORE.rings:
+            self._send_json_response(HTTPStatus.OK, STORE.rings[ring_id])
+            return
+
+        role_default_positions = {
+            "victim": [-8.0, 0.5, 0.0],
+            "collector": [-4.0, 2.5, 1.2],
+            "mule": [0.0, 0.0, -1.0],
+            "cash_out": [8.0, -1.5, 0.0],
+        }
+
         try:
             if DB.is_configured():
                 ring_sql = f"SELECT * FROM rings WHERE ring_id = '{ring_id}' LIMIT 1;"
@@ -329,6 +341,24 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
                         f"ORDER BY rt.hop_index ASC, t.ts ASC;"
                     )
                     edges = DB.query_json(edge_sql)
+
+                    # Ensure every node from DB has valid 3D coordinates, risk score, and telemetry
+                    for idx, n in enumerate(nodes):
+                        if "position" not in n or not n.get("position"):
+                            n["position"] = role_default_positions.get(
+                                n.get("role"),
+                                [(idx - (len(nodes) - 1) / 2) * 3.5, (1 if idx % 2 == 0 else -1) * 1.5, 0.0]
+                            )
+                        if "risk_score" not in n or n.get("risk_score") is None:
+                            n["risk_score"] = 15.0 if n.get("role") == "victim" else 88.0
+                        if "reason_codes" not in n or n.get("reason_codes") is None:
+                            n["reason_codes"] = []
+                        if "total_incoming" not in n or n.get("total_incoming") is None:
+                            n["total_incoming"] = 500000.0
+                        if "total_outgoing" not in n or n.get("total_outgoing") is None:
+                            n["total_outgoing"] = 500000.0
+                        if "transaction_count" not in n or n.get("transaction_count") is None:
+                            n["transaction_count"] = 2
 
                     # Query freeze or block actions for this ring
                     blocked_info = None
@@ -709,6 +739,8 @@ class TraceMeshAPIHandler(SimpleHTTPRequestHandler):
         blocked_by = "TraceMesh AI Shield / Autonomous Detection Engine"
         now_dt = datetime.datetime.now(datetime.timezone.utc)
         now_iso = now_dt.isoformat()
+        sim_id = int(time.time() * 1000) % 1000000
+        t3_ts = raw_edges[min(2, len(raw_edges) - 1)]["ts"] if raw_edges else now_iso
 
         # Build dynamic execution steps for live attack playback
         execution_steps = []
