@@ -1,4 +1,4 @@
-import { ArrowRight, Clock, CreditCard, X } from 'lucide-react';
+import { ArrowRight, Clock, CreditCard, Laptop, Lock, Smartphone, X } from 'lucide-react';
 import { formatInrCompact, formatRelativeTime } from '../../../lib/formatters';
 import type { TransactionEdgeData } from '../../../types/ring-graph';
 
@@ -30,6 +30,18 @@ export function TransactionInspector({ edge, onClose }: TransactionInspectorProp
       </div>
 
       <div className="mt-3 space-y-2.5 text-xs">
+        {/* Blocked Alert Banner if blocked */}
+        {edge.is_blocked && (
+          <div className="rounded-lg border border-danger/40 bg-danger/15 p-2 text-danger">
+            <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[10px]">
+              <Lock className="size-3" /> Transaction Intercepted
+            </div>
+            <p className="mt-1 text-[11px] text-ink/90 leading-tight">
+              {edge.blocked_reason || 'Autonomous AI Shield blocked transfer into suspicious mule node.'}
+            </p>
+          </div>
+        )}
+
         {/* Flow: Source -> Destination */}
         <div className="flex items-center justify-between rounded-lg border border-gold/10 bg-canvas/60 p-2">
           <span className="font-mono font-medium text-ink">{edge.src_account}</span>
@@ -54,6 +66,32 @@ export function TransactionInspector({ edge, onClose }: TransactionInspectorProp
             </p>
           </div>
         </div>
+
+        {/* Device & IP Telemetry */}
+        {(edge.device_type || edge.ip_address) && (
+          <div className="rounded-lg border border-gold/10 bg-canvas/40 p-2 text-[11px] space-y-1">
+            {edge.device_type && (
+              <div className="flex items-center justify-between">
+                <span className="text-muted flex items-center gap-1">
+                  <Smartphone className="size-2.5" /> Device
+                </span>
+                <span className="font-mono text-ink text-[10px] truncate max-w-[120px]" title={edge.device_type}>
+                  {edge.device_type}
+                </span>
+              </div>
+            )}
+            {edge.ip_address && (
+              <div className="flex items-center justify-between">
+                <span className="text-muted flex items-center gap-1">
+                  <Laptop className="size-2.5" /> IP
+                </span>
+                <span className="font-mono text-muted text-[10px]">
+                  {edge.ip_address}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Timestamp & Hop Info */}
         <div className="flex items-center justify-between text-[11px] text-muted pt-1">

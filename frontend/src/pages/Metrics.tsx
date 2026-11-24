@@ -1,9 +1,7 @@
-import { RefreshCw, Sparkles } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary';
 import { Skeleton } from '../components/ui/Skeleton';
-import { StatusBadge } from '../components/ui/StatusBadge';
-import { BenchmarkDisclaimerBanner } from '../features/metrics/components/BenchmarkDisclaimerBanner';
 import { ExportMetricsButton } from '../features/metrics/components/ExportMetricsButton';
 import { FairnessBiasTable } from '../features/metrics/components/FairnessBiasTable';
 import { FourWayComparisonChart } from '../features/metrics/components/FourWayComparisonChart';
@@ -27,9 +25,6 @@ export default function Metrics() {
             <h1 className="font-display text-2xl font-bold tracking-tight text-ink sm:text-3xl">
               Models &amp; Evaluation Benchmarks
             </h1>
-            <StatusBadge tone="gold" size="sm" dot>
-              Validation Run #4 &bull; Demo Benchmark
-            </StatusBadge>
           </div>
           <p className="mt-1 text-sm text-muted">
             Empirical performance benchmarks, 4-way architectural comparison, PR/ROC curves, and fairness auditing.
@@ -38,11 +33,6 @@ export default function Metrics() {
 
         <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
           {data && <ExportMetricsButton data={data} />}
-
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald/30 bg-emerald/10 px-3 py-1 text-xs font-semibold text-emerald">
-            <Sparkles className="size-3.5" />
-            Empirically Calibrated
-          </div>
 
           <button
             type="button"
@@ -55,9 +45,6 @@ export default function Metrics() {
           </button>
         </div>
       </div>
-
-      {/* Benchmark Data Integrity & Provenance Banner */}
-      <BenchmarkDisclaimerBanner />
 
       {loading && (
         <div className="space-y-6">

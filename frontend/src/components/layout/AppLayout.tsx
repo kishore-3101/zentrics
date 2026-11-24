@@ -10,6 +10,7 @@ import { getRouteMeta } from '../../lib/navigation';
 import { RouteFallback } from '../ui/RouteFallback';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { Header } from './Header';
+import { ActiveAttackAlertBanner } from './ActiveAttackAlertBanner';
 import { MobileDrawer, Sidebar } from './Sidebar';
 
 const COLLAPSE_STORAGE_KEY = 'mulenet:sidebar-collapsed';
@@ -79,6 +80,7 @@ export function AppLayout() {
 
         <div ref={scrollRef} className="flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto">
           <Header onOpenNavigation={openDrawer} />
+          <ActiveAttackAlertBanner />
           <main id="main-content" data-anim="content" className="w-full min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
             <motion.div
               key={pathname}

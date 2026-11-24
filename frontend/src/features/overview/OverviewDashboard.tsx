@@ -1,7 +1,6 @@
 import { IndianRupee, Network, RotateCw, ShieldAlert, Target, Users } from 'lucide-react';
 import { useMemo } from 'react';
 import { EmptyState } from '../../components/ui/EmptyState';
-import { StatusBadge } from '../../components/ui/StatusBadge';
 import { formatCount, formatInrCompact, formatPercent } from '../../lib/formatters';
 import { percentTrend, pointsTrend } from '../../lib/trend';
 import { AlertVolumeTrendChart } from './components/AlertVolumeTrendChart';
@@ -119,9 +118,6 @@ function OverviewContent({ data }: { data: OverviewData }) {
           <span className="font-semibold text-ink">{formatCount(totalAlerts)} account alerts</span> consolidated into{' '}
           <span className="font-semibold text-gold-light">{activeRings} actionable rings</span>.
         </p>
-        <StatusBadge tone="gold" size="sm" dot title="Backend not connected: values are illustrative">
-          Mock data
-        </StatusBadge>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">

@@ -119,7 +119,7 @@ export function OperationalImpactCard({ impact }: OperationalImpactCardProps) {
       <div className="rounded-xl border border-gold/15 bg-canvas/30 p-2.5 text-[11px] text-muted leading-relaxed flex items-start gap-2">
         <ShieldCheck className="size-3.5 text-emerald shrink-0 mt-0.5" />
         <p>
-          <strong className="text-ink">Operational Data Integrity:</strong> Alert reduction counts are derived directly from Module 10 evaluation benchmarks comparing baseline single-account rule hits against clustered ring cases. Money saved is simulated based on un-cashed funds at alert time.
+          <strong className="text-ink">Operational Data Integrity:</strong> Alert reduction counts are derived directly from evaluation benchmarks comparing baseline single-account rule hits against clustered ring cases. Money saved is simulated based on un-cashed funds at alert time.
         </p>
       </div>
     </DashboardCard>

@@ -126,6 +126,14 @@ export function AccountNode3D({
         </mesh>
       )}
 
+      {/* 2b. Autonomous AI Shield Quarantine Wireframe Sphere */}
+      {(node.is_blocked || node.is_frozen) && (
+        <mesh>
+          <sphereGeometry args={[size * 1.6, 16, 16]} />
+          <meshBasicMaterial color="#EF4444" wireframe transparent opacity={0.7} />
+        </mesh>
+      )}
+
       {/* 3. HTML Billboard Label (Toggleable) */}
       {showLabels && (
         <Html
@@ -137,23 +145,29 @@ export function AccountNode3D({
           <div className="pointer-events-none select-none flex items-center gap-1 rounded-md border border-gold/30 bg-canvas/85 px-1.5 py-0.5 shadow-lg backdrop-blur-xs">
             <span
               className="size-1.5 rounded-full"
-              style={{ backgroundColor: color }}
+              style={{ backgroundColor: (node.is_blocked || node.is_frozen) ? '#EF4444' : color }}
               aria-hidden
             />
             <span className="font-mono text-[10px] font-semibold text-ink">
               {node.account_id}
             </span>
-            <span
-              className={`rounded px-1 text-[9px] font-mono font-bold ${
-                node.risk_score >= 80
-                  ? 'bg-danger/25 text-danger'
-                  : node.risk_score >= 60
-                    ? 'bg-gold/25 text-gold-light'
-                    : 'bg-emerald/25 text-emerald'
-              }`}
-            >
-              {Math.round(node.risk_score)}
-            </span>
+            {(node.is_blocked || node.is_frozen) ? (
+              <span className="rounded bg-danger/30 text-danger border border-danger/40 px-1 text-[8px] font-bold tracking-wider">
+                FROZEN
+              </span>
+            ) : (
+              <span
+                className={`rounded px-1 text-[9px] font-mono font-bold ${
+                  node.risk_score >= 80
+                    ? 'bg-danger/25 text-danger'
+                    : node.risk_score >= 60
+                      ? 'bg-gold/25 text-gold-light'
+                      : 'bg-emerald/25 text-emerald'
+                }`}
+              >
+                {Math.round(node.risk_score)}
+              </span>
+            )}
           </div>
         </Html>
       )}

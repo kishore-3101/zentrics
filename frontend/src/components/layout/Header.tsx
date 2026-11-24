@@ -4,7 +4,6 @@ import { getRouteMeta } from '../../lib/navigation';
 import { IconButton } from '../ui/IconButton';
 import { ApiHealthIndicator } from './ApiHealthIndicator';
 import { Breadcrumbs } from './Breadcrumbs';
-import { EnvironmentBadge } from './EnvironmentBadge';
 import { NotificationMenu } from './NotificationMenu';
 import { ProfileMenu } from './ProfileMenu';
 import { SimulationToolbar } from './SimulationToolbar';
@@ -46,7 +45,6 @@ export function Header({ onOpenNavigation }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-          <EnvironmentBadge />
           <ApiHealthIndicator />
           <span className="h-5 w-px bg-gold/15 mx-1 hidden sm:block" aria-hidden />
           <NotificationMenu />

@@ -60,11 +60,13 @@ export function TransactionEdge3D({
   // Stroke color logic
   const color = isSelected
     ? '#E5C778'
-    : edge.channel === 'ATM_WITHDRAWAL'
+    : edge.is_blocked
       ? '#EF4444'
-      : isHighlighted || hovered
-        ? '#C9A85B'
-        : '#2FB5A6';
+      : edge.channel === 'ATM_WITHDRAWAL'
+        ? '#EF4444'
+        : isHighlighted || hovered
+          ? '#C9A85B'
+          : '#2FB5A6';
 
   return (
     <group>

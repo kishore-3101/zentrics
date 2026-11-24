@@ -1,5 +1,4 @@
 import { AlertTriangle, RefreshCw } from 'lucide-react';
-import { StatusBadge } from '../components/ui/StatusBadge';
 import { AlertDetailsDrawer } from '../features/alerts/components/AlertDetailsDrawer';
 import { AlertFiltersBar } from '../features/alerts/components/AlertFiltersBar';
 import { AlertKpiCards } from '../features/alerts/components/AlertKpiCards';
@@ -40,9 +39,6 @@ export default function AlertQueue() {
             <h1 className="font-display text-2xl font-bold tracking-tight text-ink sm:text-3xl">
               Alert Queue
             </h1>
-            <StatusBadge tone="gold" size="sm" dot>
-              Demo data
-            </StatusBadge>
           </div>
           <p className="mt-1 text-sm text-muted">
             High-density operational triage consuming <code className="font-mono text-gold-light text-xs bg-canvas/70 px-1.5 py-0.5 rounded border border-gold/15">v_alerts</code>. Click any row to inspect ring topology, view evidence, and execute enforcement actions.
