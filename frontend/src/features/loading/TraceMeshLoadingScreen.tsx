@@ -10,17 +10,17 @@ import { Globe3DBackground } from './components/Globe3DBackground';
 import { HudCornerOverlays } from './components/HudCornerOverlays';
 import { TransactionNetworkFlow } from './components/TransactionNetworkFlow';
 
-interface MuleNetLoadingScreenProps {
+interface ZentricsLoadingScreenProps {
   onComplete?: () => void;
   minDurationMs?: number; // Default: ~3600ms
   autoComplete?: boolean; // Default: true
 }
 
-export function MuleNetLoadingScreen({
+export function ZentricsLoadingScreen({
   onComplete,
   minDurationMs = 3600,
   autoComplete = true,
-}: MuleNetLoadingScreenProps) {
+}: ZentricsLoadingScreenProps) {
   const [progress, setProgress] = useState(0);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -79,7 +79,7 @@ export function MuleNetLoadingScreen({
           {/* Layer 2: Corner Tactical HUD Overlays */}
           <HudCornerOverlays />
 
-          {/* Layer 3: Top MULE-NET Brand Pill Header */}
+          {/* Layer 3: Top Zentrics Brand Pill Header */}
           <div className="relative z-30 pt-4">
             <CinematicBrandHeader />
           </div>
@@ -103,4 +103,5 @@ export function MuleNetLoadingScreen({
 }
 
 // Backwards-compatibility alias
-export const TraceMeshLoadingScreen = MuleNetLoadingScreen;
+export const TraceMeshLoadingScreen = ZentricsLoadingScreen;
+export const MuleNetLoadingScreen = ZentricsLoadingScreen;

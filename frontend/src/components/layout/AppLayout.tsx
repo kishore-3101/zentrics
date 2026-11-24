@@ -13,7 +13,7 @@ import { Header } from './Header';
 import { ActiveAttackAlertBanner } from './ActiveAttackAlertBanner';
 import { MobileDrawer, Sidebar } from './Sidebar';
 
-const COLLAPSE_STORAGE_KEY = 'mulenet:sidebar-collapsed';
+const COLLAPSE_STORAGE_KEY = 'zentrics:sidebar-collapsed';
 
 function readStoredCollapsed(): boolean {
   try {
@@ -56,7 +56,7 @@ export function AppLayout() {
   }, [reducedMotion]);
 
   useEffect(() => {
-    document.title = `${getRouteMeta(pathname).title} · MuleNet`;
+    document.title = `${getRouteMeta(pathname).title} · Zentrics`;
     scrollRef.current?.scrollTo({ top: 0 });
   }, [pathname]);
 

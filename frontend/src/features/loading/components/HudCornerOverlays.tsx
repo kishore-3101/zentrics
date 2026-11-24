@@ -9,7 +9,7 @@ export function HudCornerOverlays() {
         <div className="hidden sm:flex flex-col gap-1 rounded-xl border border-gold/15 bg-canvas/40 p-3 backdrop-blur-xs">
           <div className="flex items-center gap-1.5 text-gold-light font-semibold">
             <Radio className="size-3 text-emerald animate-pulse" />
-            <span>MULE-NET // CORE v4.18</span>
+            <span>ZENTRICS // CORE v4.18</span>
           </div>
           <div className="text-[10px] space-y-0.5 text-muted">
             <p>GEO: IN-SOUTH-MUMBAI-01</p>

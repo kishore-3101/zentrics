@@ -39,7 +39,7 @@ export interface RouteMeta {
   crumbs: Crumb[];
 }
 
-const ROOT_CRUMB: Crumb = { label: 'MuleNet', to: '/overview' };
+const ROOT_CRUMB: Crumb = { label: 'Zentrics', to: '/overview' };
 
 export function getRouteMeta(pathname: string): RouteMeta {
   const item = NAV_ITEMS.find((candidate) => matchPath(candidate.matchPattern, pathname));
