@@ -31,7 +31,10 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from backend.detection_engine import DETECTION_ENGINE
+try:
+    from backend.detection_engine import DETECTION_ENGINE
+except ImportError:
+    from detection_engine import DETECTION_ENGINE
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
@@ -629,6 +632,10 @@ def create_fastapi_app():
         def post_simulation_pause():
             return STORE.set_simulation_status("paused")
 
+        @app.post("/simulation/reset")
+        def post_simulation_reset():
+            return STORE.reset_simulation()
+
         @app.post("/simulation/speed")
         def post_simulation_speed(payload: Dict[str, Any]):
             speed = float(payload.get("speed", 1.0))
@@ -645,6 +652,26 @@ def create_fastapi_app():
         @app.post("/simulation/custom")
         def post_simulation_custom(payload: Dict[str, Any]):
             return STORE.inject_ring(payload)
+
+        @app.post("/simulation/simulate")
+        def post_simulation_simulate(payload: Dict[str, Any]):
+            return STORE.inject_ring(payload)
+
+        @app.get("/cases")
+        def get_cases():
+            with STORE.lock:
+                return [
+                    {
+                        "case_id": a.get("case_id", 100),
+                        "ring_id": a["ring_id"],
+                        "status": a.get("status", "new"),
+                        "priority": a.get("priority", 80),
+                        "assignee": a.get("assigned_to", "Autonomous AI Shield"),
+                        "amount_moved": a.get("amount_moved", 500000),
+                        "detected_at": a.get("detected_at"),
+                    }
+                    for a in STORE.alerts[:25]
+                ]
 
         return app
     except ImportError:
