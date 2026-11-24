@@ -301,6 +301,13 @@ class MockDataStore:
             self.simulation["speed"] = speed
             return copy.deepcopy(self.simulation)
 
+    def reset_simulation(self) -> Dict[str, Any]:
+        with self.lock:
+            self.load_fixtures()
+            self.simulation["status"] = "idle"
+            self.simulation["speed"] = 1.0
+            return copy.deepcopy(self.simulation)
+
     def inject_ring(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         with self.lock:
             # Dynamically evaluate scenario through AutonomousDetectionEngine
@@ -520,6 +527,28 @@ class MockRequestHandler(SimpleHTTPRequestHandler):
                 self.send_json(404, {"error": "NOT_FOUND", "message": f"Account '{account_id}' not found."})
             return
 
+        # 9. Cases
+        if path == "/cases":
+            with STORE.lock:
+                cases = [
+                    {
+                        "case_id": a.get("case_id", 100),
+                        "ring_id": a["ring_id"],
+                        "status": a.get("status", "new"),
+                        "priority": a.get("priority", 80),
+                        "assignee": a.get("assigned_to", "Autonomous AI Shield"),
+                        "amount_moved": a.get("amount_moved", 500000),
+                        "detected_at": a.get("detected_at"),
+                    }
+                    for a in STORE.alerts[:25]
+                ]
+            self.send_json(200, cases)
+            return
+
+        if path == "/audit/logs":
+            self.send_json(200, [])
+            return
+
         self.send_json(404, {"error": "NOT_FOUND", "message": f"Path '{path}' not found."})
 
     def do_POST(self):
@@ -545,6 +574,10 @@ class MockRequestHandler(SimpleHTTPRequestHandler):
 
         if path == "/simulation/pause":
             self.send_json(200, STORE.set_simulation_status("paused"))
+            return
+
+        if path == "/simulation/reset":
+            self.send_json(200, STORE.reset_simulation())
             return
 
         if path == "/simulation/speed":
@@ -706,11 +739,200 @@ def create_fastapi_app():
                 ]
 
         return app
-    except ImportError:
+    except Exception:
         return None
 
 # Export FastAPI app for Uvicorn if available
-app = create_fastapi_app()
+fastapi_app = create_fastapi_app()
+
+
+async def asgi_handler(scope, receive, send):
+    """
+    Universal ASGI 3.0 Serverless Handler.
+    Zero external dependencies, 100% resilient on Vercel Serverless.
+    Dispatches all TraceMesh Module 2 endpoints with full CORS headers.
+    """
+    if scope.get("type") == "lifespan":
+        while True:
+            message = await receive()
+            if message["type"] == "lifespan.startup":
+                await send({"type": "lifespan.startup.complete"})
+            elif message["type"] == "lifespan.shutdown":
+                await send({"type": "lifespan.shutdown.complete"})
+                return
+
+    if scope.get("type") != "http":
+        return
+
+    method = scope.get("method", "GET").upper()
+    raw_path = scope.get("path", "/") or "/"
+    query_string = scope.get("query_string", b"").decode("utf-8")
+
+    # Normalize path (strip trailing slashes and normalize /api/ prefix if present)
+    path = raw_path.rstrip("/")
+    if not path:
+        path = "/"
+    norm_path = path[4:] if path.startswith("/api/") else path
+    if not norm_path:
+        norm_path = "/"
+
+    cors_headers = [
+        (b"content-type", b"application/json; charset=utf-8"),
+        (b"access-control-allow-origin", b"*"),
+        (b"access-control-allow-methods", b"GET, POST, PUT, DELETE, OPTIONS, PATCH"),
+        (b"access-control-allow-headers", b"Content-Type, Authorization, X-API-Key, Accept"),
+    ]
+
+    if method == "OPTIONS":
+        await send({"type": "http.response.start", "status": 204, "headers": cors_headers})
+        await send({"type": "http.response.body", "body": b""})
+        return
+
+    # Parse body
+    body_bytes = b""
+    if method in ("POST", "PUT", "PATCH"):
+        more_body = True
+        while more_body:
+            msg = await receive()
+            body_bytes += msg.get("body", b"")
+            more_body = msg.get("more_body", False)
+
+    payload = {}
+    if body_bytes:
+        try:
+            payload = json.loads(body_bytes.decode("utf-8"))
+        except Exception:
+            payload = {}
+
+    status_code = 200
+    response_data = None
+
+    if norm_path in ("/", "/health", "/api/health"):
+        response_data = {
+            "status": "healthy",
+            "service": "TraceMesh MuleNet API",
+            "version": "1.0.0",
+            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "database": "mock_fixtures_loaded"
+        }
+    elif norm_path == "/alerts":
+        query_params = parse_qs(query_string)
+        filters = {
+            "ring_type": query_params.get("ring_type", [None])[0],
+            "status": query_params.get("status", [None])[0],
+            "min_score": float(query_params["min_score"][0]) if "min_score" in query_params else None,
+            "min_priority": float(query_params["min_priority"][0]) if "min_priority" in query_params else None,
+            "since_event_id": int(query_params["since_event_id"][0]) if "since_event_id" in query_params else None,
+            "limit": int(query_params["limit"][0]) if "limit" in query_params else None,
+            "offset": int(query_params.get("offset", [0])[0]),
+        }
+        response_data = STORE.get_alerts(filters)
+    elif norm_path == "/overview":
+        response_data = STORE.get_overview()
+    elif norm_path == "/metrics":
+        response_data = STORE.get_metrics()
+    elif norm_path == "/simulation/state":
+        response_data = STORE.get_simulation_state()
+    elif norm_path == "/simulation/start" and method == "POST":
+        response_data = STORE.set_simulation_status("running")
+    elif norm_path == "/simulation/pause" and method == "POST":
+        response_data = STORE.set_simulation_status("paused")
+    elif norm_path == "/simulation/reset" and method == "POST":
+        response_data = STORE.reset_simulation()
+    elif norm_path == "/simulation/speed" and method == "POST":
+        speed = float(payload.get("speed", 1.0))
+        response_data = STORE.set_simulation_speed(speed)
+    elif norm_path in ("/simulation/run", "/simulation/inject_ring", "/simulation/custom", "/simulation/simulate") and method == "POST":
+        response_data = STORE.inject_ring(payload)
+    elif norm_path == "/cases":
+        with STORE.lock:
+            response_data = [
+                {
+                    "case_id": a.get("case_id", 100),
+                    "ring_id": a["ring_id"],
+                    "status": a.get("status", "new"),
+                    "priority": a.get("priority", 80),
+                    "assignee": a.get("assigned_to", "Autonomous AI Shield"),
+                    "amount_moved": a.get("amount_moved", 500000),
+                    "detected_at": a.get("detected_at"),
+                }
+                for a in STORE.alerts[:25]
+            ]
+    elif norm_path == "/audit/logs":
+        response_data = []
+    elif norm_path.startswith("/rings/"):
+        parts = norm_path.strip("/").split("/")
+        if len(parts) == 2:
+            ring_id = unquote(parts[1])
+            ring = STORE.get_ring(ring_id)
+            if ring:
+                response_data = ring
+            else:
+                status_code = 404
+                response_data = {"error": "NOT_FOUND", "message": f"Ring '{ring_id}' not found."}
+        elif len(parts) == 3 and parts[2] == "timeline":
+            ring_id = unquote(parts[1])
+            response_data = STORE.get_timeline(ring_id)
+        elif len(parts) == 3 and parts[2] == "action" and method == "POST":
+            ring_id = unquote(parts[1])
+            result = STORE.execute_action(ring_id, payload)
+            if result:
+                response_data = result
+            else:
+                status_code = 404
+                response_data = {"error": "NOT_FOUND", "message": f"Ring '{ring_id}' not found."}
+        else:
+            status_code = 404
+            response_data = {"error": "NOT_FOUND", "message": f"Route '{norm_path}' not found."}
+    elif norm_path.startswith("/accounts/"):
+        parts = norm_path.strip("/").split("/")
+        if len(parts) == 2:
+            account_id = unquote(parts[1])
+            acc = STORE.get_account(account_id)
+            if acc:
+                response_data = acc
+            else:
+                status_code = 404
+                response_data = {"error": "NOT_FOUND", "message": f"Account '{account_id}' not found."}
+        else:
+            status_code = 404
+            response_data = {"error": "NOT_FOUND", "message": f"Route '{norm_path}' not found."}
+    elif norm_path.startswith("/cases/"):
+        parts = norm_path.strip("/").split("/")
+        if len(parts) == 3 and parts[2] == "actions":
+            try:
+                case_id = int(parts[1])
+                response_data = STORE.get_case_actions(case_id)
+            except ValueError:
+                status_code = 400
+                response_data = {"error": "BAD_REQUEST", "message": "Invalid case_id."}
+        else:
+            status_code = 404
+            response_data = {"error": "NOT_FOUND", "message": f"Route '{norm_path}' not found."}
+    else:
+        status_code = 404
+        response_data = {"error": "NOT_FOUND", "message": f"Endpoint '{norm_path}' not found."}
+
+    res_bytes = json.dumps(response_data, indent=2).encode("utf-8")
+    await send({"type": "http.response.start", "status": status_code, "headers": cors_headers})
+    await send({"type": "http.response.body", "body": res_bytes})
+
+
+async def app(scope, receive, send):
+    """
+    Primary Entrypoint for Vercel Serverless.
+    Delegates to FastAPI if initialized, otherwise transparently executes pure ASGI handler.
+    """
+    if fastapi_app is not None:
+        try:
+            return await fastapi_app(scope, receive, send)
+        except Exception:
+            pass
+    return await asgi_handler(scope, receive, send)
+
+
+handler = app
+application = app
 
 
 # -----------------------------------------------------------------------------

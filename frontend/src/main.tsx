@@ -4,10 +4,24 @@ import axios from 'axios';
 import App from './App';
 import './styles/globals.css';
 
-// Configure production backend API base URL when set in Vercel environment variables
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-if (apiBaseUrl && apiBaseUrl !== 'http://localhost:8000') {
-  axios.defaults.baseURL = apiBaseUrl;
+// Automatically resolve API Base URL:
+// 1. Check VITE_API_BASE_URL or VITE_API_BASE_URLS (supporting both)
+// 2. Strip trailing slashes to prevent double slashes (e.g. https://...//health)
+// 3. If running on vercel.app and no env var is configured, default to https://mulenet-api.vercel.app
+const rawEnvUrl = (
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env as unknown as Record<string, string>)?.VITE_API_BASE_URLS ||
+  ''
+).trim();
+
+let resolvedApiUrl = rawEnvUrl.replace(/\/+$/, '');
+
+if (!resolvedApiUrl && typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+  resolvedApiUrl = 'https://mulenet-api.vercel.app';
+}
+
+if (resolvedApiUrl && resolvedApiUrl !== 'http://localhost:8000') {
+  axios.defaults.baseURL = resolvedApiUrl;
 }
 
 createRoot(document.getElementById('root')!).render(
