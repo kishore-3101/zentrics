@@ -36,7 +36,39 @@ try:
 except ImportError:
     from detection_engine import DETECTION_ENGINE
 
-FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
+def find_fixtures_dir() -> Path:
+    candidates = [
+        Path(__file__).resolve().parent / "fixtures",
+        Path.cwd() / "fixtures",
+        Path.cwd() / "backend" / "fixtures",
+        Path(__file__).resolve().parent.parent / "backend" / "fixtures",
+        Path("/var/task/fixtures"),
+        Path("/var/task/backend/fixtures"),
+    ]
+    for c in candidates:
+        if c.exists() and (c / "alerts.json").exists():
+            return c
+    return Path(__file__).resolve().parent / "fixtures"
+
+FIXTURES_DIR = find_fixtures_dir()
+
+def load_json_file(filename: str, default: Any) -> Any:
+    for base in [
+        FIXTURES_DIR,
+        Path(__file__).resolve().parent / "fixtures",
+        Path.cwd() / "fixtures",
+        Path.cwd() / "backend" / "fixtures",
+        Path("/var/task/fixtures"),
+        Path("/var/task/backend/fixtures"),
+    ]:
+        p = base / filename
+        if p.exists():
+            try:
+                with open(p, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except Exception:
+                pass
+    return default
 
 # -----------------------------------------------------------------------------
 # In-Memory State Store (Mutable for live analyst actions & simulation controls)
@@ -49,8 +81,7 @@ class MockDataStore:
     def load_fixtures(self):
         with self.lock:
             # Load alerts
-            with open(FIXTURES_DIR / "alerts.json", "r", encoding="utf-8") as f:
-                self.alerts: List[Dict[str, Any]] = json.load(f)
+            self.alerts = load_json_file("alerts.json", [])
             for a in self.alerts:
                 if not a.get("fingerprint"):
                     a["fingerprint"] = f"fp_{a.get('ring_id', 'unknown').lower()}"
@@ -66,42 +97,42 @@ class MockDataStore:
                     a["n_victims"] = 1
 
             # Load rings
-            with open(FIXTURES_DIR / "rings.json", "r", encoding="utf-8") as f:
-                self.rings: Dict[str, Dict[str, Any]] = json.load(f)
+            self.rings = load_json_file("rings.json", {})
 
             # Load timelines
-            with open(FIXTURES_DIR / "timelines.json", "r", encoding="utf-8") as f:
-                self.timelines: Dict[str, List[Dict[str, Any]]] = json.load(f)
+            self.timelines = load_json_file("timelines.json", {})
 
             # Load accounts
-            with open(FIXTURES_DIR / "accounts.json", "r", encoding="utf-8") as f:
-                self.accounts: Dict[str, Dict[str, Any]] = json.load(f)
+            self.accounts = load_json_file("accounts.json", {})
 
             # Load cases actions
-            with open(FIXTURES_DIR / "cases_actions.json", "r", encoding="utf-8") as f:
-                self.cases_actions: Dict[str, List[Dict[str, Any]]] = json.load(f)
+            self.cases_actions = load_json_file("cases_actions.json", {})
 
             # Load metrics
-            with open(FIXTURES_DIR / "metrics.json", "r", encoding="utf-8") as f:
-                self.metrics: Dict[str, Any] = json.load(f)
-                if "by_typology_difficulty" in self.metrics and "typologyBreakdown" not in self.metrics:
-                    self.metrics["typologyBreakdown"] = self.metrics["by_typology_difficulty"]
-                if "alert_reduction" in self.metrics and "operationalImpact" not in self.metrics:
-                    ar = self.metrics["alert_reduction"]
-                    self.metrics["operationalImpact"] = {
-                        "totalAccountAlerts": ar.get("baseline_alerts", 412),
-                        "consolidatedRings": ar.get("ring_cases", 18),
-                        "reductionPercentage": ar.get("reduction_pct", 97.8),
-                        "simulatedMoneySaved": 38400000,
-                    }
+            self.metrics = load_json_file("metrics.json", {})
+            if "by_typology_difficulty" in self.metrics and "typologyBreakdown" not in self.metrics:
+                self.metrics["typologyBreakdown"] = self.metrics["by_typology_difficulty"]
+            if "alert_reduction" in self.metrics and "operationalImpact" not in self.metrics:
+                ar = self.metrics["alert_reduction"]
+                self.metrics["operationalImpact"] = {
+                    "totalAccountAlerts": ar.get("baseline_alerts", 412),
+                    "consolidatedRings": ar.get("ring_cases", 18),
+                    "reductionPercentage": ar.get("reduction_pct", 97.8),
+                    "simulatedMoneySaved": 38400000,
+                }
 
             # Load overview
-            with open(FIXTURES_DIR / "overview.json", "r", encoding="utf-8") as f:
-                self.overview: Dict[str, Any] = json.load(f)
+            self.overview = load_json_file("overview.json", {
+                "kpis": {"totalMonitoredAccounts": 25000, "activeRings": 24, "atRiskVolume": 18500000, "frozenVolume": 14200000},
+                "rings": [],
+                "alertVolume": [],
+                "activity": [],
+                "detectionRate": 96.4,
+                "previousPeriod": {"activeRings": 28, "atRiskVolume": 22000000}
+            })
 
             # Load simulation
-            with open(FIXTURES_DIR / "simulation.json", "r", encoding="utf-8") as f:
-                self.simulation: Dict[str, Any] = json.load(f)
+            self.simulation = load_json_file("simulation.json", {"status": "idle", "speed": 1.0, "current_step": 0})
 
             self.next_action_id = 2000
             self.next_event_id = 500
@@ -552,6 +583,7 @@ def create_fastapi_app():
             allow_headers=["*"],
         )
 
+        @app.get("/")
         @app.get("/health")
         def health():
             return {
