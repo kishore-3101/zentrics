@@ -30,7 +30,7 @@ export function RingSummaryBar({ graph }: RingSummaryBarProps) {
   const blockedReason =
     graph.blocked_info?.blocked_reason ||
     blockedNode?.blocked_reason ||
-    'Autonomous freeze enforced by MuleNet ML Shield';
+    'Autonomous freeze enforced by Zentrics ML Shield';
   const amountSaved =
     graph.blocked_info?.amount_saved ||
     (graph.amount_moved ? graph.amount_moved * 0.5 : 250000);

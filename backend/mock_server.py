@@ -276,7 +276,7 @@ class MockDataStore:
             typology = eval_res["typology"]
             total_amount = eval_res["total_amount"]
             entity_list = eval_res["entities"]
-            raw_edges = eval_res["transactions"]
+            raw_edges = eval_res.get("edges") or [t for t in eval_res["transactions"] if not t.get("is_blocked") and t.get("amount", 0) > 0]
             blocked_info = eval_res["blocked_info"]
             detection_results = eval_res["detection_results"]
             block_enabled = bool(blocked_info and blocked_info.get("is_blocked"))
@@ -309,9 +309,9 @@ class MockDataStore:
                     "is_blocked": ent.get("is_blocked", False),
                     "blocked_reason": ent.get("blocked_reason"),
                     "position": ent["position"],
-                    "total_incoming": ent.get("total_incoming", total_amount),
-                    "total_outgoing": ent.get("total_outgoing", total_amount),
-                    "transaction_count": ent.get("transaction_count", 2),
+                    "total_incoming": ent.get("total_incoming", 0.0),
+                    "total_outgoing": ent.get("total_outgoing", 0.0),
+                    "transaction_count": ent.get("transaction_count", 0),
                     "kyc_level": ent.get("kyc_level", "minimal"),
                     "account_type": "savings" if ent["role"] == "victim" else ("sink" if ent["role"] == "cash_out" else "current"),
                     "open_date": ent.get("open_date", "2024-06-15"),

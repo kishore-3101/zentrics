@@ -127,7 +127,7 @@ interface GisWorldMapProps {
   onSelectAccount?: (acc: AccountNodeData) => void;
 }
 
-type PlaybackPhase = 'idle' | 'genesis' | 'hop1' | 'hop2' | 'hop3' | 'blocked' | 'completed';
+type PlaybackPhase = 'idle' | 'genesis' | 'hop1' | 'hop2' | 'hop3' | 'hop4' | 'blocked' | 'completed';
 
 export const GisWorldMap = memo(function GisWorldMap({
   geoGraph,
@@ -216,9 +216,11 @@ export const GisWorldMap = memo(function GisWorldMap({
           ? 2
           : currentLivePhase === 'hop3'
             ? 3
-            : currentLivePhase === 'blocked'
-              ? 3
-              : 0;
+            : currentLivePhase === 'hop4'
+              ? 4
+              : currentLivePhase === 'blocked' || currentLivePhase === 'completed'
+                ? 4
+                : 0;
 
     const items: Array<{
       id: string;
@@ -246,7 +248,7 @@ export const GisWorldMap = memo(function GisWorldMap({
         if (arc.hop_index < currentHopNum) {
           // Previously completed hop: edge stays drawn after transfer
           curvePoints = fullCurve;
-        } else if (arc.hop_index === currentHopNum || (currentHopNum === 3 && arc.hop_index === 4)) {
+        } else if (arc.hop_index === currentHopNum) {
           // Current hop: draws progressively as amount travels
           const sliceCount = Math.max(
             2,
@@ -271,7 +273,7 @@ export const GisWorldMap = memo(function GisWorldMap({
       }
 
       const isBlocked = Boolean(
-        arc.is_blocked || (currentIsLive && currentLivePhase === 'blocked' && arc.hop_index === 3),
+        arc.is_blocked || (currentIsLive && currentLivePhase === 'blocked' && arc.hop_index === 4),
       );
 
       const color = isBlocked
@@ -339,6 +341,7 @@ export const GisWorldMap = memo(function GisWorldMap({
       hop1: 2800,      // Line draws & money travels from Victim to Adversary
       hop2: 2800,      // Line draws & money travels from Adversary to Distributor
       hop3: 2800,      // Line draws & money travels towards Mule Intermediator
+      hop4: 2800,      // Line draws & money travels towards Terminal Cash-Out
       blocked: 4200,   // AI Shield Containment Triggered! Target account frozen
       completed: 0,
     };
@@ -406,6 +409,18 @@ export const GisWorldMap = memo(function GisWorldMap({
             }
           }
         } else if (currentPhase === 'hop3') {
+          currentPhase = 'hop4';
+          setLivePhase('hop4');
+          livePhaseRef.current = 'hop4';
+          startTime = now;
+          updateSvgEdges();
+          if (map && orderedArcs[3]) {
+            const dstLoc = geoGraph.locations.find((l) => l.id === orderedArcs[3].dst_city_id);
+            if (dstLoc) {
+              map.easeTo({ center: [dstLoc.lon, dstLoc.lat], zoom: 5.6, duration: 1500 });
+            }
+          }
+        } else if (currentPhase === 'hop4') {
           currentPhase = 'blocked';
           setLivePhase('blocked');
           livePhaseRef.current = 'blocked';
@@ -490,7 +505,18 @@ export const GisWorldMap = memo(function GisWorldMap({
 
     // LIVE PLAYBACK MODE: Draw lines progressively as money travels!
     const features: any[] = [];
-    const currentHopNum = livePhase === 'hop1' ? 1 : livePhase === 'hop2' ? 2 : livePhase === 'hop3' ? 3 : livePhase === 'blocked' ? 3 : 0;
+    const currentHopNum =
+      livePhase === 'hop1'
+        ? 1
+        : livePhase === 'hop2'
+          ? 2
+          : livePhase === 'hop3'
+            ? 3
+            : livePhase === 'hop4'
+              ? 4
+              : livePhase === 'blocked'
+                ? 4
+                : 0;
 
     orderedArcs.forEach((arc) => {
       const srcLoc = geoGraph.locations.find((l) => l.id === arc.src_city_id);
@@ -521,15 +547,18 @@ export const GisWorldMap = memo(function GisWorldMap({
         // Guarantee at least 2 points for a valid LineString
         const sliceCount = Math.max(2, Math.floor(Math.max(0.06, liveProgress) * fullCurve.length));
         const partialCoords = livePhase === 'blocked' ? fullCurve : fullCurve.slice(0, sliceCount);
+        const isBlockedHop = Boolean(
+          arc.is_blocked || (livePhase === 'blocked' && arc.hop_index === 4)
+        );
         features.push({
           type: 'Feature' as const,
           geometry: { type: 'LineString' as const, coordinates: partialCoords },
           properties: {
             txn_id: arc.txn_id,
             amount: arc.amount,
-            color: (livePhase === 'blocked' || arc.is_blocked) ? '#EF4444' : (arc.color || '#00C878'),
+            color: isBlockedHop ? '#EF4444' : (arc.color || '#00C878'),
             is_active: true,
-            is_blocked: livePhase === 'blocked' || Boolean(arc.is_blocked),
+            is_blocked: isBlockedHop,
             blocked_reason: arc.blocked_reason || null,
             src_city: arc.src_city,
             dst_city: arc.dst_city,
@@ -784,7 +813,18 @@ export const GisWorldMap = memo(function GisWorldMap({
     markersRef.current = [];
 
     // Filter locations to show
-    const currentHopNum = livePhase === 'hop1' ? 1 : livePhase === 'hop2' ? 2 : livePhase === 'hop3' ? 3 : livePhase === 'blocked' ? 3 : 0;
+    const currentHopNum =
+      livePhase === 'hop1'
+        ? 1
+        : livePhase === 'hop2'
+          ? 2
+          : livePhase === 'hop3'
+            ? 3
+            : livePhase === 'hop4'
+              ? 4
+              : livePhase === 'blocked' || livePhase === 'completed'
+                ? 4
+                : 0;
 
     const visibleLocations = geoGraph.locations.filter((loc) => {
       if (!isLiveActive || livePhase === 'idle' || livePhase === 'completed') {
@@ -811,11 +851,19 @@ export const GisWorldMap = memo(function GisWorldMap({
         if (loc.id === orderedArcs[1]?.dst_city_id && liveProgress >= 0.85) return true;
         return false;
       }
-      if (currentHopNum >= 3 || livePhase === 'blocked') {
+      if (currentHopNum === 3) {
+        if (loc.id === victimLocation?.id) return true;
+        if (loc.id === orderedArcs[0]?.dst_city_id) return true;
+        if (loc.id === orderedArcs[1]?.dst_city_id) return true;
+        if (loc.id === orderedArcs[2]?.dst_city_id && liveProgress >= 0.85) return true;
+        return false;
+      }
+      if (currentHopNum >= 4 || livePhase === 'blocked') {
         if (loc.id === victimLocation?.id) return true;
         if (loc.id === orderedArcs[0]?.dst_city_id) return true;
         if (loc.id === orderedArcs[1]?.dst_city_id) return true;
         if (loc.id === orderedArcs[2]?.dst_city_id) return true;
+        if (loc.id === orderedArcs[3]?.dst_city_id && (liveProgress >= 0.85 || livePhase === 'blocked')) return true;
         return false;
       }
 
@@ -830,7 +878,10 @@ export const GisWorldMap = memo(function GisWorldMap({
           (a.src_city_id === loc.id || a.dst_city_id === loc.id),
       );
 
-      const isFrozenNode = loc.isBlocked || (isLiveActive && livePhase === 'blocked' && loc.id === blockedLocation?.id);
+      // FROZEN status should ONLY be displayed after edge travel completes (in blocked/completed phase)!
+      const isFrozenNode = isLiveActive
+        ? (livePhase === 'blocked' || livePhase === 'completed') && Boolean(loc.isBlocked)
+        : Boolean(loc.isBlocked);
 
       // Dominant color (Red if frozen/blocked or cashout)
       const color = isFrozenNode
@@ -904,7 +955,16 @@ export const GisWorldMap = memo(function GisWorldMap({
 
     if (isLiveActive && livePhase !== 'idle' && livePhase !== 'completed') {
       // In live mode: Place single particle at the tip of the current active drawing hop!
-      const currentHopNum = livePhase === 'hop1' ? 1 : livePhase === 'hop2' ? 2 : livePhase === 'hop3' ? 3 : 0;
+      const currentHopNum =
+        livePhase === 'hop1'
+          ? 1
+          : livePhase === 'hop2'
+            ? 2
+            : livePhase === 'hop3'
+              ? 3
+              : livePhase === 'hop4'
+                ? 4
+                : 0;
       const activeArc = orderedArcs.find((a) => a.hop_index === currentHopNum);
 
       if (activeArc && map.isStyleLoaded() && map.getSource('particle-source')) {
@@ -1211,7 +1271,8 @@ export const GisWorldMap = memo(function GisWorldMap({
                       {livePhase === 'hop1' && '💸 LIVE ATTACK STREAMING: Hop 1 ➔ Adversary Transfer'}
                       {livePhase === 'hop2' && '💸 LIVE ATTACK STREAMING: Hop 2 ➔ Distributor Layering'}
                       {livePhase === 'hop3' && '💸 LIVE ATTACK STREAMING: Hop 3 ➔ Mule Smurfing Fan-Out'}
-                      {livePhase === 'blocked' && '🛡️ AUTONOMOUS AI SHIELD ENGAGED: Account Quarantined!'}
+                      {livePhase === 'hop4' && '🚨 LIVE ATTACK STREAMING: Hop 4 ➔ Cash-Out Extraction Attempt'}
+                      {livePhase === 'blocked' && '🛡️ AUTONOMOUS AI SHIELD ENGAGED: Entire Mule Network Quarantined!'}
                     </span>
                     <span className={cn(
                       'shrink-0 rounded px-1.5 py-0.2 text-[9px] font-mono font-bold uppercase tracking-wider border',
@@ -1225,7 +1286,8 @@ export const GisWorldMap = memo(function GisWorldMap({
                     {livePhase === 'hop1' && `Tracing money moving across state borders from ${orderedArcs[0]?.src_city} to ${orderedArcs[0]?.dst_city}`}
                     {livePhase === 'hop2' && `Forwarding structured funds from ${orderedArcs[1]?.src_city} to ${orderedArcs[1]?.dst_city}`}
                     {livePhase === 'hop3' && `Layering smurfed funds from ${orderedArcs[2]?.src_city} to ${orderedArcs[2]?.dst_city}`}
-                    {livePhase === 'blocked' && `Target account in ${blockedLocation?.city || 'Kanpur'} frozen! Cash-Out sink terminated.`}
+                    {livePhase === 'hop4' && `Intercepting terminal extraction from ${orderedArcs[3]?.src_city} to ${orderedArcs[3]?.dst_city}`}
+                    {livePhase === 'blocked' && `Cash-out extraction blocked! All syndicate accounts quarantined under PMLA Sec 5. ₹${(geoGraph.arcs[0]?.amount || 500000).toLocaleString('en-IN')} preserved.`}
                   </p>
                 </div>
               </div>
@@ -1251,14 +1313,16 @@ export const GisWorldMap = memo(function GisWorldMap({
                 style={{
                   width: `${
                     livePhase === 'genesis'
-                      ? liveProgress * 20
+                      ? liveProgress * 15
                       : livePhase === 'hop1'
-                        ? 20 + liveProgress * 25
+                        ? 15 + liveProgress * 20
                         : livePhase === 'hop2'
-                          ? 45 + liveProgress * 25
+                          ? 35 + liveProgress * 20
                           : livePhase === 'hop3'
-                            ? 70 + liveProgress * 20
-                            : 100
+                            ? 55 + liveProgress * 20
+                            : livePhase === 'hop4'
+                              ? 75 + liveProgress * 20
+                              : 100
                   }%`,
                 }}
               />

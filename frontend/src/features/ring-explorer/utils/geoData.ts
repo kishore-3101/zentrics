@@ -176,7 +176,7 @@ export function buildGeoGraph(graph: RingGraphData, globeRadius: number = 4.8): 
       color = '#EF4444'; // Red for cash-out terminal
     }
 
-    const isEdgeBlocked = Boolean(edge.is_blocked || dstLoc.isBlocked || dstNode?.is_blocked);
+    const isEdgeBlocked = Boolean(edge.is_blocked || (edge as any).status === 'blocked');
     if (isEdgeBlocked) {
       color = '#EF4444'; // Crimson alert for blocked transaction
     }

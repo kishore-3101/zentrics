@@ -50,7 +50,7 @@ export function ExportAuditButton({ entries }: ExportAuditButtonProps) {
     link.href = url;
     link.setAttribute(
       'download',
-      `mulenet-compliance-audit-${new Date().toISOString().slice(0, 10)}.csv`,
+      `zentrics-compliance-audit-${new Date().toISOString().slice(0, 10)}.csv`,
     );
     document.body.appendChild(link);
     link.click();

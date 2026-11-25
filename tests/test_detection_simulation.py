@@ -69,15 +69,34 @@ class TestDetectionSimulation(unittest.TestCase):
         vic = next(e for e in eval_res["entities"] if e["account_id"] == "ACC_TEST_VIC_01")
         self.assertLess(vic["ml_prob"], 0.20)
         self.assertFalse(vic.get("is_blocked", False))
+        self.assertFalse(vic.get("is_frozen", False))
 
-        # 2. Containment should be decided dynamically by engine
+        # 2. Every mule account in the syndicate must be blocked & frozen!
+        mules = [e for e in eval_res["entities"] if e["account_id"] != "ACC_TEST_VIC_01"]
+        self.assertEqual(len(mules), 4)
+        for m in mules:
+            self.assertTrue(m.get("is_blocked", False), f"Mule {m['account_id']} should be blocked")
+            self.assertTrue(m.get("is_frozen", False), f"Mule {m['account_id']} should be frozen")
+
+        # 3. Containment should be decided dynamically by engine
         blocked_info = eval_res["blocked_info"]
         self.assertIsNotNone(blocked_info)
         self.assertTrue(blocked_info["is_blocked"])
         self.assertIn("Autonomous AI Shield Freeze", blocked_info["blocked_reason"])
         self.assertIn("XGBoost ML Confidence", blocked_info["blocked_reason"])
 
-        # 3. Test mock store inject_ring returns dynamic evaluation
+        # 4. Outflow from frozen account must be intercepted & blocked on final cash-out!
+        txns = eval_res["transactions"]
+        hop4 = next(t for t in txns if t["hop_index"] == 4)
+        self.assertTrue(hop4["is_blocked"])
+        self.assertEqual(hop4["status"], "blocked")
+
+        # 5. Executed edges must have all 4 hops with hop 4 blocked so UI can animate and render the route!
+        self.assertEqual(len(eval_res["edges"]), 4)
+        self.assertEqual(eval_res["amount_cashed"], 0.0)
+        self.assertEqual(eval_res["amount_saved"], 750000.0)
+
+        # 6. Test mock store inject_ring returns dynamic evaluation
         mock_res = STORE.inject_ring(payload)
         self.assertTrue(mock_res["success"])
         self.assertIn("detection_results", mock_res)

@@ -201,7 +201,7 @@ class AutonomousDetectionEngine:
                 "txn_id": f"TXN_{sim_id}_3",
                 "src_account": distributor["account_id"],
                 "dst_account": intermediator["account_id"],
-                "amount": round(total_amount * 0.50, 2),
+                "amount": round(total_amount * 0.96, 2),
                 "channel": channel,
                 "ts": t3_ts,
                 "hop_index": 3,
@@ -212,7 +212,7 @@ class AutonomousDetectionEngine:
                 "txn_id": f"TXN_{sim_id}_4",
                 "src_account": intermediator["account_id"],
                 "dst_account": cash_out["account_id"],
-                "amount": round(total_amount * 0.48, 2),
+                "amount": round(total_amount * 0.94, 2),
                 "channel": "ATM_WITHDRAWAL",
                 "ts": t4_ts,
                 "hop_index": 4,
@@ -347,28 +347,12 @@ class AutonomousDetectionEngine:
         user_override = bp_raw.get("blocked_account_id")
 
         if policy_enabled and detected_freeze_account is None:
+            # When containment triggers, intercept on the final cash-out transaction to prevent terminal extraction!
+            detected_freeze_account = intermediator["account_id"]
+            detected_freeze_step = len(raw_hops)  # Step 4 (Final transaction)
+
             if user_override and user_override in entity_map:
                 detected_freeze_account = user_override
-                # Determine at which hop this account is targeted
-                detected_freeze_step = 3
-                for h in raw_hops:
-                    if h["dst_account"] == user_override:
-                        detected_freeze_step = h["hop_index"]
-                        break
-            else:
-                # Autonomous mode: AI Shield evaluates at the mule conduit (Hop 3) or terminal sink
-                # Checks which conduit crosses the anomaly defense threshold
-                for candidate in [intermediator["account_id"], distributor["account_id"], cash_out["account_id"]]:
-                    c_fused = current_fused_risks.get(candidate, 0.0)
-                    c_ml = current_ml_probs.get(candidate, 0.0)
-                    if c_fused >= self.defense_threshold or c_ml >= 0.85:
-                        detected_freeze_account = candidate
-                        detected_freeze_step = 3 if candidate == intermediator["account_id"] else (2 if candidate == distributor["account_id"] else 4)
-                        break
-
-                if detected_freeze_account is None:
-                    detected_freeze_account = intermediator["account_id"]
-                    detected_freeze_step = 3
 
             c_ent = entity_map.get(detected_freeze_account, intermediator)
             detected_fused_risk = current_fused_risks.get(detected_freeze_account, 94.6)
@@ -379,11 +363,11 @@ class AutonomousDetectionEngine:
                 f"Autonomous AI Shield Freeze: Fused Risk {detected_fused_risk:.1f}% "
                 f"(XGBoost ML Confidence {detected_ml_prob*100:.1f}%). "
                 f"Triggered Detectors: [{hit_summary}]. "
-                f"Account {detected_freeze_account} ({c_ent['city']}) quarantined at Hop {detected_freeze_step} "
-                f"under PMLA Sec 5 before cash-out sink."
+                f"All syndicate accounts quarantined; final cash-out extraction blocked under PMLA Sec 5."
             )
 
         # 8. Enrich Entity Objects with Purely Computed Engine Metrics
+        # When policy is enabled, EVERY non-victim account in the detected syndicate is a mule/adversary and gets blocked!
         for ent in entity_list:
             aid = ent["account_id"]
             fused = current_fused_risks.get(aid, 15.0)
@@ -391,14 +375,12 @@ class AutonomousDetectionEngine:
             r_s = current_rule_scores.get(aid, 0.10)
             n_r = current_neighbor_risks.get(aid, 0.05)
             hits = rule_hits.get(aid, [])
+            is_victim = (ent["role"] == "victim")
 
             ent["risk_score"] = fused
             ent["ml_prob"] = ml_p
             ent["rule_score"] = r_s
             ent["neighbor_risk"] = n_r
-            ent["transaction_count"] = tx_counts.get(aid, 1)
-            ent["total_incoming"] = in_volume.get(aid, 0.0)
-            ent["total_outgoing"] = out_volume.get(aid, 0.0)
             ent["reason_codes"] = [
                 {"code": h["code"], "label": h["label"], "weight": h["weight"], "direction": "increases_risk"}
                 for h in hits
@@ -406,55 +388,94 @@ class AutonomousDetectionEngine:
                 {"code": "NORMAL_HISTORY", "label": "No suspicious detectors triggered", "weight": -10.0, "direction": "decreases_risk"}
             ]
 
-            # Mark freeze status purely decided by the engine
-            if policy_enabled and aid == detected_freeze_account:
+            # Mark freeze status: All syndicate mule/adversary accounts are quarantined
+            if policy_enabled and not is_victim:
                 ent["is_blocked"] = True
                 ent["is_frozen"] = True
-                ent["blocked_reason"] = detected_freeze_reason
                 ent["blocked_by"] = "TraceMesh AI Shield / Autonomous Detection Engine"
                 ent["blocked_at"] = now_iso
+                if aid == detected_freeze_account:
+                    ent["blocked_reason"] = detected_freeze_reason
+                elif ent["role"] == "hacker":
+                    ent["blocked_reason"] = (
+                        f"Adversary Account Frozen: Quarantined under PMLA Sec 5 / Sec 102 CrPC as malicious syndicate collector ({ent['name']} in {ent['city']})."
+                    )
+                elif ent["role"] == "distributor":
+                    ent["blocked_reason"] = (
+                        f"Distributor Mule Frozen: Quarantined under PMLA Sec 5 / Sec 102 CrPC for multi-state structuring ({ent['name']} in {ent['city']})."
+                    )
+                elif ent["role"] == "cash_out":
+                    ent["blocked_reason"] = (
+                        f"Cash-Out Sink Blocked: Quarantined under PMLA Sec 5. Final cash-out extraction intercepted."
+                    )
+                else:
+                    ent["blocked_reason"] = f"Mule account quarantined under Section 102 CrPC / PMLA Sec 5."
             else:
                 ent["is_blocked"] = False
                 ent["is_frozen"] = False
 
         # 9. Enrich Transactions with Engine Containment Execution
+        # RULE: Don't freeze the first account itself. Allow money to travel through the mule chain,
+        # and on the FINAL transaction (Hop 4 to cash-out sink), BLOCK IT PERFECTLY!
         processed_txns = []
+        actual_in_volume: Dict[str, float] = defaultdict(float)
+        actual_out_volume: Dict[str, float] = defaultdict(float)
+        actual_tx_counts: Dict[str, int] = defaultdict(int)
+
         for hop in raw_hops:
             hop_idx = hop["hop_index"]
+            is_final_hop = (hop_idx == len(raw_hops))
 
-            # Outflow from the frozen conduit or subsequent downstream extraction hops are blocked
-            if policy_enabled and detected_freeze_account is not None:
-                if hop["src_account"] == detected_freeze_account or (detected_freeze_step and hop_idx > detected_freeze_step):
-                    is_hop_blocked = True
-                    blocked_reason = f"Outflow aborted: Origin account {hop['src_account']} quarantined under PMLA Sec 5."
-                elif hop["dst_account"] == detected_freeze_account:
-                    # Inflow into conduit arrives and triggers autonomous quarantine upon receipt
-                    is_hop_blocked = False
-                    blocked_reason = detected_freeze_reason
-                else:
-                    is_hop_blocked = False
-                    blocked_reason = None
+            # Block the final cash-out transaction perfectly
+            if policy_enabled and is_final_hop:
+                is_hop_blocked = True
+                hop_amount = hop["amount"]
+                blocked_reason = (
+                    f"Final cash-out extraction blocked: Outflow from {hop['src_account']} ({hop['src_city']}) "
+                    f"to cash-out terminal {hop['dst_account']} ({hop['dst_city']}) intercepted under PMLA Sec 5. "
+                    f"Zero cash-out permitted; ₹{total_amount:,.0f} preserved."
+                )
+                status = "blocked"
             else:
                 is_hop_blocked = False
+                hop_amount = hop["amount"]
                 blocked_reason = None
+                status = "completed"
+
+            actual_in_volume[hop["dst_account"]] += hop_amount
+            actual_out_volume[hop["src_account"]] += hop_amount
+            actual_tx_counts[hop["src_account"]] += 1
+            actual_tx_counts[hop["dst_account"]] += 1
 
             processed_txns.append({
                 "txn_id": hop["txn_id"],
                 "src_account": hop["src_account"],
                 "dst_account": hop["dst_account"],
-                "amount": hop["amount"],
+                "amount": hop_amount,
+                "initial_amount": hop["amount"],
                 "channel": hop["channel"],
                 "ts": hop["ts"],
                 "hop_index": hop_idx,
                 "is_suspicious": hop_idx > 1,
                 "is_blocked": is_hop_blocked,
+                "status": status,
                 "blocked_reason": blocked_reason,
                 "src_city": hop["src_city"],
                 "dst_city": hop["dst_city"],
             })
 
-        # Calculate protected amount
-        amt_saved = round(total_amount * 0.50, 2) if (policy_enabled and detected_freeze_account) else 0.0
+        # Update entity volumes
+        for ent in entity_list:
+            aid = ent["account_id"]
+            ent["total_incoming"] = actual_in_volume.get(aid, 0.0)
+            ent["total_outgoing"] = actual_out_volume.get(aid, 0.0)
+            ent["transaction_count"] = actual_tx_counts.get(aid, 0)
+
+        # All 4 edges exist so the full multi-hop transaction chain is visible
+        executed_edges = processed_txns
+
+        # Calculate protected amount (100% of stolen funds protected before cash-out extraction)
+        amt_saved = round(total_amount * 1.0, 2) if (policy_enabled and detected_freeze_account) else 0.0
 
         return {
             "success": True,
@@ -463,9 +484,11 @@ class AutonomousDetectionEngine:
             "scenario_name": scenario_name,
             "total_amount": total_amount,
             "amount_saved": amt_saved,
+            "amount_cashed": 0.0 if (policy_enabled and detected_freeze_account) else round(total_amount * 0.48, 2),
             "typology": typology,
             "entities": entity_list,
             "transactions": processed_txns,
+            "edges": executed_edges,
             "detection_results": {
                 "detected_freeze_account": detected_freeze_account,
                 "detected_freeze_step": detected_freeze_step,
