@@ -720,8 +720,13 @@ class AutonomousDetectionEngine:
                 {"code": "NORMAL_HISTORY", "label": "Established customer baseline (Full KYC)", "weight": -15.0, "direction": "decreases_risk"}
             ]
 
-            # Freeze target and syndicate accomplices whose risk breaches 65.0; spare victim
-            should_freeze = policy_enabled and not is_victim and (aid == detected_freeze_account or fused >= 65.0)
+            # Freeze target, terminal cash-out sink, and syndicate accomplices whose risk breaches 65.0; spare victim
+            should_freeze = policy_enabled and not is_victim and (
+                aid == detected_freeze_account
+                or aid == cash_out["account_id"]
+                or ent.get("role") in ("cash_out", "sink")
+                or fused >= 65.0
+            )
             if should_freeze:
                 ent["is_blocked"] = True
                 ent["is_frozen"] = True

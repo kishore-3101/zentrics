@@ -393,7 +393,13 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                 const isTargetFreeze =
                   shouldHydrateFreeze &&
                   node.role !== 'victim' &&
-                  ((primaryBlockedId && node.id === primaryBlockedId) || Number(node.risk_score ?? 0) >= 65);
+                  (
+                    (primaryBlockedId && (node.id === primaryBlockedId || node.account_id === primaryBlockedId)) ||
+                    node.role === 'cash_out' ||
+                    node.role === 'sink' ||
+                    node.account_type === 'sink' ||
+                    Number(node.risk_score ?? 0) >= 65
+                  );
                 if (alreadyFrozen || isTargetFreeze) {
                   return { ...node, is_frozen: true, is_blocked: true };
                 }
