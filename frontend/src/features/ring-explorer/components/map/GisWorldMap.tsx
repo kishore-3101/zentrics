@@ -719,9 +719,11 @@ export const GisWorldMap = memo(function GisWorldMap({
 
       const color = isFrozenNode
         ? '#EF4444'
-        : loc.isCollectorHub || loc.isMuleHub
-          ? '#C9A85B'
-          : '#00C878';
+        : loc.isCashoutHub
+          ? '#EF4444'
+          : loc.isCollectorHub || loc.isMuleHub
+            ? '#C9A85B'
+            : '#00C878';
 
       const el = document.createElement('div');
       el.className = 'group relative flex items-center justify-center cursor-pointer select-none';

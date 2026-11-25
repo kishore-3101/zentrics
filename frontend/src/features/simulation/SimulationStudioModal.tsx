@@ -328,8 +328,10 @@ export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModal
     setDistributor(p.distributor);
     setIntermediator(p.intermediator);
     setCashOut(p.cash_out);
+    setBlockEnabled(true);
     setBlockedTarget(p.blocked_target);
     setBlockedReason(p.blocked_reason);
+    setReasonEditedManually(false);
   };
 
   const buildPayload = () => {

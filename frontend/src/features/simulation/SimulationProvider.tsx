@@ -259,7 +259,17 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
   const [savedConfig, setSavedConfig] = useState<any>(() => {
     try {
       const raw = localStorage.getItem('tm_simulation_config');
-      return raw ? JSON.parse(raw) : DEFAULT_ATTACK_CONFIG;
+      if (!raw) return DEFAULT_ATTACK_CONFIG;
+      const parsed = JSON.parse(raw);
+      return {
+        ...DEFAULT_ATTACK_CONFIG,
+        ...parsed,
+        block_policy: {
+          ...DEFAULT_ATTACK_CONFIG.block_policy,
+          ...(parsed?.block_policy || {}),
+          enabled: parsed?.block_policy?.enabled ?? true,
+        },
+      };
     } catch {
       return DEFAULT_ATTACK_CONFIG;
     }
@@ -373,8 +383,26 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         const resp = await axios.post('/simulation/run', payload);
         const data = resp.data;
         if (data && data.ring_id) {
+          const shouldHydrateFreeze =
+            payload.block_policy?.enabled !== false &&
+            (Boolean(data.blocked_info?.is_blocked) || data.status === 'frozen');
+          const primaryBlockedId = data.blocked_info?.blocked_account;
+          const hydratedNodes = Array.isArray(data.nodes)
+            ? data.nodes.map((node: any) => {
+                const alreadyFrozen = Boolean(node.is_frozen || node.is_blocked);
+                const isTargetFreeze =
+                  shouldHydrateFreeze &&
+                  node.role !== 'victim' &&
+                  ((primaryBlockedId && node.id === primaryBlockedId) || Number(node.risk_score ?? 0) >= 65);
+                if (alreadyFrozen || isTargetFreeze) {
+                  return { ...node, is_frozen: true, is_blocked: true };
+                }
+                return node;
+              })
+            : [];
+
           // Cache complete RingGraphData so RingExplorer loads the brand new ring immediately without Vercel instance misses
-          const fullRing: RingGraphData = Array.isArray(data.nodes) && data.nodes.length > 0
+          const fullRing: RingGraphData = hydratedNodes.length > 0
             ? {
                 ring_id: data.ring_id,
                 fingerprint: data.fingerprint || `inj_${data.ring_id.toLowerCase()}_fp`,
@@ -390,7 +418,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                 pattern_tags: Array.isArray(data.pattern_tags) ? data.pattern_tags : [normalizeTypology(payload.typology), 'live_simulation'],
                 explanation: data.explanation || `Simulated ${data.scenario_name || payload.scenario_name}`,
                 recommended: data.recommended,
-                nodes: data.nodes,
+                nodes: hydratedNodes,
                 edges: data.edges || [],
                 blocked_info: data.blocked_info,
               }
