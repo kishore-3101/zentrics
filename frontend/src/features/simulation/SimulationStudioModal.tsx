@@ -273,8 +273,32 @@ export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModal
       : 'auto'
   );
   const [blockedReason, setBlockedReason] = useState<string>(savedConfig?.block_policy?.blocked_reason || PRESETS[0].blocked_reason);
+  const [reasonEditedManually, setReasonEditedManually] = useState(false);
   const [isSavedNotice, setIsSavedNotice] = useState(false);
   const [isExecutingNow, setIsExecutingNow] = useState(false);
+
+  // Sync modal state from latest savedConfig whenever modal opens
+  useEffect(() => {
+    if (!isOpen || !savedConfig) return;
+    setAmount(savedConfig.total_amount || PRESETS[0].amount);
+    setChannel(savedConfig.channel || PRESETS[0].channel);
+    setTypology(savedConfig.typology || PRESETS[0].typology);
+    setBlockEnabled(savedConfig.block_policy?.enabled ?? true);
+    if (savedConfig.victim) setVictim(savedConfig.victim);
+    if (savedConfig.hacker) setHacker(savedConfig.hacker);
+    if (savedConfig.distributor) setDistributor(savedConfig.distributor);
+    if (savedConfig.intermediator) setIntermediator(savedConfig.intermediator);
+    if (savedConfig.cash_out) setCashOut(savedConfig.cash_out);
+    if (savedConfig.block_policy?.blocked_target) {
+      setBlockedTarget(savedConfig.block_policy.blocked_target);
+    }
+    if (savedConfig.block_policy?.blocked_reason) {
+      setBlockedReason(savedConfig.block_policy.blocked_reason);
+    }
+    const matchedPreset = PRESETS.find((p) => p.label === savedConfig.scenario_name);
+    if (matchedPreset) setPreset(matchedPreset);
+    setReasonEditedManually(false);
+  }, [isOpen, savedConfig]);
 
   // Lock body scroll and listen for Escape key while modal is open
   useEffect(() => {
@@ -316,8 +340,12 @@ export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModal
         ? intermediator.account_id
         : cashOut.account_id;
 
+    const dynamicReason = reasonEditedManually
+      ? blockedReason
+      : `Autonomous ML Freeze: Cross-city ${typology.replace(/_/g, ' ')} from ${victim.city} to ${intermediator.city} (${formatInrCompact(amount)}) breached 85% risk threshold. Quarantined under PMLA Sec 5.`;
+
     return {
-      scenario_name: preset.label,
+      scenario_name: `${preset.label} (${victim.city} ➔ ${intermediator.city})`,
       total_amount: amount,
       channel,
       typology,
@@ -330,7 +358,7 @@ export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModal
         enabled: blockEnabled,
         blocked_target: blockedTarget,
         blocked_account_id: blockedAccount,
-        blocked_reason: blockedReason,
+        blocked_reason: dynamicReason,
         blocked_by: 'TraceMesh AI Shield / Autonomous Detection Engine',
         blocked_step: blockedTarget === 'intermediator' ? 3 : blockedTarget === 'cash_out' ? 4 : undefined,
       },
@@ -925,7 +953,10 @@ export function SimulationStudioModal({ isOpen, onClose }: SimulationStudioModal
                     <textarea
                       rows={2}
                       value={blockedReason}
-                      onChange={(e) => setBlockedReason(e.target.value)}
+                      onChange={(e) => {
+                        setBlockedReason(e.target.value);
+                        setReasonEditedManually(true);
+                      }}
                       className="w-full rounded-xl border border-gold/25 bg-[#07110D] px-3.5 py-2 text-xs text-ink focus:border-gold focus:outline-none resize-none leading-relaxed"
                     />
                   </div>

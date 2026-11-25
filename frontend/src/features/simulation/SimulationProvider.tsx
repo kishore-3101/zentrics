@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { SimulationSpeed, SimulationStatus } from './constants';
 import { SimulationContext, type ActiveAttackAlert, type SimulationContextValue } from './simulationContext';
 import { cacheSimulatedRing } from '../../services/ring-graph.service';
@@ -264,6 +264,8 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
       return DEFAULT_ATTACK_CONFIG;
     }
   });
+  const savedConfigRef = useRef<any>(savedConfig);
+  savedConfigRef.current = savedConfig;
 
   const [hasSavedConfig, setHasSavedConfig] = useState<boolean>(() => {
     try {
@@ -344,10 +346,13 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const saveConfig = useCallback((config: any) => {
-    setSavedConfig(config);
+    const clean = { ...config };
+    delete clean.ring_id;
+    savedConfigRef.current = clean;
+    setSavedConfig(clean);
     setHasSavedConfig(true);
     try {
-      localStorage.setItem('tm_simulation_config', JSON.stringify(config));
+      localStorage.setItem('tm_simulation_config', JSON.stringify(clean));
       localStorage.setItem('tm_has_saved_config', 'true');
     } catch {
       // ignore storage errors
@@ -360,7 +365,9 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 
   const runSimulation = useCallback(
     async (customPayload?: any) => {
-      const payload = customPayload || savedConfig || DEFAULT_ATTACK_CONFIG;
+      const rawPayload = customPayload || savedConfigRef.current || DEFAULT_ATTACK_CONFIG;
+      const payload = { ...rawPayload };
+      delete payload.ring_id;
       setIsSimulating(true);
       try {
         const resp = await axios.post('/simulation/run', payload);

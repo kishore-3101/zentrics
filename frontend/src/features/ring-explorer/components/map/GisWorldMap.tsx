@@ -127,12 +127,12 @@ interface PrecomputedArc {
 
 const PHASE_DURATIONS: Record<PlaybackPhase, number> = {
   idle: 0,
-  genesis: 1800,
-  hop1: 2200,
-  hop2: 2200,
-  hop3: 2200,
-  hop4: 2200,
-  blocked: 3800,
+  genesis: 900,
+  hop1: 1200,
+  hop2: 1200,
+  hop3: 1200,
+  hop4: 1200,
+  blocked: 3200,
   completed: 0,
 };
 
@@ -585,27 +585,30 @@ export const GisWorldMap = memo(function GisWorldMap({
             }
           }
         } else if (currentPhase === 'hop1') {
-          nextPhase = orderedArcs.length >= 2 ? 'hop2' : 'blocked';
-          if (map && orderedArcs[1]) {
-            const dstLoc = geoGraph.locations.find((l) => l.id === orderedArcs[1].dst_city_id);
-            if (dstLoc) map.easeTo({ center: [dstLoc.lon, dstLoc.lat], zoom: 5.4, duration: 1200 });
+          const hop2Arc = orderedArcs.find((a) => a.hop_index === 2);
+          nextPhase = hop2Arc ? 'hop2' : 'blocked';
+          if (map && hop2Arc) {
+            const dstLoc = geoGraph.locations.find((l) => l.id === hop2Arc.dst_city_id);
+            if (dstLoc) map.easeTo({ center: [dstLoc.lon, dstLoc.lat], zoom: 5.4, duration: 900 });
           }
         } else if (currentPhase === 'hop2') {
-          nextPhase = orderedArcs.length >= 3 ? 'hop3' : 'blocked';
-          if (map && orderedArcs[2]) {
-            const dstLoc = geoGraph.locations.find((l) => l.id === orderedArcs[2].dst_city_id);
-            if (dstLoc) map.easeTo({ center: [dstLoc.lon, dstLoc.lat], zoom: 5.5, duration: 1200 });
+          const hop3Arc = orderedArcs.find((a) => a.hop_index === 3);
+          nextPhase = hop3Arc ? 'hop3' : 'blocked';
+          if (map && hop3Arc) {
+            const dstLoc = geoGraph.locations.find((l) => l.id === hop3Arc.dst_city_id);
+            if (dstLoc) map.easeTo({ center: [dstLoc.lon, dstLoc.lat], zoom: 5.5, duration: 900 });
           }
         } else if (currentPhase === 'hop3') {
-          nextPhase = orderedArcs.length >= 4 ? 'hop4' : 'blocked';
-          if (map && orderedArcs[3]) {
-            const dstLoc = geoGraph.locations.find((l) => l.id === orderedArcs[3].dst_city_id);
-            if (dstLoc) map.easeTo({ center: [dstLoc.lon, dstLoc.lat], zoom: 5.6, duration: 1200 });
+          const hop4Arc = orderedArcs.find((a) => a.hop_index >= 4);
+          nextPhase = hop4Arc ? 'hop4' : 'blocked';
+          if (map && hop4Arc) {
+            const dstLoc = geoGraph.locations.find((l) => l.id === hop4Arc.dst_city_id);
+            if (dstLoc) map.easeTo({ center: [dstLoc.lon, dstLoc.lat], zoom: 5.6, duration: 900 });
           }
         } else if (currentPhase === 'hop4') {
           nextPhase = 'blocked';
           if (map && blockedLocation) {
-            map.flyTo({ center: [blockedLocation.lon, blockedLocation.lat], zoom: 6.8, pitch: 52, duration: 1200 });
+            map.flyTo({ center: [blockedLocation.lon, blockedLocation.lat], zoom: 6.4, pitch: 52, duration: 1000 });
           }
         } else if (currentPhase === 'blocked') {
           currentPhase = 'completed';
@@ -690,15 +693,15 @@ export const GisWorldMap = memo(function GisWorldMap({
         return loc.id === victimLocation?.id;
       }
       if (loc.id === victimLocation?.id) return true;
-      for (let h = 1; h < currentHopNum; h++) {
-        if (orderedArcs[h - 1]?.dst_city_id === loc.id) return true;
-      }
-      if (
-        currentHopNum >= 1 &&
-        orderedArcs[currentHopNum - 1]?.dst_city_id === loc.id &&
-        (hasArrivedCurrentHop || livePhase === 'blocked')
-      ) {
-        return true;
+      for (const arc of orderedArcs) {
+        if (arc.hop_index < currentHopNum && arc.dst_city_id === loc.id) return true;
+        if (
+          arc.hop_index === currentHopNum &&
+          arc.dst_city_id === loc.id &&
+          (hasArrivedCurrentHop || livePhase === 'blocked')
+        ) {
+          return true;
+        }
       }
       if (livePhase === 'blocked' && loc.isBlocked) return true;
       return false;
@@ -883,7 +886,8 @@ export const GisWorldMap = memo(function GisWorldMap({
         {precomputedArcs.map(({ arc, color, isBlocked }) => {
           const isSelected = selectedArc?.txn_id === arc.txn_id;
           const isLive = isLiveActive && livePhase !== 'idle' && livePhase !== 'completed';
-          const effectiveBlocked = Boolean(isBlocked || (isLive && livePhase === 'blocked' && arc.hop_index === precomputedArcs.length));
+          const maxHop = orderedArcs.reduce((m, a) => Math.max(m, a.hop_index), 4);
+          const effectiveBlocked = Boolean(isBlocked || (isLive && livePhase === 'blocked' && arc.hop_index >= maxHop));
           const strokeWidth = isSelected ? 4.8 : effectiveBlocked ? 3.8 : 3.2;
           const activeColor = effectiveBlocked ? '#EF4444' : color;
           const arrowMarker = effectiveBlocked

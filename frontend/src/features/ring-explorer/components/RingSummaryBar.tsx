@@ -12,21 +12,22 @@ export function RingSummaryBar({ graph }: RingSummaryBarProps) {
   const muleCount = graph.nodes.filter((n) => n.role === 'mule').length;
   const cashOutCount = graph.nodes.filter((n) => n.role === 'cash_out').length;
 
-  const blockedNode = graph.nodes.find((n) => n.is_blocked || n.is_frozen);
+  const frozenNodes = graph.nodes.filter((n) => n.is_blocked || n.is_frozen);
+  const blockedNode = frozenNodes[0];
   const isBlocked = Boolean(
     graph.blocked_info?.is_blocked ||
     graph.status === 'frozen' ||
-    blockedNode,
+    frozenNodes.length > 0,
   );
 
   const blockedAccount =
     graph.blocked_info?.blocked_account ||
     blockedNode?.account_id ||
     'Target Node';
-  const blockedCity =
-    graph.blocked_info?.blocked_city ||
-    blockedNode?.city ||
-    'Regional Terminal';
+  const frozenListLabel =
+    frozenNodes.length > 1
+      ? `${frozenNodes.length} ML-Detected Accounts Frozen (${frozenNodes.map((n) => n.account_id).join(', ')})`
+      : `Account ${blockedAccount} (${graph.blocked_info?.blocked_city || blockedNode?.city || 'Regional Terminal'}) Quarantined`;
   const blockedReason =
     graph.blocked_info?.blocked_reason ||
     blockedNode?.blocked_reason ||
@@ -48,8 +49,8 @@ export function RingSummaryBar({ graph }: RingSummaryBarProps) {
               <span className="rounded bg-danger/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-danger border border-danger/40">
                 AI Shield Freeze Triggered
               </span>
-              <span className="text-ink font-semibold">
-                Account <strong className="font-mono text-gold-light">{blockedAccount}</strong> ({blockedCity}) Quarantined
+              <span className="text-ink font-semibold font-mono text-[11px] text-gold-light">
+                {frozenListLabel}
               </span>
               <span className="hidden sm:inline text-muted">·</span>
               <span className="hidden md:inline text-xs text-ink/80 max-w-xl truncate" title={blockedReason}>
