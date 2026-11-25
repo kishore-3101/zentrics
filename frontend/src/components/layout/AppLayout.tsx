@@ -56,7 +56,7 @@ export function AppLayout() {
   }, [reducedMotion]);
 
   useEffect(() => {
-    document.title = `${getRouteMeta(pathname).title} · MuleNet`;
+    document.title = `${getRouteMeta(pathname).title} · Zentrics`;
     scrollRef.current?.scrollTo({ top: 0 });
   }, [pathname]);
 

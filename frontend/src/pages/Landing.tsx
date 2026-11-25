@@ -6,7 +6,7 @@ export default function Landing() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = 'MuleNet · Initializing Command Center';
+    document.title = 'Zentrics · Initializing Command Center';
   }, []);
 
   const handleComplete = () => {

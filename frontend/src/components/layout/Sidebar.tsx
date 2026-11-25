@@ -94,7 +94,7 @@ function SidebarBody({ collapsed, onNavigate, onClose, onToggleCollapsed }: Side
           collapsed ? 'justify-center' : 'justify-between',
         )}
       >
-        <Link to="/overview" onClick={onNavigate} aria-label="MuleNet home" className="rounded-lg">
+        <Link to="/overview" onClick={onNavigate} aria-label="Zentrics home" className="rounded-lg">
           <BrandLockup compact={collapsed} />
         </Link>
         {onClose && (

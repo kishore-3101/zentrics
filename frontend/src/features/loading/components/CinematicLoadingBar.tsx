@@ -97,7 +97,7 @@ export const CinematicBrandHeader = memo(function CinematicBrandHeader() {
         <span className="absolute -bottom-1 -right-1 size-3 border-b-2 border-r-2 border-gold-light" />
 
         <h1 className="font-mono text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-[0.22em] text-transparent bg-clip-text bg-gradient-to-r from-[#E5C778] via-[#C9A85B] to-[#FFE6A3] drop-shadow-[0_0_18px_rgba(201,168,91,0.6)]">
-          MULE-NET
+          ZENTRICS
         </h1>
       </div>
       <p className="mt-1 text-[10px] font-mono uppercase tracking-[0.3em] text-emerald/80">

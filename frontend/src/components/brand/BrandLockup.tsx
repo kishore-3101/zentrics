@@ -1,11 +1,11 @@
 import { cn } from '../../lib/cn';
 
-/** Official MuleNet Emblem: Gold Hexagon with Emerald Mule Head */
+/** Official Zentrics Emblem */
 export function LogoMark({ size = 36, className }: { size?: number; className?: string }) {
   return (
     <img
       src="/favicon.png"
-      alt="MuleNet Emblem"
+      alt="Zentrics Emblem"
       width={size}
       height={size}
       className={cn('object-contain drop-shadow-[0_0_10px_rgba(0,200,120,0.28)]', className)}
@@ -26,7 +26,7 @@ export function BrandLockup({ compact = false, className }: BrandLockupProps) {
       {!compact && (
         <span className="flex flex-col leading-none">
           <span className="font-display text-[15px] font-bold tracking-[0.16em] text-ink">
-            MULE <span className="text-gold-gradient">NET</span>
+            ZEN<span className="text-gold-gradient">TRICS</span>
           </span>
           <span className="mt-1.5 font-mono text-[9px] font-medium tracking-[0.24em] text-muted">
             FINANCIAL INTELLIGENCE

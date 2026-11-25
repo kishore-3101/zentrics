@@ -178,7 +178,7 @@ export function generateGeoMapTexture(): THREE.CanvasTexture {
   ctx.font = '14px monospace';
   ctx.fillStyle = 'rgba(201, 168, 91, 0.5)';
   ctx.textAlign = 'left';
-  ctx.fillText('MULENET FINANCIAL INTELLIGENCE · 3D GEOGRAPHIC GRID', 40, CANVAS_SIZE - 40);
+  ctx.fillText('ZENTRICS FINANCIAL INTELLIGENCE · 3D GEOGRAPHIC GRID', 40, CANVAS_SIZE - 40);
   ctx.fillText('SPATIAL PROJECTION: WGS84 / 3D TOPOLOGY MESH', 40, CANVAS_SIZE - 20);
 
   const texture = new THREE.CanvasTexture(canvas);
