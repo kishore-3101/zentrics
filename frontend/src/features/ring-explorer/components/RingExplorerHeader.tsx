@@ -6,6 +6,7 @@ import { RiskScoreMeter } from '../../../components/ui/RiskScoreMeter';
 import { TypologyBadge } from '../../../components/ui/TypologyBadge';
 import type { RingGraphData } from '../../../types/ring-graph';
 import { fetchAlerts } from '../../../services/alerts.service';
+import { getCachedSimulatedRings } from '../../../services/ring-graph.service';
 
 interface RingExplorerHeaderProps {
   graph: RingGraphData;
@@ -22,13 +23,14 @@ export function RingExplorerHeader({
   const [availableRings, setAvailableRings] = useState<string[]>([graph.ring_id]);
 
   useEffect(() => {
+    const simIds = getCachedSimulatedRings().map((r) => r.ring_id);
     fetchAlerts()
       .then((alerts) => {
-        const ids = Array.from(new Set([graph.ring_id, ...alerts.map((a) => a.ring_id)])).sort();
+        const ids = Array.from(new Set([graph.ring_id, ...simIds, ...alerts.map((a) => a.ring_id)]));
         setAvailableRings(ids);
       })
       .catch(() => {
-        setAvailableRings([graph.ring_id]);
+        setAvailableRings(Array.from(new Set([graph.ring_id, ...simIds])));
       });
   }, [graph.ring_id]);
 

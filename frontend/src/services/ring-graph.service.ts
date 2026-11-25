@@ -1,6 +1,53 @@
 import axios from 'axios';
 import type { RingGraphData, TimelineEvent } from '../types/ring-graph';
 
+const SIM_RING_STORAGE_KEY = 'tm_cached_sim_rings_v1';
+const simulatedRingCache = new Map<string, RingGraphData>();
+
+function hydrateCacheFromStorage() {
+  if (typeof window === 'undefined') return;
+  try {
+    const raw = window.sessionStorage.getItem(SIM_RING_STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw) as Record<string, RingGraphData>;
+    Object.entries(parsed).forEach(([k, v]) => {
+      if (v && Array.isArray(v.nodes) && !simulatedRingCache.has(k)) {
+        simulatedRingCache.set(k, v);
+      }
+    });
+  } catch {
+    // ignore storage errors
+  }
+}
+
+export function cacheSimulatedRing(ring: RingGraphData): void {
+  if (!ring || !ring.ring_id || !Array.isArray(ring.nodes)) return;
+  simulatedRingCache.set(ring.ring_id, ring);
+  if (typeof window !== 'undefined') {
+    try {
+      const obj: Record<string, RingGraphData> = {};
+      // Keep latest 10 simulated rings in sessionStorage
+      const entries = Array.from(simulatedRingCache.entries()).slice(-10);
+      entries.forEach(([k, v]) => {
+        obj[k] = v;
+      });
+      window.sessionStorage.setItem(SIM_RING_STORAGE_KEY, JSON.stringify(obj));
+    } catch {
+      // ignore quota errors
+    }
+  }
+}
+
+export function getCachedRing(ringId: string): RingGraphData | null {
+  hydrateCacheFromStorage();
+  return simulatedRingCache.get(ringId) || null;
+}
+
+export function getCachedSimulatedRings(): RingGraphData[] {
+  hydrateCacheFromStorage();
+  return Array.from(simulatedRingCache.values()).reverse();
+}
+
 export const FALLBACK_DEMO_RING: RingGraphData = {
   ring_id: 'R-104',
   fingerprint: 'fp_r104',
@@ -132,20 +179,34 @@ export const FALLBACK_DEMO_RING: RingGraphData = {
 };
 
 /**
- * Service to fetch 3D Ring Topology and Timeline replay events from live database.
- * Conforms strictly to GET /rings/{id} and GET /rings/{id}/timeline.
+ * Service to fetch 3D Ring Topology and Timeline replay events from live database
+ * or cached simulated stream.
  */
 export async function fetchRingGraph(ringId: string): Promise<RingGraphData> {
   const normalizedId = (ringId || '').trim();
   const targetId = !normalizedId || normalizedId === 'demo-ring' ? 'R-104' : normalizedId;
+
+  // 1. Check freshly simulated or locally mutated ring cache first (eliminates cold serverless container misses)
+  const cached = getCachedRing(targetId);
+  if (cached) {
+    return cached;
+  }
+
+  // 2. Query backend REST API
   try {
     const response = await axios.get<RingGraphData>(`/rings/${encodeURIComponent(targetId)}`);
-    if (response.data && Array.isArray(response.data.nodes) && response.data.nodes.length > 0) {
+    if (
+      response.data &&
+      Array.isArray(response.data.nodes) &&
+      response.data.nodes.length > 0 &&
+      (response.data.ring_id === targetId || targetId === 'R-104')
+    ) {
       return response.data;
     }
   } catch (err) {
-    console.warn(`Could not load ring ${targetId}, serving fallback demo ring topology:`, err);
+    console.warn(`Could not load ring ${targetId} from backend API:`, err);
   }
+
   return {
     ...FALLBACK_DEMO_RING,
     ring_id: targetId,
@@ -159,7 +220,6 @@ export async function fetchRingTimeline(ringId: string): Promise<TimelineEvent[]
 
     if (edges.length === 0) return [];
 
-    // Sort strictly in chronological order by transaction timestamp
     edges.sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime());
 
     const firstTs = new Date(edges[0].ts).getTime();

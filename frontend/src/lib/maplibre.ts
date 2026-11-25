@@ -1,8 +1,9 @@
 import * as maplibregl from 'maplibre-gl';
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 
-// Configure MapLibre web worker to prevent 404 / non-JS MIME type errors on Vercel
+// Configure MapLibre web worker using Vite's bundled asset URL so Vercel always serves it with application/javascript MIME type
 if (typeof window !== 'undefined' && maplibregl.config) {
-  maplibregl.config.WORKER_URL = '/assets/maplibre-gl-worker.mjs';
+  maplibregl.config.WORKER_URL = maplibreWorkerUrl;
 }
 
 export const Map = maplibregl.Map;

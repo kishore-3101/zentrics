@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { AlertVolumePoint, OverviewData, OverviewRing } from '../features/overview/types';
+import { getCachedSimulatedRings } from './ring-graph.service';
 
 const DEFAULT_OVERVIEW_RINGS: readonly OverviewRing[] = [
   { id: 'R-106', typology: 'structural_cycle', riskScore: 95, totalMoved: 2100000, amountAtRisk: 1550000, accountCount: 11, status: 'frozen' },
@@ -19,47 +20,55 @@ const DEFAULT_ALERT_VOLUME: readonly AlertVolumePoint[] = [
 
 /**
  * Overview data source.
- * Conforms to GET /overview on the live backend server.
+ * Conforms to GET /overview on the live backend server and merges locally cached simulations.
  */
 export async function fetchOverview(): Promise<OverviewData> {
+  let raw: any = {};
   try {
     const response = await axios.get<any>('/overview');
-    const raw = response.data || {};
-
-    const rings = Array.isArray(raw.rings) && raw.rings.length > 0 ? raw.rings : DEFAULT_OVERVIEW_RINGS;
-    const alertVolume = Array.isArray(raw.alertVolume) && raw.alertVolume.length > 0
-      ? raw.alertVolume
-      : Array.isArray(raw.trends) && raw.trends.length > 0
-      ? raw.trends
-      : DEFAULT_ALERT_VOLUME;
-    const activity = Array.isArray(raw.activity) ? raw.activity : [];
-    const detectionRate = raw.detectionRate ?? raw.kpis?.detectionRate ?? 92.5;
-
-    return {
-      rings,
-      alertVolume,
-      activity,
-      detectionRate,
-      previousPeriod: raw.previousPeriod || {
-        activeRings: 5,
-        amountAtRisk: 3800000,
-        accountsUnderInvestigation: 34,
-        detectionRate: 88.0,
-      },
-    };
+    raw = response.data || {};
   } catch (err) {
     console.warn('Using fallback overview metrics:', err);
-    return {
-      rings: DEFAULT_OVERVIEW_RINGS,
-      alertVolume: DEFAULT_ALERT_VOLUME,
-      activity: [],
-      detectionRate: 92.5,
-      previousPeriod: {
-        activeRings: 5,
-        amountAtRisk: 3800000,
-        accountsUnderInvestigation: 34,
-        detectionRate: 88.0,
-      },
-    };
   }
+
+  const baseRings: OverviewRing[] = Array.isArray(raw.rings) && raw.rings.length > 0
+    ? raw.rings
+    : [...DEFAULT_OVERVIEW_RINGS];
+
+  const simRings = getCachedSimulatedRings();
+  const seenIds = new Set(baseRings.map((r) => r.id));
+  const simOverviewRings: OverviewRing[] = simRings
+    .filter((r) => !seenIds.has(r.ring_id))
+    .map((r) => ({
+      id: r.ring_id,
+      typology: r.ring_type,
+      riskScore: Math.round(r.score || 94),
+      totalMoved: r.amount_moved || 500000,
+      amountAtRisk: r.amount_at_risk ?? 0,
+      accountCount: r.nodes.length,
+      status: r.status,
+    }));
+
+  const rings = [...simOverviewRings, ...baseRings];
+
+  const alertVolume = Array.isArray(raw.alertVolume) && raw.alertVolume.length > 0
+    ? raw.alertVolume
+    : Array.isArray(raw.trends) && raw.trends.length > 0
+    ? raw.trends
+    : DEFAULT_ALERT_VOLUME;
+  const activity = Array.isArray(raw.activity) ? raw.activity : [];
+  const detectionRate = raw.detectionRate ?? raw.kpis?.detectionRate ?? 92.5;
+
+  return {
+    rings,
+    alertVolume,
+    activity,
+    detectionRate,
+    previousPeriod: raw.previousPeriod || {
+      activeRings: 5,
+      amountAtRisk: 3800000,
+      accountsUnderInvestigation: 34,
+      detectionRate: 88.0,
+    },
+  };
 }

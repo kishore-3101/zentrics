@@ -75,7 +75,7 @@ def load_json_file(filename: str, default: Any) -> Any:
 # -----------------------------------------------------------------------------
 class MockDataStore:
     def __init__(self):
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()
         self.load_fixtures()
 
     def load_fixtures(self):
@@ -206,12 +206,113 @@ class MockDataStore:
 
             # Load simulation
             self.simulation = load_json_file("simulation.json", {"status": "idle", "speed": 1.0, "current_step": 0})
+            self.delta_events: List[Dict[str, Any]] = []
 
             self.next_action_id = 2000
             self.next_event_id = 500
+            self._sim_state_file = Path("/tmp/tracemesh_sim_state.json")
+            self._load_sim_state()
 
-    def get_alerts(self, filters: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _save_sim_state(self):
+        """Persists simulated rings, alerts, timelines, and case actions to /tmp across serverless invocations."""
+        try:
+            sim_rings = {k: v for k, v in self.rings.items() if v.get("is_simulation") or k.startswith("SIM-")}
+            sim_alerts = [a for a in self.alerts if a.get("is_simulation") or str(a.get("ring_id", "")).startswith("SIM-")]
+            frozen_overrides = {
+                a.get("ring_id"): {
+                    "status": a.get("status"),
+                    "assigned_to": a.get("assigned_to"),
+                    "case_notes": a.get("case_notes"),
+                    "amount_at_risk": a.get("amount_at_risk"),
+                    "amount_cashed": a.get("amount_cashed"),
+                    "blocked_info": self.rings.get(a.get("ring_id", ""), {}).get("blocked_info"),
+                }
+                for a in self.alerts
+                if a.get("status") in ("frozen", "escalated", "false_positive", "under_review")
+            }
+            sim_timelines = {k: self.timelines[k] for k in sim_rings if k in self.timelines}
+            sim_actions = {
+                str(r.get("case_id")): self.cases_actions[str(r.get("case_id"))]
+                for r in sim_rings.values()
+                if str(r.get("case_id")) in self.cases_actions
+            }
+            state = {
+                "sim_rings": sim_rings,
+                "sim_alerts": sim_alerts,
+                "sim_timelines": sim_timelines,
+                "sim_actions": sim_actions,
+                "frozen_overrides": frozen_overrides,
+                "delta_events": self.delta_events[-50:],
+                "next_action_id": self.next_action_id,
+                "next_event_id": self.next_event_id,
+            }
+            self._sim_state_file.write_text(json.dumps(state), encoding="utf-8")
+        except Exception:
+            pass
+
+    def _load_sim_state(self):
+        """Loads persisted simulation state from /tmp if available."""
+        try:
+            if not getattr(self, "_sim_state_file", None) or not self._sim_state_file.exists():
+                return
+            state = json.loads(self._sim_state_file.read_text(encoding="utf-8"))
+            for k, v in state.get("sim_rings", {}).items():
+                self.rings[k] = v
+            for k, v in state.get("sim_timelines", {}).items():
+                self.timelines[k] = v
+            for k, v in state.get("sim_actions", {}).items():
+                self.cases_actions[k] = v
+
+            existing_ids = {a.get("ring_id") for a in self.alerts}
+            for a in reversed(state.get("sim_alerts", [])):
+                if a.get("ring_id") not in existing_ids:
+                    self.alerts.insert(0, a)
+                    existing_ids.add(a.get("ring_id"))
+
+            for rid, ov in state.get("frozen_overrides", {}).items():
+                for a in self.alerts:
+                    if a.get("ring_id") == rid:
+                        if ov.get("status"):
+                            a["status"] = ov["status"]
+                        if ov.get("assigned_to") is not None:
+                            a["assigned_to"] = ov["assigned_to"]
+                        if ov.get("case_notes") is not None:
+                            a["case_notes"] = ov["case_notes"]
+                        if ov.get("amount_at_risk") is not None:
+                            a["amount_at_risk"] = ov["amount_at_risk"]
+                        if ov.get("amount_cashed") is not None:
+                            a["amount_cashed"] = ov["amount_cashed"]
+                if rid in self.rings and ov.get("status"):
+                    self.rings[rid]["status"] = ov["status"]
+                    if ov.get("blocked_info"):
+                        self.rings[rid]["blocked_info"] = ov["blocked_info"]
+                    if ov["status"] == "frozen":
+                        for node in self.rings[rid].get("nodes", []):
+                            if node.get("role") != "victim":
+                                node["is_frozen"] = True
+                                node["is_blocked"] = True
+
+            if state.get("delta_events"):
+                self.delta_events = state["delta_events"]
+            self.next_action_id = max(self.next_action_id, int(state.get("next_action_id", 2000)))
+            self.next_event_id = max(self.next_event_id, int(state.get("next_event_id", 500)))
+        except Exception:
+            pass
+
+    def get_alerts(self, filters: Dict[str, Any]) -> Any:
         with self.lock:
+            self._load_sim_state()
+            since_ev = filters.get("since_event_id")
+            if since_ev is not None:
+                try:
+                    since_id = int(since_ev)
+                    new_events = [e for e in self.delta_events if e.get("event_id", 0) > since_id]
+                    return {
+                        "events": copy.deepcopy(new_events),
+                        "latest_event_id": self.next_event_id,
+                    }
+                except (ValueError, TypeError):
+                    pass
             res = copy.deepcopy(self.alerts)
 
         # Apply query filters
@@ -239,8 +340,8 @@ class MockDataStore:
             except ValueError:
                 pass
 
-        # Sort by priority descending
-        res.sort(key=lambda x: x.get("priority", 0), reverse=True)
+        # Sort simulated alerts newest first, then priority descending
+        res.sort(key=lambda x: (1 if x.get("is_simulation") else 0, x.get("detected_at", ""), x.get("priority", 0)), reverse=True)
 
         offset = int(filters.get("offset", 0))
         limit = filters.get("limit")
@@ -256,14 +357,15 @@ class MockDataStore:
         with self.lock:
             ring = self.rings.get(normalized)
             if not ring:
+                self._load_sim_state()
+                ring = self.rings.get(normalized)
+            if not ring:
                 for k, v in self.rings.items():
                     if k.lower() == normalized.lower():
                         return copy.deepcopy(v)
-            if not ring:
-                # Fallback alias for convenience
+            # Only fall back to demo ring when default/demo-ring alias is requested
+            if not ring and normalized.lower() in ("", "demo-ring", "demo_ring", "demoring", "default", "sample"):
                 ring = self.rings.get("R-104") or self.rings.get("demo-ring")
-            if not ring and self.rings:
-                ring = next(iter(self.rings.values()))
             return copy.deepcopy(ring) if ring else None
 
     def get_timeline(self, ring_id: str) -> List[Dict[str, Any]]:
@@ -271,19 +373,41 @@ class MockDataStore:
         with self.lock:
             timeline = self.timelines.get(normalized)
             if not timeline:
+                self._load_sim_state()
+                timeline = self.timelines.get(normalized)
+            if not timeline and normalized in self.rings:
+                edges = self.rings[normalized].get("edges", [])
+                if edges:
+                    total = max(len(edges), 1)
+                    timeline = [
+                        {
+                            "txn_id": e.get("txn_id"),
+                            "ts": e.get("ts"),
+                            "src_account": e.get("src_account"),
+                            "dst_account": e.get("dst_account"),
+                            "amount": e.get("amount"),
+                            "channel": e.get("channel"),
+                            "hop_index": e.get("hop_index", idx),
+                            "is_suspicious": e.get("is_suspicious", True),
+                            "progress": idx / total,
+                        }
+                        for idx, e in enumerate(edges, 1)
+                    ]
+            if not timeline and normalized.lower() in ("", "demo-ring", "demo_ring", "r-104"):
                 timeline = self.timelines.get("R-104", [])
-            return copy.deepcopy(timeline)
+            return copy.deepcopy(timeline or [])
 
     def get_account(self, account_id: str) -> Optional[Dict[str, Any]]:
         normalized = unquote(account_id).strip()
         with self.lock:
+            self._load_sim_state()
             acc = self.accounts.get(normalized)
             return copy.deepcopy(acc) if acc else None
 
     def get_case_actions(self, case_id: int) -> List[Dict[str, Any]]:
         with self.lock:
+            self._load_sim_state()
             actions = self.cases_actions.get(str(case_id), [])
-            # Return sorted latest first or chronological
             return copy.deepcopy(actions)
 
     def execute_action(self, ring_id: str, payload: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -295,6 +419,7 @@ class MockDataStore:
         assigned_to = payload.get("assigned_to")
 
         with self.lock:
+            self._load_sim_state()
             # Find alert
             target_alert = None
             for a in self.alerts:
@@ -326,17 +451,70 @@ class MockDataStore:
             if note:
                 target_alert["case_notes"] = note
 
-            # Update ring graph state
+            now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+            if action_type == "freeze":
+                target_alert["amount_at_risk"] = 0.0
+                target_alert["amount_cashed"] = 0.0
+
+            # Update ring graph state & enforce freeze across non-victim accounts
+            frozen_accounts: List[str] = []
             if normalized in self.rings:
-                self.rings[normalized]["status"] = target_status
+                ring_obj = self.rings[normalized]
+                ring_obj["status"] = target_status
                 if action_type == "freeze":
-                    for node in self.rings[normalized].get("nodes", []):
-                        if node.get("role") in ["collector", "mule"]:
+                    ring_obj["amount_at_risk"] = 0.0
+                    ring_obj["amount_cashed"] = 0.0
+                    primary_frozen_node = None
+                    for node in ring_obj.get("nodes", []):
+                        if node.get("role") != "victim":
                             node["is_frozen"] = True
+                            node["is_blocked"] = True
+                            node["blocked_by"] = actor
+                            node["blocked_at"] = now_iso
+                            node["blocked_reason"] = note or f"Precautionary account freeze enforced on {node.get('account_id')} under PMLA Sec 5."
+                            frozen_accounts.append(node.get("account_id", ""))
+                            if primary_frozen_node is None and node.get("role") in ("mule", "collector"):
+                                primary_frozen_node = node
+                            if node.get("account_id") in self.accounts:
+                                self.accounts[node["account_id"]]["is_frozen"] = True
+                                self.accounts[node["account_id"]]["is_blocked"] = True
+
+                    # Block cash-out extraction edge
+                    edges = ring_obj.get("edges", [])
+                    if edges:
+                        edges[-1]["is_blocked"] = True
+                        edges[-1]["status"] = "blocked"
+                        edges[-1]["blocked_reason"] = note or "Terminal cash-out blocked via analyst freeze enforcement."
+
+                    if primary_frozen_node:
+                        ring_obj["blocked_info"] = {
+                            "is_blocked": True,
+                            "blocked_account": primary_frozen_node.get("account_id"),
+                            "blocked_city": primary_frozen_node.get("city") or primary_frozen_node.get("city_cluster", "Regional Hub"),
+                            "blocked_reason": note or primary_frozen_node.get("blocked_reason"),
+                            "amount_saved": ring_obj.get("amount_moved", target_alert.get("amount_moved", 0.0)),
+                        }
+
+            # Sync overview ring status & activity feed
+            for r in self.overview.get("rings", []):
+                if r.get("id") == normalized:
+                    r["status"] = target_status
+                    if action_type == "freeze":
+                        r["amountAtRisk"] = 0.0
+
+            self.overview.setdefault("activity", []).insert(0, {
+                "id": f"act_{self.next_action_id + 1}",
+                "action": action_type,
+                "ringId": normalized,
+                "actor": actor,
+                "timestamp": now_iso,
+                "note": note or f"Status updated to {target_status}",
+            })
+            self.overview["activity"] = self.overview["activity"][:20]
 
             # Create immutable audit record
             self.next_action_id += 1
-            now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
             new_action = {
                 "action_id": self.next_action_id,
                 "case_id": case_id,
@@ -352,10 +530,13 @@ class MockDataStore:
             if str_cid not in self.cases_actions:
                 self.cases_actions[str_cid] = []
             self.cases_actions[str_cid].append(new_action)
+            self._save_sim_state()
 
             return {
                 "alert": copy.deepcopy(target_alert),
                 "action": copy.deepcopy(new_action),
+                "frozen_accounts": frozen_accounts,
+                "ring": copy.deepcopy(self.rings.get(normalized)),
             }
 
     def get_metrics(self) -> Dict[str, Any]:
@@ -364,6 +545,7 @@ class MockDataStore:
 
     def get_overview(self) -> Dict[str, Any]:
         with self.lock:
+            self._load_sim_state()
             return copy.deepcopy(self.overview)
 
     def get_simulation_state(self) -> Dict[str, Any]:
@@ -382,6 +564,11 @@ class MockDataStore:
 
     def reset_simulation(self) -> Dict[str, Any]:
         with self.lock:
+            try:
+                if self._sim_state_file.exists():
+                    self._sim_state_file.unlink()
+            except Exception:
+                pass
             self.load_fixtures()
             self.simulation["status"] = "idle"
             self.simulation["speed"] = 1.0
@@ -396,18 +583,24 @@ class MockDataStore:
             typology = eval_res["typology"]
             total_amount = eval_res["total_amount"]
             entity_list = eval_res["entities"]
-            raw_edges = eval_res.get("edges") or [t for t in eval_res["transactions"] if not t.get("is_blocked") and t.get("amount", 0) > 0]
+            raw_edges = eval_res.get("edges") or eval_res.get("transactions", [])
             blocked_info = eval_res["blocked_info"]
             detection_results = eval_res["detection_results"]
             block_enabled = bool(blocked_info and blocked_info.get("is_blocked"))
             blocked_account_id = blocked_info.get("blocked_account") if blocked_info else None
+            blocked_reason = blocked_info.get("blocked_reason") if blocked_info else None
             now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
             self.next_event_id += 1
+            self.next_action_id += 1
 
             nodes = []
             for ent in entity_list:
-                role_mapped = "victim" if ent["role"] == "victim" else ("cash_out" if ent["role"] == "cash_out" else ("collector" if ent["role"] == "hacker" else "mule"))
-                nodes.append({
+                role_mapped = (
+                    "victim"
+                    if ent["role"] == "victim"
+                    else ("cash_out" if ent["role"] == "cash_out" else ("collector" if ent["role"] == "hacker" else "mule"))
+                )
+                node_obj = {
                     "account_id": ent["account_id"],
                     "role": role_mapped,
                     "actual_role": ent["role"],
@@ -427,6 +620,8 @@ class MockDataStore:
                     "bank_id": ent["bank_id"],
                     "is_frozen": ent.get("is_frozen", False),
                     "is_blocked": ent.get("is_blocked", False),
+                    "blocked_by": ent.get("blocked_by"),
+                    "blocked_at": ent.get("blocked_at"),
                     "blocked_reason": ent.get("blocked_reason"),
                     "position": ent["position"],
                     "total_incoming": ent.get("total_incoming", 0.0),
@@ -435,21 +630,26 @@ class MockDataStore:
                     "kyc_level": ent.get("kyc_level", "minimal"),
                     "account_type": "savings" if ent["role"] == "victim" else ("sink" if ent["role"] == "cash_out" else "current"),
                     "open_date": ent.get("open_date", "2024-06-15"),
-                })
+                }
+                nodes.append(node_obj)
+                self.accounts[ent["account_id"]] = node_obj
 
             max_risk = max((ent["risk_score"] for ent in entity_list if ent["role"] != "victim"), default=92.0)
             ring_status = "frozen" if block_enabled else "under_review"
+            fingerprint = f"inj_{ring_id.lower()}_fp"
+            amount_cashed = 0.0 if block_enabled else round(total_amount * 0.48, 2)
+            amount_at_risk = 0.0 if block_enabled else total_amount
 
             new_alert = {
                 "run_id": 1,
                 "ring_id": ring_id,
-                "fingerprint": f"inj_{ring_id.lower()}_fp",
+                "fingerprint": fingerprint,
                 "ring_type": typology,
                 "score": max_risk,
                 "priority": round(max_risk * (total_amount / 1000.0), 1),
                 "amount_moved": total_amount,
-                "amount_cashed": 0.0 if block_enabled else round(total_amount * 0.48, 2),
-                "amount_at_risk": 0.0 if block_enabled else total_amount,
+                "amount_cashed": amount_cashed,
+                "amount_at_risk": amount_at_risk,
                 "duration_min": 4.0,
                 "n_accounts": len(entity_list),
                 "n_victims": 1,
@@ -459,19 +659,18 @@ class MockDataStore:
                 "case_id": case_id,
                 "status": ring_status,
                 "assigned_to": "TraceMesh AI Shield / Autonomous Detection Engine" if block_enabled else None,
-                "case_notes": f"Live simulation scenario detected dynamically by XGBoost & Graph Engine.",
+                "case_notes": "Live simulation scenario detected dynamically by XGBoost & Graph Engine.",
                 "explanation": f"Live stream evaluated: {typology} topology synthesized with ₹{total_amount:,.0f} transaction volume. Autonomous containment active.",
                 "key_evidence": [
-                    f"XGBoost Mule Probability: {detection_results.get('detected_ml_prob', 0.95)*100:.1f}%",
+                    f"XGBoost Mule Probability: {detection_results.get('detected_ml_prob', 0.95) * 100:.1f}%",
                     f"Fused Risk Score: {detection_results.get('detected_fused_risk', 94.6):.1f}%",
-                    f"Triggered reason: {detection_results.get('detected_freeze_reason', 'Threshold exceeded')}",
+                    f"Detectors Fired: {', '.join(detection_results.get('detectors_triggered', []))}",
                 ],
                 "blocked_info": blocked_info,
                 "is_simulation": True,
             }
 
-            self.alerts.insert(0, new_alert)
-            self.rings[ring_id] = {
+            full_ring = {
                 **new_alert,
                 "nodes": nodes,
                 "edges": raw_edges,
@@ -479,17 +678,97 @@ class MockDataStore:
                 "detection_results": detection_results,
             }
 
+            timeline = [
+                {
+                    "txn_id": e["txn_id"],
+                    "ts": e["ts"],
+                    "timestampMs": int(datetime.datetime.fromisoformat(e["ts"].replace("Z", "+00:00")).timestamp() * 1000),
+                    "src_account": e["src_account"],
+                    "dst_account": e["dst_account"],
+                    "amount": e["amount"],
+                    "channel": e["channel"],
+                    "hop_index": e["hop_index"],
+                    "is_suspicious": True,
+                    "is_blocked": e.get("is_blocked", False),
+                    "progress": idx / max(len(raw_edges), 1),
+                }
+                for idx, e in enumerate(raw_edges, 1)
+            ]
+
+            self.alerts = [a for a in self.alerts if a.get("ring_id") != ring_id]
+            self.alerts.insert(0, new_alert)
+            self.rings[ring_id] = full_ring
+            self.timelines[ring_id] = timeline
+
+            # Record case audit trail
+            self.cases_actions[str(case_id)] = [
+                {
+                    "action_id": self.next_action_id,
+                    "case_id": case_id,
+                    "actor": "TraceMesh XGBoost & Graph Engine",
+                    "action": "status_change",
+                    "from_status": "new",
+                    "to_status": "under_review",
+                    "note": f"Detected {typology} ring across {len(entity_list)} accounts (63-feature XGBoost score: {detection_results.get('detected_ml_prob', 0.95) * 100:.1f}%).",
+                    "ts": now_iso,
+                }
+            ]
+            if block_enabled:
+                self.next_action_id += 1
+                self.cases_actions[str(case_id)].append({
+                    "action_id": self.next_action_id,
+                    "case_id": case_id,
+                    "actor": "TraceMesh AI Shield / Autonomous Detection Engine",
+                    "action": "freeze",
+                    "from_status": "under_review",
+                    "to_status": "frozen",
+                    "note": blocked_reason or f"Account {blocked_account_id} frozen automatically.",
+                    "ts": now_iso,
+                })
+
+            # Sync overview live rings & activity
+            ov_rings = [r for r in self.overview.get("rings", []) if r.get("id") != ring_id]
+            ov_rings.insert(0, {
+                "id": ring_id,
+                "typology": typology,
+                "riskScore": max_risk,
+                "totalMoved": total_amount,
+                "amountAtRisk": amount_at_risk,
+                "accountCount": len(entity_list),
+                "status": ring_status,
+            })
+            self.overview["rings"] = ov_rings[:15]
+            self.overview.setdefault("activity", []).insert(0, {
+                "id": f"sim_act_{self.next_event_id}",
+                "action": "freeze" if block_enabled else "status_change",
+                "ringId": ring_id,
+                "actor": "TraceMesh AI Shield" if block_enabled else "Detection Engine",
+                "timestamp": now_iso,
+                "note": f"Simulated {typology}: ₹{total_amount:,.0f}" + (f" · Account {blocked_account_id} frozen" if block_enabled else ""),
+            })
+            self.overview["activity"] = self.overview["activity"][:20]
+
+            # Emit delta polling event
+            self.delta_events.append({
+                "event_id": self.next_event_id,
+                "run_id": 1,
+                "ring_id": ring_id,
+                "event_type": "new_ring",
+                "payload": new_alert,
+                "created_at": now_iso,
+            })
+            self.delta_events = self.delta_events[-50:]
+
+            self._save_sim_state()
+
             return {
+                **full_ring,
                 "success": True,
                 "injected_ring_id": ring_id,
-                "ring_id": ring_id,
-                "case_id": case_id,
                 "scenario_name": eval_res.get("scenario_name", "Live Account Takeover"),
                 "total_amount": total_amount,
-                "blocked_info": blocked_info,
-                "detection_results": detection_results,
-                "nodes": nodes,
-                "edges": raw_edges,
+                "amount_saved": eval_res.get("amount_saved", 0.0),
+                "timeline": timeline,
                 "txns_injected": len(raw_edges),
             }
 
@@ -901,7 +1180,15 @@ async def asgi_handler(scope, receive, send):
     if norm_path in ("/", "/health", "/api/health"):
         if method == "POST":
             # Resilient fallback: If proxy forwarded POST without path
-            if payload.get("scenario") or payload.get("transactions") or payload.get("entities"):
+            if (
+                payload.get("scenario")
+                or payload.get("scenario_name")
+                or payload.get("typology")
+                or payload.get("victim")
+                or payload.get("transactions")
+                or payload.get("entities")
+                or payload.get("block_policy")
+            ):
                 response_data = STORE.inject_ring(payload)
             elif payload.get("speed") is not None:
                 response_data = STORE.set_simulation_speed(float(payload.get("speed", 1.0)))
@@ -948,20 +1235,52 @@ async def asgi_handler(scope, receive, send):
         response_data = STORE.inject_ring(payload)
     elif norm_path == "/cases":
         with STORE.lock:
-            response_data = [
-                {
-                    "case_id": a.get("case_id", 100),
+            STORE._load_sim_state()
+            cases_out = []
+            for a in STORE.alerts[:35]:
+                cid = a.get("case_id", 100)
+                actions = STORE.cases_actions.get(str(cid), [])
+                cases_out.append({
+                    "case_id": cid,
                     "ring_id": a["ring_id"],
+                    "fingerprint": a.get("fingerprint", f"fp_{a['ring_id'].lower()}"),
                     "status": a.get("status", "new"),
                     "priority": a.get("priority", 80),
-                    "assignee": a.get("assigned_to", "Autonomous AI Shield"),
+                    "score": a.get("score", 90.0),
+                    "ring_type": a.get("ring_type", "structural_cycle"),
                     "amount_moved": a.get("amount_moved", 500000),
-                    "detected_at": a.get("detected_at"),
-                }
-                for a in STORE.alerts[:25]
-            ]
+                    "amount_at_risk": a.get("amount_at_risk", a.get("amount_moved", 500000)),
+                    "n_accounts": a.get("n_accounts", 4),
+                    "n_victims": a.get("n_victims", 1),
+                    "assigned_to": a.get("assigned_to"),
+                    "notes": a.get("case_notes"),
+                    "created_at": a.get("detected_at"),
+                    "updated_at": actions[-1]["ts"] if actions else a.get("detected_at"),
+                    "actions_count": len(actions),
+                })
+            response_data = cases_out
     elif norm_path == "/audit/logs":
-        response_data = []
+        with STORE.lock:
+            STORE._load_sim_state()
+            case_meta = {
+                str(a.get("case_id")): {
+                    "ring_id": a.get("ring_id"),
+                    "ring_type": a.get("ring_type", "structural_cycle"),
+                }
+                for a in STORE.alerts
+                if a.get("case_id") is not None
+            }
+            all_logs = []
+            for str_cid, actions in STORE.cases_actions.items():
+                meta = case_meta.get(str_cid, {"ring_id": f"CASE-{str_cid}", "ring_type": "structural_cycle"})
+                for act in actions:
+                    all_logs.append({
+                        **act,
+                        "ring_id": meta["ring_id"],
+                        "ring_type": meta["ring_type"],
+                    })
+            all_logs.sort(key=lambda x: x.get("ts", ""), reverse=True)
+            response_data = all_logs
     elif norm_path.startswith("/rings/"):
         parts = norm_path.strip("/").split("/")
         if len(parts) == 2:

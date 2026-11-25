@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { fetchAlerts, fetchCaseActions, postCaseAction } from './alerts.service';
 import type { AuditLogEntry, CaseRecord } from '../types/cases';
+import { getCachedSimulatedRings } from './ring-graph.service';
 
 const DEFAULT_CASES: CaseRecord[] = [
   {
@@ -88,21 +89,41 @@ const DEFAULT_AUDIT_LOGS: AuditLogEntry[] = [
 
 /**
  * Cases & Audit Service.
- * Bridges with alerts.service.ts to guarantee 100% shared state synchronization
- * across Alert Queue, Ring Explorer, Case Management, and the Compliance Audit Log.
+ * Bridges with alerts.service.ts and ring cache for synchronized Compliance Audit & Case Management.
  */
 export async function fetchAllCases(): Promise<CaseRecord[]> {
   try {
     const response = await axios.get<CaseRecord[]>('/cases');
     if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-      return response.data;
+      const apiCases = response.data;
+      const seen = new Set(apiCases.map((c) => c.ring_id));
+      const simCases: CaseRecord[] = getCachedSimulatedRings()
+        .filter((r) => !seen.has(r.ring_id))
+        .map((r) => ({
+          case_id: (r as any).case_id || 8000,
+          ring_id: r.ring_id,
+          fingerprint: r.fingerprint,
+          status: r.status,
+          priority: r.priority,
+          score: r.score,
+          ring_type: r.ring_type,
+          amount_moved: r.amount_moved,
+          amount_at_risk: r.amount_at_risk,
+          n_accounts: r.nodes.length,
+          n_victims: r.nodes.filter((n) => n.role === 'victim').length || 1,
+          assigned_to: 'TraceMesh AI Shield',
+          notes: r.explanation,
+          created_at: r.detected_at,
+          updated_at: r.detected_at,
+          actions_count: r.status === 'frozen' ? 2 : 1,
+        }));
+      return [...simCases, ...apiCases];
     }
   } catch (err) {
     console.warn('GET /cases endpoint error, using fallback:', err);
   }
 
   const alerts = await fetchAlerts();
-
   if (Array.isArray(alerts) && alerts.length > 0) {
     const cases: CaseRecord[] = await Promise.all(
       alerts.map(async (alert) => {
